@@ -1,0 +1,1808 @@
+<!doctype html>
+<html lang="th">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <title>PDPA CRM Terminal - ระบบจัดการข้อมูลส่วนบุคคล</title>
+        <link rel="stylesheet" href="../static/css/index.css" />
+    </head>
+
+    <body class="crt noise">
+        <div class="scan"></div>
+
+        <main class="wrap">
+            <!-- Login Page -->
+            <section id="page-login" class="page active">
+                <div class="login-container">
+                    <div
+                        class="brand"
+                        style="text-align: center; margin-bottom: 1.5rem"
+                    >
+                        <h1>PDPA CRM TERMINAL</h1>
+                        <div class="tag">
+                            ระบบจัดการข้อมูลส่วนบุคคลและการปฏิบัติตามกฎหมาย
+                        </div>
+                    </div>
+
+                    <div class="auth-message">
+                        <div style="margin-bottom: 0.5rem">
+                            🔒 SECURE LOGIN REQUIRED
+                        </div>
+                        <div style="font-size: 0.85rem; opacity: 0.7">
+                            กรุณาเข้าสู่ระบบด้วยข้อมูลรับรองของคุณ
+                        </div>
+                    </div>
+
+                    <form class="login-form" id="loginForm">
+                        <div class="field">
+                            <label for="username">ชื่อผู้ใช้ / Username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                placeholder="admin@company.com"
+                                autocomplete="off"
+                            />
+                        </div>
+
+                        <div class="field">
+                            <label for="password">รหัสผ่าน / Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                placeholder="••••••••"
+                                autocomplete="off"
+                            />
+                        </div>
+
+                        <div
+                            class="field"
+                            style="
+                                display: flex;
+                                gap: 0.8rem;
+                                align-items: center;
+                            "
+                        >
+                            <input
+                                type="checkbox"
+                                id="remember"
+                                style="width: auto; margin-right: 0.4rem"
+                            />
+                            <label
+                                for="remember"
+                                style="font-weight: normal; cursor: pointer"
+                                >จดจำการเข้าสู่ระบบ / Remember me</label
+                            >
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            <span style="margin-right: 0.6rem">🔐</span>LOGIN TO
+                            SYSTEM
+                        </button>
+                    </form>
+
+                    <div
+                        style="
+                            margin-top: 1rem;
+                            text-align: center;
+                            font-size: 0.85rem;
+                        "
+                    >
+                        <div style="margin-bottom: 0.4rem">
+                            <a
+                                href="#"
+                                onclick="showPage('page-forgot')"
+                                style="
+                                    color: var(--warning);
+                                    text-decoration: underline;
+                                "
+                            >
+                                ลืมรหัสผ่าน? / Forgot Password?
+                            </a>
+                        </div>
+                        <div>
+                            <span style="opacity: 0.6">|</span>
+                            <a
+                                href="#"
+                                onclick="showPage('page-register')"
+                                style="
+                                    margin-left: 0.6rem;
+                                    color: var(--info);
+                                    text-decoration: underline;
+                                "
+                            >
+                                ลงทะเบียนผู้ใช้ใหม่ / Register New User
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="
+                        text-align: center;
+                        margin-top: 2rem;
+                        font-size: 0.9rem;
+                        opacity: 0.7;
+                    "
+                >
+                    <div>PDPA CRM TERMINAL v2.0</div>
+                    <div style="margin-top: 0.4rem; font-size: 0.8rem">
+                        ระบบจัดการข้อมูลส่วนบุคคลตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล
+                        พ.ศ. 2562
+                    </div>
+                    <div style="margin-top: 0.4rem">
+                        <span style="color: var(--success)">✓</span> SECURE •
+                        <span style="color: var(--success)">✓</span> COMPLIANT •
+                        <span style="color: var(--success)">✓</span> AUDIT-READY
+                    </div>
+                </div>
+            </section>
+
+            <!-- Forgot Password Page -->
+            <section id="page-forgot" class="page">
+                <div class="login-container">
+                    <div
+                        class="brand"
+                        style="text-align: center; margin-bottom: 1rem"
+                    >
+                        <h1>RESET PASSWORD</h1>
+                        <div class="tag">
+                            กู้คืนรหัสผ่าน / Password Recovery
+                        </div>
+                    </div>
+
+                    <div class="auth-message">
+                        <div style="margin-bottom: 0.5rem">
+                            📧 PASSWORD RECOVERY
+                        </div>
+                        <div style="font-size: 0.85rem; opacity: 0.7">
+                            กรอกอีเมลของคุณเพื่อรับลิงก์กู้คืนรหัสผ่าน
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="recovery-email"
+                            >อีเมล / Email Address</label
+                        >
+                        <input
+                            type="email"
+                            id="recovery-email"
+                            placeholder="your@email.com"
+                            style="
+                                width: 100%;
+                                padding: 0.6rem;
+                                background: transparent;
+                                border: 1px solid var(--border);
+                                color: var(--primary);
+                            "
+                        />
+                    </div>
+
+                    <button
+                        class="login-btn"
+                        onclick="
+                            alert(
+                                'ระบบได้ส่งอีเมลกู้คืนรหัสผ่านไปยังอีเมลของคุณแล้ว\nPassword recovery email has been sent',
+                            );
+                            showPage('page-login');
+                        "
+                    >
+                        <span style="margin-right: 0.6rem">📧</span>SEND
+                        RECOVERY EMAIL
+                    </button>
+
+                    <div style="margin-top: 1rem; text-align: center">
+                        <a
+                            href="#"
+                            onclick="showPage('page-login')"
+                            style="
+                                color: var(--info);
+                                text-decoration: underline;
+                            "
+                        >
+                            ← กลับไปหน้าเข้าสู่ระบบ / Back to Login
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Register Page -->
+            <section id="page-register" class="page">
+                <div class="login-container">
+                    <div
+                        class="brand"
+                        style="text-align: center; margin-bottom: 1rem"
+                    >
+                        <h1>REGISTER ACCOUNT</h1>
+                        <div class="tag">
+                            ลงทะเบียนผู้ใช้ใหม่ / New User Registration
+                        </div>
+                    </div>
+
+                    <div class="auth-message">
+                        <div style="margin-bottom: 0.5rem">
+                            📝 NEW USER REGISTRATION
+                        </div>
+                        <div style="font-size: 0.85rem; opacity: 0.7">
+                            กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้ใหม่
+                        </div>
+                    </div>
+
+                    <form class="login-form">
+                        <div class="field">
+                            <label for="reg-name"
+                                >ชื่อ-นามสกุล / Full Name</label
+                            >
+                            <input
+                                type="text"
+                                id="reg-name"
+                                placeholder="สมชาย ใจดี"
+                            />
+                        </div>
+
+                        <div class="field">
+                            <label for="reg-email">อีเมล / Email Address</label>
+                            <input
+                                type="email"
+                                id="reg-email"
+                                placeholder="user@company.com"
+                            />
+                        </div>
+
+                        <div class="field">
+                            <label for="reg-role">ตำแหน่ง / Role</label>
+                            <select
+                                id="reg-role"
+                                style="
+                                    width: 100%;
+                                    padding: 0.6rem;
+                                    background: transparent;
+                                    border: 1px solid var(--border);
+                                    color: var(--primary);
+                                    font-family: inherit;
+                                "
+                            >
+                                <option value="admin">
+                                    ผู้ดูแลระบบ / System Administrator
+                                </option>
+                                <option value="compliance">
+                                    เจ้าหน้า้าที่ปฏิบัติตามกฎหมาย / Compliance
+                                    Officer
+                                </option>
+                                <option value="analyst">
+                                    นักวิเคราะห์ข้อมูล / Data Analyst
+                                </option>
+                                <option value="manager">
+                                    ผู้จัดการ / Manager
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="reg-password"
+                                >รหัสผ่าน / Password</label
+                            >
+                            <input
+                                type="password"
+                                id="reg-password"
+                                placeholder="••••••••"
+                            />
+                        </div>
+
+                        <div class="field">
+                            <label for="reg-confirm"
+                                >ยืนยันรหัสผ่าน / Confirm Password</label
+                            >
+                            <input
+                                type="password"
+                                id="reg-confirm"
+                                placeholder="••••••••"
+                            />
+                        </div>
+
+                        <button
+                            type="button"
+                            class="login-btn"
+                            onclick="
+                                alert(
+                                    'ลงทะเบียนสำเร็จ! ระบบจะส่งอีเมลยืนยันไปยังอีเมลของคุณ\nRegistration successful! Verification email sent.',
+                                );
+                                showPage('page-login');
+                            "
+                        >
+                            <span style="margin-right: 0.6rem">✅</span>REGISTER
+                            ACCOUNT
+                        </button>
+                    </form>
+
+                    <div style="margin-top: 1rem; text-align: center">
+                        <a
+                            href="#"
+                            onclick="showPage('page-login')"
+                            style="
+                                color: var(--info);
+                                text-decoration: underline;
+                            "
+                        >
+                            ← กลับไปหน้าเข้าสู่ระบบ / Back to Login
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Page -->
+            <section id="page-dashboard" class="page">
+                <div class="topbar">
+                    <div class="brand">
+                        <div>
+                            <h1>PDPA CRM DASHBOARD</h1>
+                            <div class="tag">
+                                แผงควบคุมการจัดการข้อมูลส่วนบุคคล / Personal
+                                Data Management Dashboard
+                            </div>
+                        </div>
+                        <div class="pill" id="clock">USER: ADMIN</div>
+                    </div>
+                    <div class="status">
+                        <span class="pill">STATUS: ONLINE</span>
+                        <span class="pill">COMPLIANCE: 99.7%</span>
+                        <span class="pill">ALERTS: 2</span>
+                        <span class="pill">USERS: 1,247</span>
+                    </div>
+                </div>
+
+                <div class="breadcrumb">
+                    <span>Home</span>
+                    <span>Dashboard</span>
+                    <span>Overview</span>
+                </div>
+
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">ข้อมูลส่วนบุคคลทั้งหมด</div>
+                        <div class="stat-number">14,832</div>
+                        <div class="stat-trend trend-up">
+                            ↑ 12% จากเดือนที่แล้ว
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">ผู้ใช้ที่ลงทะเบียน</div>
+                        <div class="stat-number">1,247</div>
+                        <div class="stat-trend trend-up">
+                            ↑ 8% จากเดือนที่แล้ว
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">การให้ความยินยอม</div>
+                        <div class="stat-number">386</div>
+                        <div class="stat-trend">คงที่</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">การละเมิดข้อมูล</div>
+                        <div class="stat-number" style="color: var(--error)">
+                            2
+                        </div>
+                        <div class="stat-trend trend-down">↓ ต้องตรวจสอบ</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="widget">
+                        <div class="widget-header">
+                            <span>📊</span>
+                            <span>ข้อมูลการเข้าถึงข้อมูล (30 วันล่าสุด)</span>
+                        </div>
+                        <div class="chart-container" id="access-chart">
+                            <!-- Chart will be populated by JS -->
+                        </div>
+                        <div class="system-message" style="margin-top: 0.5rem">
+                            การเข้าถึงข้อมูลเพิ่มขึ้น 15% ในช่วงสัปดาห์ที่ผ่านมา
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">
+                            <span>📋</span>
+                            <span>กิจกรรมล่าสุด / Recent Activities</span>
+                        </div>
+                        <div class="widget-content">
+                            <div style="margin-bottom: 0.6rem">
+                                <span style="opacity: 0.7">[10:23:45]</span>
+                                <span
+                                    style="
+                                        margin-left: 0.6rem;
+                                        color: var(--info);
+                                    "
+                                    >[DATA_ACCESS]</span
+                                >
+                                <span style="margin-left: 0.6rem"
+                                    >ผู้ใช้ USER-54321
+                                    เข้าถึงข้อมูลส่วนตัว</span
+                                >
+                            </div>
+                            <div style="margin-bottom: 0.6rem">
+                                <span style="opacity: 0.7">[10:15:22]</span>
+                                <span
+                                    style="
+                                        margin-left: 0.6rem;
+                                        color: var(--success);
+                                    "
+                                    >[CONSENT]</span
+                                >
+                                <span style="margin-left: 0.6rem"
+                                    >ผู้ใช้ให้ความยินยอมในการประมวลผลข้อมูล</span
+                                >
+                            </div>
+                            <div style="margin-bottom: 0.6rem">
+                                <span style="opacity: 0.7">[09:45:11]</span>
+                                <span
+                                    style="
+                                        margin-left: 0.6rem;
+                                        color: var(--warning);
+                                    "
+                                    >[POLICY_UPDATE]</span
+                                >
+                                <span style="margin-left: 0.6rem"
+                                    >อัปเดตนโยบายความเป็นส่วนตัวเวอร์ชัน
+                                    3.2</span
+                                >
+                            </div>
+                            <div style="margin-bottom: 0.6rem">
+                                <span style="opacity: 0.7">[09:30:05]</span>
+                                <span
+                                    style="
+                                        margin-left: 0.6rem;
+                                        color: var(--error);
+                                    "
+                                    >[ALERT]</span
+                                >
+                                <span style="margin-left: 0.6rem"
+                                    >ตรวจพบการเข้าถึงที่ผิดปกติจาก IP
+                                    203.xx.xx.xx</span
+                                >
+                            </div>
+                            <div>
+                                <span style="opacity: 0.7">[09:15:33]</span>
+                                <span
+                                    style="
+                                        margin-left: 0.6rem;
+                                        color: var(--info);
+                                    "
+                                    >[EXPORT]</span
+                                >
+                                <span style="margin-left: 0.6rem"
+                                    >ส่งออกข้อมูลผู้ใช้ตามคำขอ DSAR</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">
+                            <span>⚠️</span>
+                            <span>การแจ้งเตือน / Alerts</span>
+                        </div>
+                        <div class="widget-content">
+                            <div
+                                style="
+                                    background: rgba(100, 0, 0, 0.3);
+                                    padding: 0.8rem;
+                                    border-radius: 4px;
+                                    margin-bottom: 0.6rem;
+                                "
+                            >
+                                <div
+                                    style="
+                                        font-weight: bold;
+                                        color: var(--error);
+                                        margin-bottom: 0.3rem;
+                                    "
+                                >
+                                    🔴 พบการละเมิดข้อมูล 2 รายการ
+                                </div>
+                                <div style="font-size: 0.85rem">
+                                    • ข้อมูลผู้ใช้ 50 รายการ
+                                    ถูกเข้าถึงโดยไม่ได้รับอนุญาต (2026-02-15)
+                                    <br />
+                                    • การสำรองข้อมูลล้มเหลว - ข้อมูล 1,200
+                                    รายการ ไม่ได้รับการสำรอง (2026-02-16)
+                                </div>
+                            </div>
+
+                            <div
+                                style="
+                                    background: rgba(100, 100, 0, 0.2);
+                                    padding: 0.8rem;
+                                    border-radius: 4px;
+                                "
+                            >
+                                <div
+                                    style="
+                                        font-weight: bold;
+                                        color: var(--warning);
+                                        margin-bottom: 0.3rem;
+                                    "
+                                >
+                                    🟡 ต้องดำเนินการ 3 รายการ
+                                </div>
+                                <div style="font-size: 0.85rem">
+                                    • คำขอเข้าถึงข้อมูล (DSAR) ค้างอยู่ 5 รายการ
+                                    <br />
+                                    • ความยินยอมหมดอายุใน 7 วัน: ผู้ใช้ 23 ราย
+                                    <br />
+                                    • ต้องอัปเดตบันทึกการประมวลผล (ROPA)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">
+                            <span>👥</span>
+                            <span>ผู้ใช้ที่ใช้งานล่าสุด / Active Users</span>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ผู้ใช้</th>
+                                        <th>ล่าสุด</th>
+                                        <th>สถานะ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>USER-54321</td>
+                                        <td>10:23</td>
+                                        <td>
+                                            <span
+                                                class="status-badge status-active"
+                                                >ACTIVE</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>USER-67890</td>
+                                        <td>09:45</td>
+                                        <td>
+                                            <span
+                                                class="status-badge status-active"
+                                                >ACTIVE</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>USER-12345</td>
+                                        <td>08:30</td>
+                                        <td>
+                                            <span
+                                                class="status-badge status-active"
+                                                >ACTIVE</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>USER-78901</td>
+                                        <td>07:15</td>
+                                        <td>
+                                            <span
+                                                class="status-badge status-pending"
+                                                >PENDING</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>USER-23456</td>
+                                        <td>06:20</td>
+                                        <td>
+                                            <span
+                                                class="status-badge status-active"
+                                                >ACTIVE</span
+                                            >
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            style="
+                                text-align: center;
+                                margin-top: 0.5rem;
+                                font-size: 0.85rem;
+                                opacity: 0.7;
+                            "
+                        >
+                            แสดง 5 จาก 1,247 ผู้ใช้
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1rem; text-align: center">
+                    <button
+                        class="login-btn"
+                        style="width: auto; padding: 0.6rem 1.5rem"
+                        onclick="showPage('page-logs')"
+                    >
+                        <span style="margin-right: 0.6rem">🔍</span>VIEW
+                        DETAILED LOGS
+                    </button>
+                </div>
+            </section>
+
+            <!-- Data Inventory Page -->
+            <section id="page-inventory" class="page">
+                <div class="topbar">
+                    <div class="brand">
+                        <h1>DATA INVENTORY</h1>
+                        <div class="tag">
+                            ทะเบียนข้อมูลส่วนบุคคล / Personal Data Registry
+                        </div>
+                    </div>
+                </div>
+
+                <div class="breadcrumb">
+                    <span
+                        ><a href="#" onclick="showPage('page-dashboard')"
+                            >Dashboard</a
+                        ></span
+                    >
+                    <span>Data Inventory</span>
+                </div>
+
+                <div class="cmd">
+                    <div class="line">
+                        <span class="prompt">INVENTORY&gt;</span>
+                        <input
+                            class="input"
+                            placeholder="ค้นหาข้อมูลส่วนบุคคล (ชื่อ, ประเภท, แผนก)..."
+                        />
+                        <span class="cursor"></span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ประเภทข้อมูล</th>
+                                <th>แหล่งที่มา</th>
+                                <th>วัตถุประสงค์</th>
+                                <th>ผู้ควบคุมข้อมูล</th>
+                                <th>อายุข้อมูล</th>
+                                <th>ระดับความละเอียดอ่อน</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ข้อมูลประจำตัว (ชื่อ, อีเมล, เบอร์โทร)</td>
+                                <td>แบบฟอร์มลงทะเบียน</td>
+                                <td>การให้บริการ</td>
+                                <td>ฝ่ายการตลาด</td>
+                                <td>2 ปี</td>
+                                <td>
+                                    <span style="color: var(--warning)"
+                                        >ปานกลาง</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ข้อมูลทางการเงิน (บัตรเครดิต)</td>
+                                <td>ระบบชำระเงิน</td>
+                                <td>การประมวลผลการชำระเงิน</td>
+                                <td>ฝ่ายการเงิน</td>
+                                <td>7 ปี</td>
+                                <td>
+                                    <span style="color: var(--error)"
+                                        >สูงมาก</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ข้อมูลสุขภาพ</td>
+                                <td>แบบฟอร์มสมัครงาน</td>
+                                <td>การจัดการทรัพยากรบุคคล</td>
+                                <td>ฝ่ายบุคคล</td>
+                                <td>10 ปี</td>
+                                <td>
+                                    <span style="color: var(--error)"
+                                        >สูงมาก</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ข้อมูลพฤติกรรมออนไลน์</td>
+                                <td>คุกกี้เว็บไซต์</td>
+                                <td>การวิเคราะห์และปรับปรุงบริการ</td>
+                                <td>ฝ่ายเทคโนโลยี</td>
+                                <td>1 ปี</td>
+                                <td>
+                                    <span style="color: var(--warning)"
+                                        >ปานกลาง</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ข้อมูลตำแหน่งที่อยู่</td>
+                                <td>แอปพลิเคชันมือถือ</td>
+                                <td>การให้บริการตามตำแหน่งที่อยู่</td>
+                                <td>ฝ่ายพัฒนาผลิตภัณฑ์</td>
+                                <td>6 เดือน</td>
+                                <td>
+                                    <span style="color: var(--warning)"
+                                        >ปานกลาง</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ภาพถ่ายและวิดีโอ</td>
+                                <td>กล้องวงจรปิด</td>
+                                <td>ความปลอดภัย</td>
+                                <td>ฝ่ายรักษาความปลอดภัย</td>
+                                <td>30 วัน</td>
+                                <td>
+                                    <span style="color: var(--error)">สูง</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div
+                    style="
+                        margin-top: 1rem;
+                        display: flex;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 0.8rem;
+                    "
+                >
+                    <button
+                        class="login-btn"
+                        style="width: auto; padding: 0.6rem 1.5rem"
+                    >
+                        <span style="margin-right: 0.6rem">📥</span>EXPORT
+                        INVENTORY
+                    </button>
+                    <button
+                        class="login-btn"
+                        style="
+                            width: auto;
+                            padding: 0.6rem 1.5rem;
+                            background: linear-gradient(
+                                to right,
+                                #003300,
+                                #005500
+                            );
+                        "
+                    >
+                        <span style="margin-right: 0.6rem">➕</span>ADD NEW DATA
+                        TYPE
+                    </button>
+                </div>
+            </section>
+
+            <!-- Logs Page -->
+            <section id="page-logs" class="page">
+                <div class="topbar">
+                    <div class="brand">
+                        <h1>PDPA LOG SEARCH</h1>
+                        <div class="tag">
+                            ค้นหาบันทึกข้อมูลส่วนบุคคล / Personal Data Log
+                            Search
+                        </div>
+                    </div>
+                </div>
+
+                <div class="breadcrumb">
+                    <span
+                        ><a href="#" onclick="showPage('page-dashboard')"
+                            >Dashboard</a
+                        ></span
+                    >
+                    <span>Logs</span>
+                    <span>Search</span>
+                </div>
+
+                <div class="cmd">
+                    <div class="line">
+                        <span class="prompt">PDPA-LOGS&gt;</span>
+                        <input
+                            id="log-search"
+                            class="input"
+                            placeholder="ค้นหาข้อมูลส่วนบุคคล..."
+                        />
+                        <span class="cursor"></span>
+                    </div>
+                </div>
+
+                <div
+                    style="
+                        display: flex;
+                        gap: 0.8rem;
+                        flex-wrap: wrap;
+                        margin-bottom: 1rem;
+                    "
+                >
+                    <div class="pill active">LAST 1H</div>
+                    <div class="pill">LAST 24H</div>
+                    <div class="pill">LAST 7D</div>
+                    <div class="pill">LAST 30D</div>
+                    <div class="pill">CUSTOM RANGE</div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>เวลา</th>
+                                <th>ระดับ</th>
+                                <th>บริการ</th>
+                                <th>ข้อความ</th>
+                                <th>ผู้ใช้</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>10:23:45</td>
+                                <td>
+                                    <span style="color: var(--info)">INFO</span>
+                                </td>
+                                <td>AUTH_SERVICE</td>
+                                <td>
+                                    ผู้ใช้ USER-54321
+                                    เข้าถึงข้อมูลส่วนตัวผ่านพอร์ทัล
+                                </td>
+                                <td>USER-54321</td>
+                            </tr>
+                            <tr>
+                                <td>10:15:22</td>
+                                <td>
+                                    <span style="color: var(--success)"
+                                        >SUCCESS</span
+                                    >
+                                </td>
+                                <td>CONSENT_MANAGER</td>
+                                <td>
+                                    ผู้ใช้ให้ความยินยอมในการประมวลผลข้อมูลสุขภาพ
+                                </td>
+                                <td>USER-67890</td>
+                            </tr>
+                            <tr>
+                                <td>09:45:11</td>
+                                <td>
+                                    <span style="color: var(--warning)"
+                                        >WARN</span
+                                    >
+                                </td>
+                                <td>POLICY_SERVICE</td>
+                                <td>อัปเดตนโยบายความเป็นส่วนตัวเวอร์ชัน 3.2</td>
+                                <td>SYSTEM</td>
+                            </tr>
+                            <tr>
+                                <td>09:30:05</td>
+                                <td>
+                                    <span style="color: var(--error)"
+                                        >ALERT</span
+                                    >
+                                </td>
+                                <td>SECURITY_MONITOR</td>
+                                <td>
+                                    ตรวจพบการเข้าถึงที่ผิดปกติจาก IP
+                                    203.xx.xx.xx
+                                </td>
+                                <td>UNKNOWN</td>
+                            </tr>
+                            <tr>
+                                <td>09:15:33</td>
+                                <td>
+                                    <span style="color: var(--info)">INFO</span>
+                                </td>
+                                <td>DATA_EXPORT</td>
+                                <td>ส่งออกข้อมูลผู้ใช้ตามคำขอ DSAR</td>
+                                <td>USER-12345</td>
+                            </tr>
+                            <tr>
+                                <td>08:55:17</td>
+                                <td>
+                                    <span style="color: var(--success)"
+                                        >SUCCESS</span
+                                    >
+                                </td>
+                                <td>DATA_DELETION</td>
+                                <td>
+                                    ลบข้อมูลผู้ใช้ตามคำขอภายใต้ PDPA มาตรา 30
+                                </td>
+                                <td>USER-78901</td>
+                            </tr>
+                            <tr>
+                                <td>08:30:42</td>
+                                <td>
+                                    <span style="color: var(--warning)"
+                                        >WARN</span
+                                    >
+                                </td>
+                                <td>RETENTION_MANAGER</td>
+                                <td>
+                                    ข้อมูลของผู้ใช้ 23 ราย ใกล้ถึงกำหนดการลบ
+                                </td>
+                                <td>SYSTEM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div
+                    style="
+                        margin-top: 1rem;
+                        text-align: center;
+                        font-size: 0.9rem;
+                        opacity: 0.8;
+                    "
+                >
+                    แสดง 1-7 จาก 14,832 รายการ | หน้า 1 จาก 2,119
+                </div>
+            </section>
+
+            <!-- Compliance Page -->
+            <section id="page-compliance" class="page">
+                <div class="topbar">
+                    <div class="brand">
+                        <h1>COMPLIANCE REPORTS</h1>
+                        <div class="tag">
+                            รายงานการปฏิบัติตามกฎหมาย PDPA / PDPA Compliance
+                            Reports
+                        </div>
+                    </div>
+                </div>
+
+                <div class="breadcrumb">
+                    <span
+                        ><a href="#" onclick="showPage('page-dashboard')"
+                            >Dashboard</a
+                        ></span
+                    >
+                    <span>Compliance</span>
+                    <span>Reports</span>
+                </div>
+
+                <div class="menu-grid">
+                    <div class="card" onclick="showPage('page-roa')">
+                        <div class="card-header">
+                            <div class="card-icon">📋</div>
+                            <div class="card-title">
+                                บันทึกการประมวลผล (ROPA)
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            บันทึกการประมวลผลข้อมูลส่วนบุคคลตามมาตรา 39
+                            รวมถึงวัตถุประสงค์ ระยะเวลา และผู้เกี่ยวข้อง
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">รายการทั้งหมด</span>
+                                <span class="stat-value">47</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">อัปเดตล่าสุด</span>
+                                <span class="stat-value">2026-02-10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="card"
+                        onclick="alert('กำลังสร้างรายงานการประเมินผลกระทบ...')"
+                    >
+                        <div class="card-header">
+                            <div class="card-icon">📊</div>
+                            <div class="card-title">
+                                รายงานการประเมินผลกระทบ (DPIA)
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            รายงานการประเมินผลกระทบต่อสิทธิและเสรีภาพ
+                            ของการประมวลผลข้อมูลส่วนบุคคล
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-row">
+                                <span class="stat-label"
+                                    >การประเมินทั้งหมด</span
+                                >
+                                <span class="stat-value">12</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">ความเสี่ยงสูง</span>
+                                <span
+                                    class="stat-value"
+                                    style="color: var(--error)"
+                                    >3</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="card"
+                        onclick="alert('แสดงรายงานการฝึกอบรม...')"
+                    >
+                        <div class="card-header">
+                            <div class="card-icon">🎓</div>
+                            <div class="card-title">รายงานการฝึกอบรม</div>
+                        </div>
+                        <div class="card-body">
+                            บันทึกการฝึกอบรมพนักงานเกี่ยวกับการคุ้มครอง
+                            ข้อมูลส่วนบุคคลและการปฏิบัติตามกฎหมาย
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-row">
+                                <span class="stat-label"
+                                    >พนักงานที่ผ่านการฝึกอบรม</span
+                                >
+                                <span class="stat-value">156/200</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label"
+                                    >การฝึกอบรมครั้งถัดไป</span
+                                >
+                                <span class="stat-value">2026-03-15</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="card"
+                        onclick="alert('แสดงรายงานการละเมิดข้อมูล...')"
+                    >
+                        <div class="card-header">
+                            <div class="card-icon">🚨</div>
+                            <div class="card-title">รายงานการละเมิดข้อมูล</div>
+                        </div>
+                        <div class="card-body">
+                            บันทึกและรายงานการละเมิดข้อมูลส่วนบุคคล
+                            รวมถึงการแจ้งเตือนและมาตรการแก้ไข
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-row">
+                                <span class="stat-label"
+                                    >เหตุการณ์ทั้งหมด (ปี 2026)</span
+                                >
+                                <span
+                                    class="stat-value"
+                                    style="color: var(--error)"
+                                    >2</span
+                                >
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label"
+                                    >แจ้งคณะกรรมการแล้ว</span
+                                >
+                                <span
+                                    class="stat-value"
+                                    style="color: var(--success)"
+                                    >✓</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget" style="margin-top: 1rem">
+                    <div class="widget-header">
+                        <span>📈</span>
+                        <span
+                            >แนวโน้มการปฏิบัติตามกฎหมาย / Compliance
+                            Trends</span
+                        >
+                    </div>
+                    <div class="chart-container" style="height: 250px">
+                        <!-- Chart will be populated by JS -->
+                    </div>
+                    <div class="system-message">
+                        อัตราการปฏิบัติตามกฎหมายอยู่ที่ 99.7% -
+                        อยู่ในเกณฑ์ดีเยี่ยม
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Page -->
+            <section id="page-settings" class="page">
+                <div class="topbar">
+                    <div class="brand">
+                        <h1>SYSTEM SETTINGS</h1>
+                        <div class="tag">
+                            การตั้งค่าระบบ / System Configuration
+                        </div>
+                    </div>
+                </div>
+
+                <div class="breadcrumb">
+                    <span
+                        ><a href="#" onclick="showPage('page-dashboard')"
+                            >Dashboard</a
+                        ></span
+                    >
+                    <span>Settings</span>
+                </div>
+
+                <div class="menu-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🔐</div>
+                            <div class="card-title">การตั้งค่าความปลอดภัย</div>
+                        </div>
+                        <div class="card-body">
+                            รหัสผ่าน, การยืนยันตัวตนสองขั้นตอน,
+                            การล็อกอัตโนมัติ, การเข้าถึงระบบ
+                        </div>
+                        <div style="margin-top: 0.8rem">
+                            <button
+                                class="login-btn"
+                                style="
+                                    width: 100%;
+                                    padding: 0.4rem;
+                                    font-size: 0.9rem;
+                                "
+                            >
+                                CONFIGURE SECURITY
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📧</div>
+                            <div class="card-title">การตั้งค่าการแจ้งเตือน</div>
+                        </div>
+                        <div class="card-body">
+                            อีเมล, SMS, การแจ้งเตือนในระบบ, เงื่อนไขการแจ้งเตือน
+                        </div>
+                        <div style="margin-top: 0.8rem">
+                            <button
+                                class="login-btn"
+                                style="
+                                    width: 100%;
+                                    padding: 0.4rem;
+                                    font-size: 0.9rem;
+                                    background: linear-gradient(
+                                        to right,
+                                        #003300,
+                                        #005500
+                                    );
+                                "
+                            >
+                                CONFIGURE NOTIFICATIONS
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">💾</div>
+                            <div class="card-title">การสำรองข้อมูล</div>
+                        </div>
+                        <div class="card-body">
+                            กำหนดการสำรองข้อมูล, การเก็บรักษา, การกู้คืนข้อมูล,
+                            พื้นที่จัดเก็บ
+                        </div>
+                        <div style="margin-top: 0.8rem">
+                            <button
+                                class="login-btn"
+                                style="
+                                    width: 100%;
+                                    padding: 0.4rem;
+                                    font-size: 0.9rem;
+                                    background: linear-gradient(
+                                        to right,
+                                        #003300,
+                                        #005500
+                                    );
+                                "
+                            >
+                                MANAGE BACKUPS
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">👥</div>
+                            <div class="card-title">การจัดการผู้ใช้</div>
+                        </div>
+                        <div class="card-body">
+                            บทบาทและสิทธิ์การเข้าถึง, การอนุมัติ,
+                            การตรวจสอบสิทธิ์
+                        </div>
+                        <div style="margin-top: 0.8rem">
+                            <button
+                                class="login-btn"
+                                style="
+                                    width: 100%;
+                                    padding: 0.4rem;
+                                    font-size: 0.9rem;
+                                "
+                            >
+                                MANAGE USERS & ROLES
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget" style="margin-top: 1rem">
+                    <div class="widget-header">
+                        <span>⚙️</span>
+                        <span>การตั้งค่าขั้นสูง / Advanced Settings</span>
+                    </div>
+                    <div style="padding: 1rem">
+                        <div style="margin-bottom: 0.8rem">
+                            <label
+                                style="
+                                    display: block;
+                                    margin-bottom: 0.4rem;
+                                    font-weight: bold;
+                                "
+                            >
+                                ระยะเวลาการเก็บรักษาข้อมูลเริ่มต้น
+                            </label>
+                            <select
+                                style="
+                                    width: 100%;
+                                    padding: 0.6rem;
+                                    background: transparent;
+                                    border: 1px solid var(--border);
+                                    color: var(--primary);
+                                    font-family: inherit;
+                                "
+                            >
+                                <option>6 เดือน</option>
+                                <option selected>1 ปี</option>
+                                <option>2 ปี</option>
+                                <option>5 ปี</option>
+                                <option>ตามกฎหมายที่เกี่ยวข้อง</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 0.8rem">
+                            <label
+                                style="
+                                    display: block;
+                                    margin-bottom: 0.4rem;
+                                    font-weight: bold;
+                                "
+                            >
+                                ระดับการบันทึกข้อมูล (Logging Level)
+                            </label>
+                            <select
+                                style="
+                                    width: 100%;
+                                    padding: 0.6rem;
+                                    background: transparent;
+                                    border: 1px solid var(--border);
+                                    color: var(--primary);
+                                    font-family: inherit;
+                                "
+                            >
+                                <option>ERROR</option>
+                                <option selected>WARN</option>
+                                <option>INFO</option>
+                                <option>DEBUG</option>
+                                <option>TRACE</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 0.8rem">
+                            <label
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.6rem;
+                                    cursor: pointer;
+                                "
+                            >
+                                <input
+                                    type="checkbox"
+                                    style="width: auto"
+                                    checked
+                                />
+                                <span
+                                    >เปิดใช้งานการตรวจสอบการเข้าถึงข้อมูลแบบเรียลไทม์</span
+                                >
+                            </label>
+                        </div>
+
+                        <div style="margin-bottom: 0.8rem">
+                            <label
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.6rem;
+                                    cursor: pointer;
+                                "
+                            >
+                                <input
+                                    type="checkbox"
+                                    style="width: auto"
+                                    checked
+                                />
+                                <span
+                                    >แจ้งเตือนเมื่อความยินยอมใกล้หมดอายุ (7
+                                    วันล่วงหน้า)</span
+                                >
+                            </label>
+                        </div>
+
+                        <div style="margin-top: 1rem; text-align: center">
+                            <button
+                                class="login-btn"
+                                style="width: auto; padding: 0.6rem 2rem"
+                            >
+                                SAVE SETTINGS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Help Page -->
+            <section id="page-help" class="page">
+                <div class="topbar">
+                    <div class="brand">
+                        <h1>HELP & DOCUMENTATION</h1>
+                        <div class="tag">
+                            คู่มือและเอกสารประกอบ / User Guide & Documentation
+                        </div>
+                    </div>
+                </div>
+
+                <div class="breadcrumb">
+                    <span
+                        ><a href="#" onclick="showPage('page-dashboard')"
+                            >Dashboard</a
+                        ></span
+                    >
+                    <span>Help</span>
+                </div>
+
+                <div class="menu-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📖</div>
+                            <div class="card-title">คู่มือผู้ใช้</div>
+                        </div>
+                        <div class="card-body">
+                            คู่มือการใช้งานระบบจัดการข้อมูลส่วนบุคคล
+                            สำหรับผู้ดูแลระบบและผู้ใช้งานทั่วไป
+                        </div>
+                        <div style="margin-top: 0.8rem">
+                            <button
+                                class="login-btn"
+                                style="
+                                    width: 100%;
+                                    padding: 0.4rem;
+                                    font-size: 0.9rem;
+                                "
+                                onclick="alert('กำลังเปิดคู่มือผู้ใช้...')"
+                            >
+                                VIEW USER MANUAL
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">⚖️</div>
+                            <div class="card-title">
+                                กฎหมายและระเบียบข้อบังคับ
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล
+                            ประกาศคณะกรรมการ และแนวทางปฏิบัติ
+                        </div>
+                        <div style="margin-top: 0.8rem">
+                            <button
+                                class="login-btn"
+                                style="
+                                    width: 100%;
+                                    padding: 0.4rem;
+                                    font-size: 0.9rem;
+                                    background: linear-gradient(
+                                        to right,
+                                        #003300,
+                                        #005500
+                                    );
+                                "
+                                onclick="alert('กำลังแสดงเอกสารกฎหมาย...')"
+                            >
+                                VIEW REGULATIONS
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📹</div>
+                            <div class="card-title">วิดีโอสอนใช้งาน</div>
+                        </div>
+                        <div class="card-body">
+                            วิดีโอสอนการใช้งานฟีเจอร์ต่างๆ
+                            ของระบบจัดการข้อมูลส่วนบุคคล
+                        </div>
+                        <div style="margin-top: 0.8rem">
+                            <button
+                                class="login-btn"
+                                style="
+                                    width: 100%;
+                                    padding: 0.4rem;
+                                    font-size: 0.9rem;
+                                    background: linear-gradient(
+                                        to right,
+                                        #003300,
+                                        #005500
+                                    );
+                                "
+                                onclick="alert('กำลังแสดงรายการวิดีโอ...')"
+                            >
+                                VIEW TUTORIALS
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">📞</div>
+                            <div class="card-title">ติดต่อฝ่ายสนับสนุน</div>
+                        </div>
+                        <div class="card-body">
+                            ติดต่อทีมสนับสนุนทางเทคนิค และทีมปฏิบัติตามกฎหมาย
+                        </div>
+                        <div style="margin-top: 0.8rem">
+                            <button
+                                class="login-btn"
+                                style="
+                                    width: 100%;
+                                    padding: 0.4rem;
+                                    font-size: 0.9rem;
+                                "
+                                onclick="
+                                    alert('กำลังเชื่อมต่อกับฝ่ายสนับสนุน...')
+                                "
+                            >
+                                CONTACT SUPPORT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget" style="margin-top: 1rem">
+                    <div class="widget-header">
+                        <span>❓</span>
+                        <span>คำถามที่พบบ่อย / FAQ</span>
+                    </div>
+                    <div style="padding: 1rem; line-height: 1.8">
+                        <div style="margin-bottom: 1rem">
+                            <div
+                                style="font-weight: bold; margin-bottom: 0.4rem"
+                            >
+                                Q: วิธีการส่งออกข้อมูลผู้ใช้ตามคำขอ DSAR?
+                            </div>
+                            <div
+                                style="
+                                    opacity: 0.9;
+                                    padding-left: 1rem;
+                                    border-left: 2px solid var(--border);
+                                "
+                            >
+                                A: ไปที่เมนู "Logs" > เลือกผู้ใช้ > กด "EXPORT
+                                DATA" > เลือกรูปแบบไฟล์ > ยืนยัน
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem">
+                            <div
+                                style="font-weight: bold; margin-bottom: 0.4rem"
+                            >
+                                Q: วิธีการลบข้อมูลผู้ใช้ตามคำขอภายใต้ PDPA?
+                            </div>
+                            <div
+                                style="
+                                    opacity: 0.9;
+                                    padding-left: 1rem;
+                                    border-left: 2px solid var(--border);
+                                "
+                            >
+                                A: ไปที่เมนู "Data Inventory" >
+                                เลือกประเภทข้อมูล > กด "DELETE" >
+                                ยืนยันการลบถาวร
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem">
+                            <div
+                                style="font-weight: bold; margin-bottom: 0.4rem"
+                            >
+                                Q: วิธีการตรวจสอบการปฏิบัติตามกฎหมาย?
+                            </div>
+                            <div
+                                style="
+                                    opacity: 0.9;
+                                    padding-left: 1rem;
+                                    border-left: 2px solid var(--border);
+                                "
+                            >
+                                A: ไปที่เมนู "Compliance" >
+                                เลือกรายงานที่ต้องการ > ดูรายละเอียดและแนวโน้ม
+                            </div>
+                        </div>
+
+                        <div>
+                            <div
+                                style="font-weight: bold; margin-bottom: 0.4rem"
+                            >
+                                Q:
+                                วิธีการตั้งค่าการแจ้งเตือนเมื่อความยินยอมใกล้หมดอายุ?
+                            </div>
+                            <div
+                                style="
+                                    opacity: 0.9;
+                                    padding-left: 1rem;
+                                    border-left: 2px solid var(--border);
+                                "
+                            >
+                                A: ไปที่เมนู "Settings" > การตั้งค่าการแจ้งเตือน
+                                > เปิดใช้งาน "แจ้งเตือนความยินยอมใกล้หมดอายุ"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Menu (appears after login) -->
+            <nav
+                id="main-nav"
+                style="display: none; margin-bottom: 1rem"
+                aria-label="Main navigation"
+            >
+                <div class="nav-menu" role="menubar">
+                    <div
+                        class="nav-item active"
+                        role="menuitem"
+                        tabindex="0"
+                        onclick="showPage('page-dashboard')"
+                    >
+                        📊 Dashboard
+                    </div>
+                    <div
+                        class="nav-item"
+                        role="menuitem"
+                        tabindex="0"
+                        onclick="showPage('page-inventory')"
+                    >
+                        📋 Data Inventory
+                    </div>
+                    <div
+                        class="nav-item"
+                        role="menuitem"
+                        tabindex="0"
+                        onclick="showPage('page-logs')"
+                    >
+                        🔍 Logs
+                    </div>
+                    <div
+                        class="nav-item"
+                        role="menuitem"
+                        tabindex="0"
+                        onclick="showPage('page-compliance')"
+                    >
+                        ✅ Compliance
+                    </div>
+                    <div
+                        class="nav-item"
+                        role="menuitem"
+                        tabindex="0"
+                        onclick="showPage('page-settings')"
+                    >
+                        ⚙️ Settings
+                    </div>
+                    <div
+                        class="nav-item"
+                        role="menuitem"
+                        tabindex="0"
+                        onclick="showPage('page-help')"
+                    >
+                        ❓ Help
+                    </div>
+                    <button
+                        class="nav-item logout-btn"
+                        type="button"
+                        onclick="showPage('page-login')"
+                        style="
+                            margin-left: auto;
+                            background: rgba(50, 0, 0, 0.5);
+                        "
+                        aria-label="Logout"
+                    >
+                        🚪 Logout
+                    </button>
+                </div>
+            </nav>
+
+            <footer class="footer">
+                PDPA CRM TERMINAL v2.0 | ระบบจัดการข้อมูลส่วนบุคคลตามกฎหมาย PDPA
+                | © 2026
+            </footer>
+        </main>
+
+        <script>
+            // Component loader
+            async function loadComponent(selector, url) {
+                const element = document.querySelector(selector);
+                if (!element) return;
+                try {
+                    const response = await fetch(url);
+                    const html = await response.text();
+                    element.innerHTML = html;
+                } catch (e) {
+                    console.error("Failed to load component:", url, e);
+                }
+            }
+
+            // Page navigation
+            function showPage(pageId) {
+                // Hide all pages
+                document.querySelectorAll(".page").forEach((page) => {
+                    page.classList.remove("active");
+                });
+
+                // Show selected page
+                document.getElementById(pageId).classList.add("active");
+
+                // Show/hide navigation
+                const nav = document.getElementById("main-nav");
+                if (
+                    pageId === "page-login" ||
+                    pageId === "page-forgot" ||
+                    pageId === "page-register"
+                ) {
+                    nav.style.display = "none";
+                } else {
+                    nav.style.display = "block";
+                }
+
+                // Update active nav item
+                if (pageId !== "page-login") {
+                    document.querySelectorAll(".nav-item").forEach((item) => {
+                        item.classList.remove("active");
+                    });
+                    const activeNavItem = Array.from(
+                        document.querySelectorAll(".nav-item"),
+                    ).find((item) => {
+                        return item.textContent
+                            .toLowerCase()
+                            .includes(pageId.replace("page-", ""));
+                    });
+                    if (activeNavItem) activeNavItem.classList.add("active");
+                }
+            }
+
+            // Login form handler
+            document
+                .getElementById("loginForm")
+                ?.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    const username = document.getElementById("username").value;
+                    const password = document.getElementById("password").value;
+
+                    if (username && password) {
+                        // Simulate login delay
+                        document.querySelector(".login-btn").innerHTML =
+                            '<span style="margin-right:0.6rem;">⏳</span>VERIFYING CREDENTIALS...';
+                        document.querySelector(".login-btn").disabled = true;
+
+                        setTimeout(() => {
+                            alert("เข้าสู่ระบบสำเร็จ!\nLogin successful!");
+                            showPage("page-dashboard");
+                            document.querySelector(".login-btn").innerHTML =
+                                '<span style="margin-right:0.6rem;">🔐</span>LOGIN TO SYSTEM';
+                            document.querySelector(".login-btn").disabled =
+                                false;
+                        }, 1);
+                    } else {
+                        alert(
+                            "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน / Please enter username and password",
+                        );
+                    }
+                });
+
+            // Clock update
+            function updateClock() {
+                const clockEl = document.getElementById("clock");
+                if (!clockEl) return;
+
+                const d = new Date();
+                const pad = (n) => String(n).padStart(2, "0");
+                clockEl.textContent = `SYSTEM: ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            }
+
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // Generate chart data
+            function generateChart(containerId, data) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                container.innerHTML = "";
+                const maxVal = Math.max(...Object.values(data));
+                const barWidth = 40;
+                const containerWidth = container.offsetWidth;
+                const availableBars = Math.floor(
+                    containerWidth / (barWidth + 10),
+                );
+
+                const entries = Object.entries(data);
+                const visibleEntries = entries.slice(
+                    0,
+                    Math.min(availableBars, entries.length),
+                );
+
+                visibleEntries.forEach(([label, value], index) => {
+                    const barHeight = (value / maxVal) * 85;
+                    const leftPos = index * (barWidth + 15);
+
+                    const barEl = document.createElement("div");
+                    barEl.className = "chart-bar";
+                    barEl.style.height = `${barHeight}%`;
+                    barEl.style.left = `${leftPos}px`;
+                    barEl.style.width = `${barWidth}px`;
+                    barEl.textContent = value;
+                    barEl.title = `${label}: ${value}`;
+
+                    const labelEl = document.createElement("div");
+                    labelEl.className = "chart-label";
+                    labelEl.style.left = `${leftPos + barWidth / 2}px`;
+                    labelEl.textContent = label;
+
+                    container.appendChild(barEl);
+                    container.appendChild(labelEl);
+                });
+            }
+
+            // Initialize charts
+            window.addEventListener("load", function () {
+                // Access chart
+                const accessData = {
+                    "00:00": 45,
+                    "04:00": 23,
+                    "08:00": 89,
+                    "12:00": 156,
+                    "16:00": 203,
+                    "20:00": 178,
+                    "24:00": 92,
+                };
+                generateChart("access-chart", accessData);
+
+                // Add click handlers to pills
+                document.querySelectorAll(".pill").forEach((pill) => {
+                    pill.addEventListener("click", function () {
+                        document
+                            .querySelectorAll(".pill")
+                            .forEach((p) => p.classList.remove("active"));
+                        this.classList.add("active");
+                    });
+                });
+            });
+
+            // Handle window resize
+            window.addEventListener("resize", function () {
+                generateChart("access-chart", {
+                    "00:00": 45,
+                    "04:00": 23,
+                    "08:00": 89,
+                    "12:00": 156,
+                    "16:00": 203,
+                    "20:00": 178,
+                    "24:00": 92,
+                });
+            });
+        </script>
+    </body>
+</html>
