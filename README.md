@@ -123,6 +123,7 @@ kubectl apply -k k8s/overlays/development
 ```
 
 ## 📁 Directory Structure
+### Root
 ```
 app
 ├── backend
