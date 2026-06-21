@@ -13,46 +13,6 @@ APP is a self-hosted system log management dashboard for viewing, filtering, and
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 
 ## 🛠️ Architecture
-
-```
-app
-├── backend
-│   ├── main.go             # Entry point using gin.Default()
-│   ├── routers/            # Route setup (SetupRoutes function)
-│   │   └── routers.go      # Route definitions
-│   ├── controllers/        # HTTP handlers
-│   │   ├── api_controller.go
-│   │   ├── export_controller.go
-│   │   ├── exports_list_controller.go
-│   │   ├── protected_controller.go
-│   │   └── search_controller.go
-│   ├── services/           # Business logic (JWTService, etc.)
-│   ├── middleware/         # Auth middleware (JWTAuth, RoleAuth)
-│   ├── models/             # JWT claims structures
-│   ├── config/             # Configuration loading
-│   └── pages/              # Static HTML/JS/CSS (optional)
-├── frontend
-│   ├── src/
-│   │   ├── components/     # Astro components
-│   │   ├── layouts/        # Layout templates
-│   │   └── pages/          # Route pages (dashboard, signin, signup)
-│   ├── styles/             # CSS files
-│   └── package.json
-├── chart
-│   ├── nfs-subdir-external-provisioner
-│   ├── quickwit
-│   └── vector
-├── docker
-│   ├── backend
-│   └── frontend
-├── docker-compose.yml
-├── k8s
-│   ├── base
-│   ├── overlays
-│   └── README.md
-└── config.json
-```
-
 ## 📦 Prerequisites
 
 - Go 1.21+
@@ -163,7 +123,44 @@ kubectl apply -k k8s/overlays/development
 ```
 
 ## 📁 Directory Structure
-
+```
+app
+├── backend
+│   ├── main.go             # Entry point using gin.Default()
+│   ├── routers/            # Route setup (SetupRoutes function)
+│   │   └── routers.go      # Route definitions
+│   ├── controllers/        # HTTP handlers
+│   │   ├── api_controller.go
+│   │   ├── export_controller.go
+│   │   ├── exports_list_controller.go
+│   │   ├── protected_controller.go
+│   │   └── search_controller.go
+│   ├── services/           # Business logic (JWTService, etc.)
+│   ├── middleware/         # Auth middleware (JWTAuth, RoleAuth)
+│   ├── models/             # JWT claims structures
+│   ├── config/             # Configuration loading
+│   └── pages/              # Static HTML/JS/CSS (optional)
+├── frontend
+│   ├── src/
+│   │   ├── components/     # Astro components
+│   │   ├── layouts/        # Layout templates
+│   │   └── pages/          # Route pages (dashboard, signin, signup)
+│   ├── styles/             # CSS files
+│   └── package.json
+├── chart
+│   ├── nfs-subdir-external-provisioner
+│   ├── quickwit
+│   └── vector
+├── docker
+│   ├── backend
+│   └── frontend
+├── docker-compose.yml
+├── k8s
+│   ├── base
+│   ├── overlays
+│   └── README.md
+└── config.json
+```
 ### Backend
 ```
 backend/
