@@ -169,7 +169,7 @@ func (s *ExportService) fetchAndTransform(ctx context.Context, query string, par
 	// For simplicity: fetch all in one batch (max_hits: 10000)
 	// Production: implement cursor-based pagination or use Quickwit scroll API
 
-	result, err := s.quickwit.Search(ctx, query)
+	result, err := s.quickwit.Search(ctx, query, params.MaxHits, params.IndexID)
 	if err != nil {
 		return nil, 0, err
 	}

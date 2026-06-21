@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"exporter/config"
 	"exporter/models"
@@ -22,14 +25,61 @@ func InitSearchController() error {
 	return nil
 }
 
+func HandleIndices(c *gin.Context) {
+	// 1. สร้าง HTTP Client พร้อมตั้งค่า Timeout ป้องกันระบบค้าง
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	// 2. สร้างคำสั่งยิงไปที่ Quickwit REST API (/api/v1/indexes)
+	quickwitEndpoint := strings.TrimSuffix(config.AppConfig.QuickwitURL, "/") + "/api/v1/indexes"
+	req, err := http.NewRequestWithContext(c.Request.Context(), "GET", quickwitEndpoint, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request: " + err.Error()})
+		return
+	}
+
+	// 3. เริ่มส่ง Request ไปยัง Quickwit
+	resp, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Cannot connect to Quickwit: " + err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	// 4. อ่านข้อมูลดิบ (Raw Body) ที่ส่งกลับมาจาก Quickwit
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read Quickwit response: " + err.Error()})
+		return
+	}
+
+	// 5. ตรวจสอบสถานะการตอบกลับจาก Quickwit
+	if resp.StatusCode != http.StatusOK {
+		c.Data(resp.StatusCode, "application/json", bodyBytes)
+		return
+	}
+
+	// 6. แปลงข้อมูล JSON ดิบเพื่อส่งต่อให้ฝั่ง Client ของคุณทันที
+	var quickwitResponse []interface{} // Quickwit คืนค่ากลับมาเป็น Array ของ Index Object
+	if err := json.Unmarshal(bodyBytes, &quickwitResponse); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse JSON: " + err.Error()})
+		return
+	}
+
+	// 7. ส่งผลลัพธ์กลับในรูปแบบ JSON สวยงาม
+	c.JSON(http.StatusOK, quickwitResponse)
+}
+
 func HandleSearch(c *gin.Context) {
 	var params models.SearchParams
 	if err := c.ShouldBindQuery(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid query parameters: " + err.Error()})
 		return
 	}
+
 	query := buildLuceneQuery(params)
-	result, err := quickwitClient.Search(c.Request.Context(), query)
+	result, err := quickwitClient.Search(c.Request.Context(), query, params.MaxHits, params.IndexID)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Search failed: " + err.Error()})
 		return
@@ -41,6 +91,8 @@ func HandleSearch(c *gin.Context) {
 // buildLuceneQuery constructs Lucene-style query from params
 func buildLuceneQuery(p models.SearchParams) string {
 	var parts []string
+
+	fmt.Printf("first query: %+v\n", p)
 
 	// ✅ Timestamp range
 	if p.FromTimestamp != nil && p.ToTimestamp != nil {
@@ -69,7 +121,7 @@ func buildLuceneQuery(p models.SearchParams) string {
 		return "*"
 	}
 
-	fmt.Println("query:", strings.Join(parts, " AND "))
+	fmt.Println("last query:", strings.Join(parts, " AND "))
 	return strings.Join(parts, " AND ")
 }
 

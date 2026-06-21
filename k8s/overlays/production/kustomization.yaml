@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namePrefix: prod-
+
+patches:
+  - target:
+      kind: Deployment
+      name: backend
+    patch: |
+      - op: replace
+        /spec/replicas: 2
+  - target:
+      kind: Deployment
+      name: frontend
+    patch: |
+      - op: replace
+        /spec/replicas: 2
+
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - QUICKWIT_URL=https://quickwit-cluster.logging.svc
+      - VITE_API_URL=https://backend.logging.svc
+      - LOG_LEVEL=info
+
+images:
+  - name: traipoap/log-management-backend
+    newName: registry.example.com/log-management-backend
+    newTag: v1.2.3
+
+  - name: traipoap/log-management-frontend
+    newName: registry.example.com/log-management-frontend
+    newTag: v1.2.3
+
+secretGenerator:
+  - name: app-secrets
+    literals:
+      - JWT_SECRET=super-secret-key-change-in-production
+      - ELASTICSEARCH_PASSWORD=changeme

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quickwit
+  namespace: log-management
+  labels:
+    app: quickwit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quickwit
+  template:
+    metadata:
+      labels:
+        app: quickwit
+    spec:
+      containers:
+        - name: quickwit
+          image: quickwit-dev/quickwit:v0.9.1
+          args:
+            - run
+            - --collector-output-dir=/dev/shm/collector
+            - --http-addr=0.0.0.0:8000
+          ports:
+            - name: grpc
+              containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /dev/shm/collector
+            - name: indexes
+              mountPath: /indexes
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /_ping
+              port: grpc
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /_ping
+              port: grpc
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+      volumes:
+        - name: data
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        - name: indexes
+          emptyDir:
+            medium: Memory
+            sizeLimit: 10Gi

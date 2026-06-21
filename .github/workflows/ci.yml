@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      actions: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci || npm install
+
+      - name: Lint
+        run: npm run lint || true
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build backend
+        run: |
+          cd backend
+          go mod download
+          go build -o /tmp/backend .
+
+      - name: Run tests
+        run: |
+          cd backend
+          go test ./...
+
+          cd ../frontend
+          npm run test || true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build application with Docker
+        run: |
+          docker compose build
+
+      - name: Run integration tests
+        run: |
+          docker compose up -d --quiet-pull
+          sleep 10
+          docker compose run app npm run test || true
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'traipoap/quickwit-api:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'

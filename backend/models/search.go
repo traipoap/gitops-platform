@@ -1,6 +1,7 @@
 package models
 
 type SearchParams struct {
+	IndexID           *string `form:"index_id"`
 	FromTimestamp     *string `form:"from_timestamp"`
 	ToTimestamp       *string `form:"to_timestamp"`
 	SourceIP          *string `form:"source_ip"`

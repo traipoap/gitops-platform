@@ -80,6 +80,7 @@ func setupAPIRoutes(r *gin.Engine) {
 func setupTaskRoutes(r *gin.Engine) {
 	task := r.Group("/task")
 
+	task.GET("/indices", controllers.HandleIndices)
 	task.GET("/search", controllers.HandleSearch)
 	task.GET("/export", controllers.HandleExport)
 	task.GET("/exports", controllers.HandleExportsList)

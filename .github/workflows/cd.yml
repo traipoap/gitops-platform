@@ -1,0 +1,52 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache: "go-mod"
+
+      - name: Build backend
+        run: |
+          cd backend
+          go build -ldflags="-s -w -X 'main.Version=${{ github.sha }}'" -o /app/backend .
+
+      - name: Publish Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ github.repository }}:${{ github.sha }}, ${{ github.repository }}:latest
+          platforms: linux/amd64
+
+      - name: Deploy to production
+        run: |
+          echo "Deploy triggered: ${{ github.event_name }}"
+          echo "Image published: ${{ github.repository }}:latest"

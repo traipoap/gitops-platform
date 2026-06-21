@@ -27,10 +27,10 @@ func NewQuickwitClient(baseURL string) *QuickwitClient {
 	}
 }
 
-func (c *QuickwitClient) Search(ctx context.Context, query string) (*models.SearchResponse, error) {
+func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int, index_id *string) (*models.SearchResponse, error) {
 	payload := models.QuickwitSearchRequest{
 		Query:       query,
-		MaxHits:     10000,
+		MaxHits:     *max_hits,
 		SortByField: "index_timestamp",
 	}
 
@@ -42,14 +42,16 @@ func (c *QuickwitClient) Search(ctx context.Context, query string) (*models.Sear
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		c.baseURL+"/api/v1/syslogs/search",
+		c.baseURL+"/api/v1/"+*index_id+"/search",
 		bytes.NewReader(body),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
 
+	fmt.Println("request body:", string(body))
+
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("execute request: %w", err)

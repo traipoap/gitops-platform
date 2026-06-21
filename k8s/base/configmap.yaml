@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: log-management-config
+  namespace: log-management
+data:
+  FRONTEND_PORT: "4321"
+  BACKEND_PORT: "8080"
+  NODE_ENV: "production"
+  VITE_API_URL: "http://backend:8080"
+  QUICKWIT_URL: "http://quickwit:8000"
+  # Quickwit configuration
+  QUICKWIT_INDEX_PREFIX: "logs"
+  QUICKWIT_SEARCH_BACKEND: "http://quickwit:8000"
+  # Elasticsearch connection (if used)
+  ELASTICSEARCH_HOST: "elasticsearch"
+  ELASTICSEARCH_PORT: "9200"
+  # JWT settings
+  JWT_SECRET: "your-secret-key-here-change-in-production"
+  JWT_EXPIRES_IN: "24h"
+  # Resource limits
+  MEMORY_LIMIT: "512Mi"
+  CPU_LIMIT: "500m"

@@ -48,7 +48,7 @@ func HandleExport(c *gin.Context) {
 
 	query := buildLuceneQuery(params)
 	fmt.Printf("Query: %s\n", query)
-	result, err := quickwitClient.Search(c.Request.Context(), query)
+	result, err := quickwitClient.Search(c.Request.Context(), query, params.MaxHits, params.IndexID)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Search failed: " + err.Error()})
 		return
@@ -77,7 +77,7 @@ func HandleExport(c *gin.Context) {
 
 	for processed < int(total) {
 		query := buildLuceneQuery(params)
-		response, err := quickwitClient.Search(c.Request.Context(), query)
+		response, err := quickwitClient.Search(c.Request.Context(), query, params.MaxHits, params.IndexID)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "Search failed: " + err.Error()})
 			return
