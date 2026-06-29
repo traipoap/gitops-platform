@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:25.8.1-alpine3.23 AS builder
+FROM --platform=linux/amd64 node:26.4.0-alpine3.24 AS builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ===================================================
-FROM --platform=linux/amd64 node:25.8.1-alpine3.23
+FROM --platform=linux/amd64 node:26.4.0-alpine3.24
 
 RUN apk --no-cache add ca-certificates
 
@@ -24,6 +24,6 @@ ENV PORT=4321
 ENV HOSTNAME="0.0.0.0"
 
 EXPOSE 4321
-RUN npm install -g npm@11.15.0
+#RUN npm install -g npm@latest
 
 CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
