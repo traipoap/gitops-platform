@@ -1,0 +1,426 @@
+---
+import "../styles/signup.css";
+
+interface Props {
+    redirect?: string;
+}
+
+const { redirect = "/dashboard" } = Astro.props;
+---
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sign Up - System Log Manager</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <div class="signup-container">
+            <!-- Animated Background -->
+            <div class="login-bg">
+                <div class="bg-shape shape-1"></div>
+                <div class="bg-shape shape-2"></div>
+                <div class="bg-shape shape-3"></div>
+            </div>
+
+            <!-- Signup Card -->
+            <div class="login-card">
+                <!-- Logo Section -->
+                <div class="login-header">
+                    <div class="logo-icon">
+                        <svg
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"></path>
+                            <path
+                                d="M3 18V6C3 4.89543 3.89543 4 5 4H19C20.1046 4 21 4.89543 21 6V18"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"></path>
+                            <rect
+                                x="7"
+                                y="14"
+                                width="10"
+                                height="2"
+                                rx="1"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"></rect>
+                        </svg>
+                    </div>
+                    <div class="header-text">
+                        <h1>Create Account</h1>
+                        <p>Join thousands of users tracking system logs</p>
+                    </div>
+
+                    <!-- Signup Form -->
+                    <form class="signup-form" id="signupForm">
+                        <div class="form-group">
+                            <label for="fullname">
+                                <span class="label-icon">👤</span>
+                                Full Name
+                            </label>
+                            <input
+                                type="text"
+                                id="fullname"
+                                name="fullname"
+                                class="form-input"
+                                placeholder="John Doe"
+                                autocomplete="name"
+                                required
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">
+                                <span class="label-icon">📧</span>
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-input"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                required
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">
+                                <span class="label-icon">🔒</span>
+                                Password
+                            </label>
+                            <div class="password-wrapper">
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    class="form-input"
+                                    placeholder="At least 8 characters"
+                                    autocomplete="new-password"
+                                    minlength="8"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    class="toggle-password"
+                                    onclick="togglePasswordVisibility(this)"
+                                    aria-label="Toggle password visibility"
+                                >
+                                    <svg
+                                        class="eye-icon eye-open"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M12 4.5C7.3 4.5 3.5 7.6 1.7 12C3.5 16.4 7.3 19.5 12 19.5C16.7 19.5 20.5 16.4 22.3 12C20.5 7.6 16.7 4.5 12 4.5Z"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                        <path
+                                            d="M12 16C14.5 16 16.5 14 16.5 11.5C16.5 10.5 16.2 9.5 15.8 8.7C15.4 7.9 14.9 7.2 14.3 6.6C13.7 6 13 5.5 12.2 5.1C11.4 4.7 10.5 4.5 9.7 4.5C7.2 4.5 5 6.7 5 9.2C5 11.7 7.2 13.9 9.7 13.9C10.5 13.9 11.4 14.1 12.2 14.5C13 14.9 13.7 15.4 14.3 16C14.9 16.6 15.4 17.2 15.8 17.8C16.2 18.4 16.5 19.1 16.5 19.9C16.5 20.6 16.1 21.2 15.4 21.6L13.6 22.9"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                    </svg>
+                                    <svg
+                                        class="eye-icon eye-closed"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        style="display: none;"
+                                    >
+                                        <path
+                                            d="M1 12C3.5 13.5 7.4 16.3 12 16.5C16.6 16.3 20.5 13.5 23 12"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="password-requirements">
+                                <span>8+ characters</span>
+                                <span>At least one letter</span>
+                                <span>At least one number</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">
+                                <span class="label-icon">🔒</span>
+                                Confirm Password
+                            </label>
+                            <div class="password-wrapper">
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    class="form-input"
+                                    placeholder="Re-enter password"
+                                    autocomplete="new-password"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    class="toggle-password"
+                                    onclick="togglePasswordVisibility(this)"
+                                    aria-label="Toggle password visibility"
+                                >
+                                    <svg
+                                        class="eye-icon eye-open"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M12 4.5C7.3 4.5 3.5 7.6 1.7 12C3.5 16.4 7.3 19.5 12 19.5C16.7 19.5 20.5 16.4 22.3 12C20.5 7.6 16.7 4.5 12 4.5Z"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                        <path
+                                            d="M12 16C14.5 16 16.5 14 16.5 11.5C16.5 10.5 16.2 9.5 15.8 8.7C15.4 7.9 14.9 7.2 14.3 6.6C13.7 6 13 5.5 12.2 5.1C11.4 4.7 10.5 4.5 9.7 4.5C7.2 4.5 5 6.7 5 9.2C5 11.7 7.2 13.9 9.7 13.9C10.5 13.9 11.4 14.1 12.2 14.5C13 14.9 13.7 15.4 14.3 16C14.9 16.6 15.4 17.2 15.8 17.8C16.2 18.4 16.5 19.1 16.5 19.9C16.5 20.6 16.1 21.2 15.4 21.6L13.6 22.9"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                    </svg>
+                                    <svg
+                                        class="eye-icon eye-closed"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        style="display: none;"
+                                    >
+                                        <path
+                                            d="M1 12C3.5 13.5 7.4 16.3 12 16.5C16.6 16.3 20.5 13.5 23 12"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <label class="checkbox-wrapper">
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                name="terms"
+                                required
+                            />
+                            <span class="checkbox-text">
+                                I agree to the
+                                <a href="#">Terms of Service</a> and
+                                <a href="#">Privacy Policy</a>
+                            </span>
+                        </label>
+
+                        <!-- Submit Button -->
+                        <button
+                            type="submit"
+                            class="btn-primary btn-signup"
+                            id="signupBtn"
+                        >
+                            <span class="btn-text">Create Account</span>
+                            <span class="btn-spinner" style="display: none;">
+                                <svg
+                                    class="spinner"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                >
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                        stroke-linecap="round"
+                                    >
+                                        <animate
+                                            attributeName="opacity"
+                                            values="0;1;0"
+                                            dur="1s"
+                                            repeatCount="indefinite"></animate>
+                                    </circle>
+                                    <path
+                                        d="M12 2C6.47 2 2 6.47 2 12"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                        stroke-linecap="round"></path>
+                                </svg>
+                            </span>
+                        </button>
+
+                        <!-- Error Message -->
+                        <div class="error-message" id="signupError"></div>
+
+                        <!-- Success Message -->
+                        <div class="success-message" id="signupSuccess"></div>
+                    </form>
+
+                    <!-- Sign Up Link -->
+                    <div class="signup-footer">
+                        <p>
+                            Already have an account?
+                            <a href="/signin">Sign in</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Toggle -->
+            <script is:inline>
+                // Toggle สำหรับ field ที่ถูกกดเท่านั้น — ปลอดภัยกว่าและตอบสนองได้ดีกว่า
+                function togglePasswordVisibility(btn) {
+                    if (!btn) return;
+                    const wrapper = btn.closest(".password-wrapper");
+                    if (!wrapper) return;
+                    const input = wrapper.querySelector(
+                        'input[type="password"], input[type="text"]',
+                    );
+                    if (!input) return;
+
+                    const wasPassword = input.type === "password";
+                    input.type = wasPassword ? "text" : "password";
+
+                    const eyeOpen = wrapper.querySelector(".eye-open");
+                    const eyeClosed = wrapper.querySelector(".eye-closed");
+                    if (eyeOpen)
+                        eyeOpen.style.display = wasPassword ? "none" : "block";
+                    if (eyeClosed)
+                        eyeClosed.style.display = wasPassword
+                            ? "block"
+                            : "none";
+
+                    // ARIA state (ช่วย accessibility)
+                    btn.setAttribute("aria-pressed", String(!wasPassword));
+                }
+            </script>
+
+            <!-- Signup Form Handler -->
+            <script type="module">
+                const form = document.getElementById("signupForm");
+                const errorEl = document.getElementById("signupError");
+                const successEl = document.getElementById("signupSuccess");
+                const btn = document.getElementById("signupBtn");
+                const btnText = btn.querySelector(".btn-text");
+                const btnSpinner = btn.querySelector(".btn-spinner");
+
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const fullname =
+                        form.querySelector('[name="fullname"]').value;
+                    const email = form.querySelector('[name="email"]').value;
+                    const password =
+                        form.querySelector('[name="password"]').value;
+                    const confirmPassword = form.querySelector(
+                        '[name="confirmPassword"]',
+                    ).value;
+                    const terms = document.getElementById("terms").checked;
+
+                    if (
+                        !fullname ||
+                        !email ||
+                        !password ||
+                        !confirmPassword ||
+                        !terms
+                    ) {
+                        showError("Please fill in all required fields");
+                        return;
+                    }
+
+                    if (password !== confirmPassword) {
+                        showError("Passwords do not match");
+                        return;
+                    }
+
+                    if (password.length < 8) {
+                        showError("Password must be at least 8 characters");
+                        return;
+                    }
+
+                    // Show loading spinner
+                    btnText.style.display = "none";
+                    btnSpinner.style.display = "block";
+                    btn.disabled = true;
+
+                    // Simulate API call (replace with actual auth logic)
+                    setTimeout(() => {
+                        // Create a demo session
+                        sessionStorage.setItem(
+                            "user",
+                            JSON.stringify({
+                                name: fullname,
+                                email: email,
+                                role: "admin",
+                                created: new Date().toISOString(),
+                            }),
+                        );
+                        sessionStorage.setItem(
+                            "sessionToken",
+                            Math.random().toString(36).substr(2, 20),
+                        );
+
+                        // Hide loading, show success
+                        btnText.style.display = "block";
+                        btnSpinner.style.display = "none";
+                        btn.disabled = false;
+
+                        // Success message
+                        successEl.textContent = "Account created successfully!";
+                        successEl.style.display = "block";
+
+                        // Redirect to dashboard
+                        setTimeout(() => {
+                            window.location.href = `${redirect}?from=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+                        }, 1500);
+                    }, 1000);
+                });
+
+                function showError(message) {
+                    errorEl.textContent = message;
+                    errorEl.style.display = "block";
+                    setTimeout(() => {
+                        errorEl.style.display = "none";
+                    }, 5000);
+                }
+            </script>
+        </div>
+    </body>
+</html>

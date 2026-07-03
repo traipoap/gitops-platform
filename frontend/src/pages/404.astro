@@ -1,0 +1,90 @@
+---
+import "../styles/signin.css";
+
+interface Props {
+    redirect?: string;
+}
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Page Not Found - System Log Manager</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <div class="login-container">
+            <!-- Animated Background -->
+            <div class="login-bg">
+                <div class="bg-shape shape-1"></div>
+                <div class="bg-shape shape-2"></div>
+                <div class="bg-shape shape-3"></div>
+            </div>
+
+            <!-- 404 Card -->
+            <div class="login-card">
+                <!-- Logo Section -->
+                <div class="login-header">
+                    <div class="logo-icon">
+                        <svg
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"></path>
+                            <path
+                                d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5C15 6.10457 14.1046 7 13 7H11C9.89543 7 9 6.10457 9 5Z"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"></path>
+                            <path
+                                d="M9 14L11 16L15 12"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"></path>
+                        </svg>
+                    </div>
+                    <div class="header-text">
+                        <h1>404</h1>
+                        <p>Page Not Found</p>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message">
+                    <p>The page you're looking for doesn't exist or has been moved.</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-options" style="margin-top: 24px; justify-content: center;">
+                    <button class="btn-login" onclick="window.location.href = '/dashboard'" style="margin-right: 12px;">
+                        <span class="btn-text">Go to Dashboard</span>
+                    </button>
+                    <button class="btn-login" onclick="window.history.back()" style="background: var(--bg-tertiary); border: 1px solid var(--border-color);">
+                        <span class="btn-text">Go Back</span>
+                    </button>
+                </div>
+
+                <!-- Footer -->
+                <div class="login-footer" style="margin-top: 32px;">
+                    <p>Need help? <a href="/contact">Contact support</a></p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

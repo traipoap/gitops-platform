@@ -1,0 +1,1061 @@
+---
+import Layout from "../layouts/Layout.astro";
+import logo from "../../assets/astro.svg";
+import logout from "../../assets/logout.svg";
+import background from "../../assets/background.svg";
+---
+
+<Layout title="APP - System Log Manager" class="landing-page">
+    <div class="landing-wrapper">
+        <header class="header">
+            <a href="/" class="logo-container" aria-label="APP Logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                    ></path>
+                </svg>
+                <span class="logo-text">APP</span>
+            </a>
+            <nav class="nav">
+                <a href="/signin" class="nav-link">Sign In</a>
+                <a href="/signup" class="nav-link primary">Get Started</a>
+            </nav>
+        </header>
+
+        <main class="hero">
+            <div class="hero-content">
+                <div class="badge">✨ Self-hosted & Open Source</div>
+                <h1 class="hero-title">
+                    Unified Log <span class="gradient">Management</span>
+                    <br />Dashboard
+                </h1>
+                <p class="hero-subtitle">
+                    View, filter, and analyze your server logs in real-time.
+                    Built for performance, optimized for monitoring.
+                </p>
+                <div class="hero-cta">
+                    <a href="/dashboard" class="btn btn-primary">
+                        View Dashboard
+                        <svg
+                            class="btn-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M5 12h14M12 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    <a href="/signup" class="btn btn-secondary">
+                        Create Account
+                    </a>
+                </div>
+                <div class="hero-features">
+                    <div class="feature">
+                        <svg
+                            class="feature-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"
+                            ></path>
+                        </svg>
+                        <span>Real-time Streaming</span>
+                    </div>
+                    <div class="feature">
+                        <svg
+                            class="feature-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                        <span>Advanced Filtering</span>
+                    </div>
+                    <div class="feature">
+                        <svg
+                            class="feature-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                            ></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Log Export</span>
+                    </div>
+                    <div class="feature">
+                        <svg
+                            class="feature-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <span>Dark Theme UI</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="visual-container">
+                    <div class="dashboard-preview">
+                        <div class="preview-header">
+                            <div class="preview-dot red"></div>
+                            <div class="preview-dot yellow"></div>
+                            <div class="preview-dot green"></div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="preview-sidebar">
+                                <div
+                                    class="sidebar-icon"
+                                    style="background: var(--gray-7);"
+                                >
+                                    ⚙️
+                                </div>
+                                <div
+                                    class="sidebar-icon"
+                                    style="background: var(--gray-7);"
+                                >
+                                    📊
+                                </div>
+                                <div
+                                    class="sidebar-icon"
+                                    style="background: var(--gray-7);"
+                                >
+                                    🔍
+                                </div>
+                                <div
+                                    class="sidebar-icon active"
+                                    style="background: var(--primary);"
+                                >
+                                    🏠
+                                </div>
+                            </div>
+                            <div class="preview-main">
+                                <div class="stat-card">
+                                    <span class="stat-label">Logs Today</span>
+                                    <span class="stat-value">12,847</span>
+                                    <span class="stat-trend positive"
+                                        >↑ 12%</span
+                                    >
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-label">Errors</span>
+                                    <span class="stat-value">23</span>
+                                    <span class="stat-trend negative">↓ 5%</span
+                                    >
+                                </div>
+                                <div class="log-stream-preview">
+                                    <span class="log-time"
+                                        >[2026-05-25 10:23:45]</span
+                                    >
+                                    <span class="log-level info">INFO</span>
+                                    <span class="log-message"
+                                        >Application started successfully</span
+                                    >
+                                </div>
+                                <div class="log-stream-preview">
+                                    <span class="log-time"
+                                        >[2026-05-25 10:23:47]</span
+                                    >
+                                    <span class="log-level warn">WARN</span>
+                                    <span class="log-message"
+                                        >High memory usage detected</span
+                                    >
+                                </div>
+                                <div class="log-stream-preview">
+                                    <span class="log-time"
+                                        >[2026-05-25 10:23:48]</span
+                                    >
+                                    <span class="log-level error">ERROR</span>
+                                    <span class="log-message"
+                                        >Connection timeout to database</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-footer">
+                            <span class="preview-status">● Live</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <section class="how-it-works">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Connect</h3>
+                    <p>Point APP to your log sources via configuration file</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Stream</h3>
+                    <p>Real-time logs flow into the dashboard instantly</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Filter</h3>
+                    <p>Search, filter, and export logs as needed</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-grid">
+            <h2>Powerful Features</h2>
+            <div class="grid-cards">
+                <article class="card">
+                    <div class="card-icon">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                            ></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h3>Live Log Streaming</h3>
+                    <p>
+                        Watch your logs stream in real-time with no buffering or
+                        delays.
+                    </p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <polygon
+                                points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
+                            ></polygon>
+                        </svg>
+                    </div>
+                    <h3>Multi-Source Support</h3>
+                    <p>
+                        Aggregate logs from multiple servers, containers, and
+                        applications.
+                    </p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <rect
+                                x="3"
+                                y="11"
+                                width="18"
+                                height="11"
+                                rx="2"
+                                ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <h3>Advanced Search</h3>
+                    <p>
+                        Full-text search with level, source, host, and time
+                        range filters.
+                    </p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                            ></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </div>
+                    <h3>Export & Archive</h3>
+                    <p>Export logs to CSV or JSON for analysis and archival.</p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                            ></path>
+                        </svg>
+                    </div>
+                    <h3>Privacy First</h3>
+                    <p>
+                        Self-hosted solution. Your logs stay on your
+                        infrastructure.
+                    </p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Lightweight</h3>
+                    <p>
+                        Built with Astro and Go for minimal resource footprint.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2>Ready to Get Started?</h2>
+                <p>Deploy APP in minutes and start managing your logs.</p>
+                <div class="cta-buttons">
+                    <a href="/signin" class="btn btn-primary btn-lg">
+                        Sign In
+                    </a>
+                    <a href="/signup" class="btn btn-secondary btn-lg">
+                        Create Account
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="/" class="footer-logo">
+                        <svg
+                            class="footer-logo-icon"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path
+                                d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                            ></path>
+                        </svg>
+                        <span>APP</span>
+                    </a>
+                    <p>System Log Manager</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-col">
+                        <h4>Product</h4>
+                        <a href="/dashboard">Dashboard</a>
+                        <a href="/docs">Documentation</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Company</h4>
+                        <a href="/">About</a>
+                        <a href="/contact">Contact</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 APP. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+</Layout>
+<style>
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #5558e3;
+        --secondary: #0ea5e9;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --gray-1: #f8fafc;
+        --gray-2: #f1f5f9;
+        --gray-3: #e2e8f0;
+        --gray-4: #cbd5e1;
+        --gray-5: #94a3b8;
+        --gray-6: #64748b;
+        --gray-7: #475569;
+        --gray-8: #334155;
+        --gray-9: #1e293b;
+        --gray-10: #0f172a;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        --radius: 12px;
+    }
+
+    .landing-page {
+        min-height: 100vh;
+        font-family:
+            "Inter",
+            system-ui,
+            -apple-system,
+            sans-serif;
+        color: var(--gray-10);
+        background: var(--gray-1);
+    }
+
+    .landing-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        color: var(--gray-10);
+    }
+
+    .logo-icon {
+        width: 32px;
+        height: 32px;
+        color: var(--primary);
+    }
+
+    .logo-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .nav {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .nav-link {
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        color: var(--gray-6);
+        font-weight: 500;
+        border-radius: var(--radius);
+        transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+        color: var(--gray-10);
+        background: var(--gray-2);
+    }
+
+    .nav-link.primary {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+    }
+
+    .nav-link.primary:hover {
+        color: white;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-1px);
+    }
+
+    /* Hero */
+    .hero {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        padding: 4rem 0;
+        align-items: center;
+        margin-bottom: 6rem;
+    }
+
+    @media (max-width: 900px) {
+        .hero {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.375rem 0.875rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        border-radius: 100px;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .hero-title {
+        font-size: clamp(2.25rem, 5vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.025em;
+        margin: 0 0 1.5rem 0;
+        max-width: 70ch;
+    }
+
+    .gradient {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1rem, 2.5vw, 1.25rem);
+        color: var(--gray-6);
+        line-height: 1.6;
+        margin: 0 0 2rem 0;
+        max-width: 54ch;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--gray-10);
+        border: 1px solid var(--gray-3);
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-1);
+        border-color: var(--gray-4);
+    }
+
+    .hero-features {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .feature {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.875rem;
+        background: white;
+        border: 1px solid var(--gray-2);
+        border-radius: 100px;
+        font-size: 0.8125rem;
+        color: var(--gray-6);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .feature-icon {
+        width: 16px;
+        height: 16px;
+        color: var(--primary);
+    }
+
+    /* Hero Visual */
+    .hero-visual {
+        position: relative;
+    }
+
+    .visual-container {
+        position: relative;
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--gray-9), var(--gray-8));
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .dashboard-preview {
+        background: var(--gray-10);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--gray-4);
+    }
+
+    .preview-header {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0.375rem;
+        background: var(--gray-9);
+        border-bottom: 1px solid var(--gray-4);
+    }
+
+    .preview-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .preview-dot.red {
+        background: var(--danger);
+    }
+    .preview-dot.yellow {
+        background: var(--warning);
+    }
+    .preview-dot.green {
+        background: var(--success);
+    }
+
+    .preview-content {
+        display: grid;
+        grid-template-columns: 60px 1fr;
+        min-height: 300px;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .preview-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .sidebar-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--gray-5);
+        transition: all 0.2s;
+    }
+
+    .sidebar-icon.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .preview-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: var(--gray-9);
+        border-radius: 8px;
+        border: 1px solid var(--gray-4);
+    }
+
+    .stat-label {
+        color: var(--gray-5);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .stat-trend {
+        font-size: 0.75rem;
+        padding: 0.125rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .stat-trend.positive {
+        background: rgba(34, 197, 94, 0.2);
+        color: var(--success);
+    }
+
+    .stat-trend.negative {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--danger);
+    }
+
+    .log-stream-preview {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: var(--gray-9);
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8125rem;
+        border-left: 3px solid var(--gray-4);
+    }
+
+    .log-time {
+        color: var(--gray-5);
+    }
+
+    .log-level.info {
+        color: var(--success);
+    }
+    .log-level.warn {
+        color: var(--warning);
+    }
+    .log-level.error {
+        color: var(--danger);
+    }
+    .log-message {
+        color: var(--gray-5);
+    }
+
+    .preview-footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: var(--gray-9);
+        border-top: 1px solid var(--gray-4);
+    }
+
+    .preview-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        font-weight: 600;
+        font-size: 0.8125rem;
+    }
+
+    .preview-status::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background: var(--success);
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    /* How It Works */
+    .how-it-works {
+        text-align: center;
+        padding: 4rem 0;
+    }
+
+    .how-it-works h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 3rem 0;
+    }
+
+    .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 700px) {
+        .steps {
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+        }
+    }
+
+    .step {
+        padding: 2rem;
+        background: white;
+        border-radius: var(--radius);
+        border: 1px solid var(--gray-2);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .step-number {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 700;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+    }
+
+    .step h3 {
+        font-size: 1.125rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .step p {
+        color: var(--gray-6);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Features Grid */
+    .features-grid {
+        padding: 4rem 0;
+        margin-bottom: 6rem;
+    }
+
+    .features-grid h2 {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 3rem 0;
+    }
+
+    .grid-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 750px) {
+        .grid-cards {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+    }
+
+    .card {
+        padding: 2rem;
+        background: white;
+        border: 1px solid var(--gray-2);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .card-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .card-icon svg {
+        width: 24px;
+        height: 24px;
+        color: white;
+    }
+
+    .card h3 {
+        font-size: 1.125rem;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .card p {
+        color: var(--gray-6);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, var(--gray-9), var(--gray-8));
+        padding: 5rem 2rem;
+        text-align: center;
+        border-radius: 24px;
+        margin-bottom: 4rem;
+    }
+
+    .cta-content h2 {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 700;
+        color: white;
+        margin: 0 0 1rem 0;
+    }
+
+    .cta-content p {
+        color: var(--gray-5);
+        font-size: 1.125rem;
+        margin: 0 0 2rem 0;
+        max-width: 45ch;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 3rem 0 2rem;
+        border-top: 1px solid var(--gray-2);
+    }
+
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        max-width: 1000px;
+        margin: 0 auto 2rem;
+    }
+
+    .footer-brand {
+        max-width: 300px;
+    }
+
+    .footer-brand a {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        color: white;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+
+    .footer-logo-icon {
+        color: white;
+        width: 24px;
+        height: 24px;
+    }
+
+    .footer-brand p {
+        color: var(--gray-5);
+        font-size: 0.875rem;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 4rem;
+    }
+
+    .footer-col h4 {
+        color: white;
+        font-size: 0.8125rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .footer-col a {
+        display: block;
+        color: var(--gray-5);
+        text-decoration: none;
+        font-size: 0.875rem;
+        margin-bottom: 0.375rem;
+        transition: color 0.2s;
+    }
+
+    .footer-col a:hover {
+        color: white;
+    }
+
+    .footer-bottom {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-2);
+    }
+
+    .footer-bottom p {
+        color: var(--gray-5);
+        font-size: 0.8125rem;
+        margin: 0;
+    }
+</style>

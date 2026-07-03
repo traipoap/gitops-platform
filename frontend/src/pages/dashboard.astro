@@ -1,0 +1,471 @@
+---
+import "../styles/main.css";
+---
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>APP - System Log Manager</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <!-- Client-side route protection: runs in the browser -->
+        <script>
+            (function protectRoute() {
+                if (typeof window === "undefined") return;
+
+                // Check both storages (signin sets localStorage, other code may use sessionStorage)
+                const token =
+                    window.sessionStorage.getItem("authToken") ||
+                    window.localStorage.getItem("authToken");
+
+                if (!token) {
+                    // small delay to avoid interfering with initial rendering
+                    setTimeout(function () {
+                        window.location.href = "/signin";
+                    }, 100);
+                }
+            })();
+        </script>
+        <script src="../scripts/dashboard.js"></script>
+    </head>
+    <body>
+        <div class="app-container">
+            <!-- Header -->
+            <header class="header">
+                <div class="logo">
+                    <div class="logo-icon">📋</div>
+                    <span>APP</span>
+                </div>
+                <div class="header-actions">
+                    <div class="live-indicator" id="liveIndicator">
+                        <span class="live-dot"></span>
+                        <span>Live</span>
+                    </div>
+                    <button
+                        class="header-btn"
+                        id="refreshBtn"
+                        onclick="refreshLogs()"
+                    >
+                        ↻ Refresh
+                    </button>
+                    <button
+                        class="header-btn"
+                        id="generateBtn"
+                        onclick="generateLogs()"
+                    >
+                        + Generate
+                    </button>
+                    <button
+                        class="header-btn"
+                        id="dashboardToggle"
+                        onclick="toggleView()"
+                    >
+                        📊 Dashboard
+                    </button>
+                    <button
+                        class="header-btn"
+                        id="signoutBtn"
+                        onclick="signout()"
+                    >
+                        Sign Out
+                    </button>
+                </div>
+            </header>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Query Engine</div>
+                    <select class="filter-select" id="engineSelect">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Index</div>
+                    <select class="filter-select" id="indexSelect">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Time Range</div>
+                    <div class="filter-group">
+                        <label class="filter-label">From</label>
+                        <input
+                            type="datetime-local"
+                            class="filter-input"
+                            id="dateFrom"
+                            onchange="applyFilters()"
+                        />
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">To</label>
+                        <input
+                            type="datetime-local"
+                            class="filter-input"
+                            id="dateTo"
+                            onchange="applyFilters()"
+                        />
+                    </div>
+                    <div
+                        class="filter-group"
+                        style="display:flex; gap:6px; flex-wrap:wrap;"
+                    >
+                        <button class="level-btn" onclick="setQuickDate('1h')"
+                            >1h</button
+                        >
+                        <button class="level-btn" onclick="setQuickDate('24h')"
+                            >24h</button
+                        >
+                        <button class="level-btn" onclick="setQuickDate('7d')"
+                            >7d</button
+                        >
+                        <button class="level-btn" onclick="setQuickDate('30d')"
+                            >30d</button
+                        >
+                    </div>
+                </div>
+
+               <div class="sidebar-section">
+                    <div class="sidebar-title">Log Level</div>
+                    <div class="level-filters">
+                        <button
+                            class="level-btn active"
+                            data-level="error"
+                            onclick="toggleLevel(this)">ERROR</button
+                        >
+
+                        <button
+                            class="level-btn active"
+                            data-level="warn"
+                            onclick="toggleLevel(this)">WARN</button
+                        >
+
+                        <button
+                            class="level-btn active"
+                            data-level="info"
+                            onclick="toggleLevel(this)">INFO</button
+                        >
+
+                        <button
+                            class="level-btn active"
+                            data-level="debug"
+                            onclick="toggleLevel(this)">DEBUG</button
+                        >
+
+                        <button
+                            class="level-btn active"
+                            data-level="critical"
+                            onclick="toggleLevel(this)">CRITICAL</button
+                        >
+                    </div>
+                    <button
+                        class="clear-filters-btn"
+                        onclick="clearAllFilters()">✕ Clear All Filters</button
+                    >
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Source</div>
+                    <select
+                        class="filter-select"
+                        id="sourceFilter"
+                        onchange="applyFilters()"
+                    >
+                        <option value="">All Sources</option>
+                        <option value="nginx">nginx</option>
+                        <option value="postgresql">postgresql</option>
+                        <option value="redis">redis</option>
+                        <option value="app-server">app-server</option>
+                        <option value="auth-service">auth-service</option>
+                        <option value="cron">cron</option>
+                        <option value="systemd">systemd</option>
+                        <option value="kernel">kernel</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="filter-group">
+                        <label class="filter-label">Host</label>
+                        <select
+                            class="filter-select"
+                            id="hostFilter"
+                            onchange="applyFilters()"
+                        >
+                            <option value="">All Hosts</option>
+                            <option value="prod-web-01">prod-web-01</option>
+                            <option value="prod-web-02">prod-web-02</option>
+                            <option value="prod-db-01">prod-db-01</option>
+                            <option value="prod-cache-01">prod-cache-01</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Full Text Search</div>
+                    <div class="search-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="searchInput"
+                            placeholder="Search logs..."
+                            oninput="debounceSearch()"
+                        />
+                    </div>
+                    <button
+                        class="search-btn"
+                        id="searchBtn"
+                        onclick="runSearch()"
+                    >
+                        🔍 Search
+                    </button>
+                </div>
+
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Stats Bar -->
+                <div class="stats-bar" id="statsBar">
+                    <div class="stat-card">
+                        <div class="stat-icon total">📄</div>
+                        <div class="stat-info">
+                            <h4 id="totalCount">0</h4>
+                            <p>Total Logs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon error">⛔</div>
+                        <div class="stat-info">
+                            <h4
+                                id="errorCount"
+                                style="color: var(--accent-red);"
+                            >
+                                0
+                            </h4>
+                            <p>Errors</p>
+                            <div class="stat-change up" id="errorChange">
+                                ↑ +12 from yesterday
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warn">⚠️</div>
+                        <div class="stat-info">
+                            <h4
+                                id="warnCount"
+                                style="color: var(--accent-yellow);"
+                            >
+                                0
+                            </h4>
+                            <p>Warnings</p>
+                            <div class="stat-change down" id="warnChange">
+                                ↓ -5 from yesterday
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon info">ℹ️</div>
+                        <div class="stat-info">
+                            <h4
+                                id="infoCount"
+                                style="color: var(--accent-blue);"
+                            >
+                                0
+                            </h4>
+                            <p>Info</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <span class="result-count"
+                            >Showing <span id="filteredCount">0</span> of <span
+                                id="totalFiltered">0</span
+                            > entries</span
+                        >
+                    </div>
+                    <div class="toolbar-right">
+                        <select
+                            class="page-size-select"
+                            id="pageSize"
+                            onchange="changePageSize()"
+                        >
+                            <option value="25">25 per page</option>
+                            <option value="50" selected>50 per page</option>
+                            <option value="100">100 per page</option>
+                            <option value="250">250 per page</option>
+                        </select>
+                        <button class="export-btn" onclick="exportCSV()"
+                            >📥 Export CSV</button
+                        >
+                        <button class="export-btn" onclick="exportJSON()"
+                            >📥 Export JSON</button
+                        >
+                        <button
+                            class="export-btn"
+                            style="background: var(--bg-tertiary); border: 1px solid var(--border-color);"
+                            onclick="showExportHistoryModal()">📥 Export History</button
+                        >
+                    </div>
+                </div>
+
+                <!-- Export History Modal -->
+                <div class="modal-overlay" id="exportHistoryModal">
+                    <div class="modal">
+                        <div class="modal-header">
+                            <h3>Export History</h3>
+                            <button class="modal-close" onclick="closeExportHistoryModal()">×</button
+                            >
+                        </div>
+                        <div class="modal-body" id="modalContent"></div>
+                        <div class="modal-footer">
+                            <button class="btn-secondary" onclick="closeExportHistoryModal()"
+                                >Close</button
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Log Table View -->
+                <div class="log-container" id="logTableView">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th
+                                    style="width: 180px;"
+                                    onclick="sortLogs('timestamp')"
+                                    >Timestamp <span class="sort-arrow">▲</span
+                                    ></th
+                                >
+                                <th
+                                    style="width: 90px;"
+                                    onclick="sortLogs('level')"
+                                    >Level <span class="sort-arrow">▼</span></th
+                                >
+                                <th
+                                    style="width: 130px;"
+                                    onclick="sortLogs('source')"
+                                    >Source <span class="sort-arrow"></span></th
+                                >
+                                <th
+                                    style="width: 100px;"
+                                    onclick="sortLogs('host')"
+                                    >Host <span class="sort-arrow"></span></th
+                                >
+                                <th onclick="sortLogs('message')"
+                                    >Message <span class="sort-arrow"
+                                    ></span></th
+                                >
+                                <th style="width: 50px;">PID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody"> </tbody>
+                    </table>
+                </div>
+
+                <!-- Dashboard View -->
+                <div class="dashboard-view" id="dashboardView">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h4>Total Logs (24h)</h4>
+                            <div class="value" id="dashTotal">N/A</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4>Error Rate</h4>
+                            <div
+                                style="color: var(--accent-red);"
+                                id="dashErrorRate"
+                            >
+                            N/A
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4>Avg Response</h4>
+                            <div
+                                style="color: var(--accent-green);"
+                                id="dashAvgResponse"
+                            >
+                            N/A
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4>Active Sources</h4>
+                            <div
+                                style="color: var(--accent-cyan);"
+                                id="dashSources"
+                            >
+                            N/A
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-chart-container">
+                        <div class="chart-card">
+                            <h4>Logs Over Time (24h)</h4>
+                            <div class="bar-chart" id="timeChart"></div>
+                        </div>
+                        <div class="chart-card">
+                            <h4>Log Distribution</h4>
+                            <div class="legend" id="levelLegend"></div>
+                        </div>
+                    </div>
+
+                    <div class="top-sources">
+                        <h4>Top Log Sources</h4>
+                        <div id="topSourcesList"></div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <div class="pagination-info" id="paginationInfo">
+                        Page 1 of 1
+                    </div>
+                    <div class="pagination-controls" id="paginationControls">
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Log Detail Modal -->
+        <div class="modal-overlay" id="logModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>Log Details</h3>
+                    <button class="modal-close" onclick="closeModal()">×</button
+                    >
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal()"
+                        >Close</button
+                    >
+
+                    <button class="btn-primary" onclick="copyLogDetail()"
+                        >📋 Copy</button
+                    >
+
+                    <button class="btn-primary" onclick="exportSingleLog()"
+                        >📥 Export</button
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast" id="toast">
+            <span class="toast-icon">✅</span>
+            <span class="toast-message" id="toastMessage">Action completed</span
+            >
+        </div>
+    </body>
+</html>
