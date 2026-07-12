@@ -49,6 +49,10 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: |
+            ${{ matrix.image }}:latest
+            ${{ matrix.image }}:${{ github.sha }}
+          secrets: |
+            GIT_AUTH_TOKEN: ${{ secrets.TOKEN_REGISTRY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
