@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine AS backend-builder
+FROM --platform=linux/amd64 golang:1.24-alpine AS backend-builder
 
 WORKDIR /app
 RUN apk add --no-cache git
@@ -11,7 +11,7 @@ COPY backend/ ./
 ARG VERSION=unknown
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'main.Version=${VERSION}'" -o /app/backend .
 
-FROM alpine
+FROM --platform=linux/amd64 alpine
 
 RUN apk --no-cache add ca-certificates \
     && adduser -D -S -g '' app
