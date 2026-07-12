@@ -226,3 +226,21 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Built with Go and Astro
 - Integrated with QuickWit for log search
 - Uses Elasticsearch for log storage
+
+
+```
+[ Developer ] --(Push Code)--> [ GitHub ]
+                                    │
+                            (Trigger Pipeline)
+                                    ▼
+                            [ GitHub Actions ]
+                            ┌───────┴───────┐
+                    (Build & Push)   (Update YAML Tag)
+                            ▼               ▼
+                  [Image Registry]   [ k3s-flux-infra Repo ]
+                            ^               ^
+                            │               │ (Auto Detect)
+                            └───────┬───────┘
+                                    ▼
+                              [ FluxCD ] (K3s) -> Deploy!
+```
