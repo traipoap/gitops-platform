@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-frontend
+  namespace: lumina
+spec:
+  template:
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/traipoap/frontend:latest
+        # ratchet: image: ghcr.io/traipoap/frontend:latest
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-backend
+  namespace: lumina
+spec:
+  template:
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/traipoap/backend:latest
+        # ratchet: image: ghcr.io/traipoap/backend:latest
