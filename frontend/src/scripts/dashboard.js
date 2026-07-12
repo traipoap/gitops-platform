@@ -11,10 +11,13 @@ let liveInterval = null;
 let selectedIndex = "syslogs";
 
 async function loadEngine() {
+  require('dotenv').config();
   const token = sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
+  const backendHost = process.env.BACKEND_HOST;
+  const backendPort = process.env.BACKEND_PORT;
 
   try {
-    const res = await fetch(`http://localhost:8080/task/indices`, {
+    const res = await fetch(`http://${backendHost}:${backendPort}/task/indices`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return;
@@ -200,7 +203,7 @@ async function runSearch() {
 
   try {
     // 6. เรียก API พร้อม Params ใหม่
-    const res = await fetch(`http://localhost:8080/task/search?${params.toString()}`);
+    const res = await fetch(`http://${backendHost}:${backendPort}/task/search?${params.toString()}`);
     if (!res.ok) throw new Error("Network response was not ok");
 
     const data = await res.json();
