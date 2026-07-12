@@ -26,7 +26,7 @@ func HandleHome(c *gin.Context) {
 
 // getPort returns the port from environment or default
 func getPort() string {
-	if port := os.Getenv("PORT"); port != "" {
+	if port := os.Getenv("BACKEND_PORT"); port != "" {
 		return port
 	}
 	return defaultPort
@@ -85,17 +85,18 @@ func setupTaskRoutes(r *gin.Engine) {
 	task.GET("/export", controllers.HandleExport)
 	task.GET("/exports", controllers.HandleExportsList)
 	task.GET("/exports/:filename", controllers.HandleDownload)
-	/*
 	r.GET("/", HandleHome)
-	r.LoadHTMLGlob("./pages/*.html")
-	r.Static("/static", "./static")
-	r.GET("/searcher", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "searcher.html", nil)
-	})
+	/*
+		r.GET("/", HandleHome)
+		r.LoadHTMLGlob("./pages/*.html")
+		r.Static("/static", "./static")
+		r.GET("/searcher", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "searcher.html", nil)
+		})
 
-	r.GET("/index", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
-	})
+		r.GET("/index", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "index.html", nil)
+		})
 	*/
 }
 
