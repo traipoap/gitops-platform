@@ -9,4 +9,6 @@ resources:
   - frontend-deployment.yaml
   - frontend-service.yaml
   - configmap.yaml
-  - ingress.yaml
+  - gateway.yaml
+  - httproute.yaml
+  - github-registry.yaml
