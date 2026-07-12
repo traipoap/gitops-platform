@@ -14,7 +14,7 @@ async function loadEngine() {
   const token = sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
 
   try {
-    const res = await fetch(`http://{BACKEND_HOST}:{BACKEND_PORT}/task/indices`, {
+    const res = await fetch(`http://localhost:8080/task/indices`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return;
@@ -102,7 +102,7 @@ function parseFlexibleTimestamp(ts) {
   if (isNaN(date.getTime()) || ts > 1000000000000000) {
     // ตัดให้เหลือ 13 หลักแรก (แปลงจาก ns/us เป็น ms)
     const ms = Math.floor(ts / 1000000);
-    date = new หาก (ms);
+    date = new Date(ms);
   }
 
   // ป้องกันกรณีเป็นเลข Nanoseconds ที่แปลงแล้วอาจจะผิดพลาด
@@ -142,7 +142,7 @@ function dynamicMapper(hit) {
   // กรณีข้อมูลสำคัญอยู่ใน string ของ message (เช่น Fortigate format)
   let extraSrcIp = null;
   const srcIpMatch = messageRaw?.match(/srcip=([\d.]+)/);
-  if (srcIpMatch) extraSrcIP = srcIpMatch[1];
+  if (srcIpMatch) extraSrcIp = srcIpMatch[1];
 
   // 4. สร้าง Object ใน Format ที่ UI ต้องการ (Standard Schema)
   return {
