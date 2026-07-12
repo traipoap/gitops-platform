@@ -38,7 +38,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.TOKEN_REGISTRY }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -52,7 +52,5 @@ jobs:
           tags: |
             ${{ matrix.image }}:latest
             ${{ matrix.image }}:${{ github.sha }}
-          secrets: |
-            GIT_AUTH_TOKEN: ${{ secrets.TOKEN_REGISTRY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
