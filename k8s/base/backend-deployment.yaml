@@ -22,7 +22,8 @@ spec:
         - name: github-registry
       containers:
         - name: backend
-          image: ghcr.io/traipoap/app-backend:latest
+          # ratchet: image: ghcr.io/traipoap/backend:latest
+          image: ghcr.io/traipoap/backend:latest
           ports:
             - name: http
               containerPort: 8080

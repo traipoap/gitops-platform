@@ -31,11 +31,11 @@ configMapGenerator:
     literals:
       - LOG_LEVEL=debug
 
-images:
-  - name: traipoap/frontend
-    newName: traipoap/frontend
-    newTag: dev-v20260612
+#images:
+#  - name: traipoap/frontend
+#    newName: traipoap/frontend
+#    newTag: dev-20260712-10
 
-  - name: traipoap/backend
-    newName: traipoap/backend
-    newTag: dev-v20260612
+#  - name: traipoap/backend
+#    newName: traipoap/backend
+#    newTag: dev-20260712-10

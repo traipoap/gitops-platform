@@ -24,10 +24,10 @@ jobs:
         include:
           - service: frontend
             dockerfile: ./docker/frontend/Dockerfile
-            image: ghcr.io/traipoap/app-frontend
+            image: ghcr.io/traipoap/frontend
           - service: backend
             dockerfile: ./docker/backend/Dockerfile
-            image: ghcr.io/traipoap/app-backend
+            image: ghcr.io/traipoap/backend
 
     steps:
       - name: Checkout

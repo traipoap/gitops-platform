@@ -8,7 +8,7 @@ services:
       - "4321:4321"
     environment:
       - NODE_ENV=development
-      - BACKEND_HOST=backend-svc
+      - BACKEND_HOST=localhost
       - BACKEND_PORT=8080
     runtime: youki
     networks:

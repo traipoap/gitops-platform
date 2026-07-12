@@ -22,7 +22,8 @@ spec:
         - name: github-registry
       containers:
         - name: frontend
-          image: ghcr.io/traipoap/app-frontend:latest
+          # ratchet: image: ghcr.io/traipoap/frontend:latest
+          image: ghcr.io/traipoap/frontend:latest
           ports:
             - name: http
               containerPort: 4321
