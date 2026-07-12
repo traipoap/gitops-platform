@@ -24,6 +24,6 @@ ENV PORT=4321
 ENV HOSTNAME="0.0.0.0"
 
 EXPOSE 4321
-#RUN npm install -g npm@latest
+RUN npm install -g npm@latest
 
 CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
