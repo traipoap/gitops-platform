@@ -24,7 +24,7 @@
           --owner={{ github_owner }} \
           --repository={{ github_repo }} \
           --branch=main \
-          --path=clusters/my-cluster \
+          --path=clusters/k3s-cluster \
           --personal
       environment:
         GITHUB_TOKEN: "{{ github_personal_access_token }}"
