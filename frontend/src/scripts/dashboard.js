@@ -12,9 +12,9 @@ let selectedIndex = "syslogs";
 
 async function loadEngine() {
   const token = sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
-  
+
   try {
-    const res = await fetch("http://localhost:8080/task/indices", {
+    const res = await fetch(`http://{BACKEND_HOST}:{BACKEND_PORT}/task/indices`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return;
@@ -32,7 +32,7 @@ async function loadEngine() {
       .sort((a, b) => (a === 'syslogs' ? -1 : b === 'syslogs' ? 1 : 0)) // ย้าย syslogs ไปไว้หน้าสุด
       .map(id => `<option value="${id}">${id}</option>`)
       .join("");
-    
+
     // 3. ตั้งค่า dateTo เป็นเวลาปัจจุบันเมื่อโหลดหน้า (ใช้ local time โดยตรง)
     const now = new Date();
     const year = now.getFullYear();
@@ -42,7 +42,7 @@ async function loadEngine() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const localISOTime = `${year}-${month}-${day}T${hours}:${minutes}`;
     document.getElementById("dateTo").value = localISOTime;
-    
+
     runSearch();
 
   } catch (err) {
@@ -94,21 +94,21 @@ function mapQuickwitHits(hits) {
  */
 function parseFlexibleTimestamp(ts) {
   if (!ts) return new Date();
-  
+
   let date = new Date(ts);
-  
+
   // ถ้าค่าที่ได้คือ NaN หรือเป็นตัวเลขที่ยาวเกินไป (เช่น Nanoseconds)
   // เราต้องเช็คว่ามันยาวเกิน 13 หลักหรือไม่ (13 หลักคือระดับ Milliseconds)
   if (isNaN(date.getTime()) || ts > 1000000000000000) {
     // ตัดให้เหลือ 13 หลักแรก (แปลงจาก ns/us เป็น ms)
-    const ms = Math.floor(ts / 1000000); 
+    const ms = Math.floor(ts / 1000000);
     date = new หาก (ms);
   }
-  
+
   // ป้องกันกรณีเป็นเลข Nanoseconds ที่แปลงแล้วอาจจะผิดพลาด
   // วิธีที่ชัวร์ที่สุดคือเช็คความสมเหตุสมผลของปี (เช่น ไม่ควรเกินปี 2100)
   if (date.getFullYear() > 2100) {
-    date = new Date(Math.floor(ts / 1000000)); 
+    date = new Date(Math.floor(ts / 1000000));
   }
 
   return date;
@@ -138,7 +138,7 @@ function dynamicMapper(hit) {
   const messageRaw = getField(['message', 'msg', 'content']);
   const pidRaw = getField(['pid', 'process_id']);
 
-  // 3. ตรวจสอบความลึก (Deep Parsing) 
+  // 3. ตรวจสอบความลึก (Deep Parsing)
   // กรณีข้อมูลสำคัญอยู่ใน string ของ message (เช่น Fortigate format)
   let extraSrcIp = null;
   const srcIpMatch = messageRaw?.match(/srcip=([\d.]+)/);
@@ -166,7 +166,7 @@ async function runSearch() {
   const query = document.getElementById("searchInput").value.trim();
   const index = document.getElementById("indexSelect").value;
   const btn = document.getElementById("searchBtn");
-  
+
   // 1. ดึงค่า Filter ปัจจุบัน
   const currentSourceFilter = document.getElementById("sourceFilter").value;
   const dateFromVal = document.getElementById("dateFrom").value;
@@ -175,10 +175,10 @@ async function runSearch() {
 
   // 2. เตรียม Params พื้นฐาน
   const params = new URLSearchParams({ index_id: index, max_hits: 10000 });
-  
+
   // 3. เพิ่ม Query/Message
   if (query) params.set("message", query);
-  
+
   // 4. เพิ่ม Source IP
   if (currentSourceFilter) params.set("source_ip", currentSourceFilter);
 
@@ -202,12 +202,12 @@ async function runSearch() {
     // 6. เรียก API พร้อม Params ใหม่
     const res = await fetch(`http://localhost:8080/task/search?${params.toString()}`);
     if (!res.ok) throw new Error("Network response was not ok");
-    
+
     const data = await res.json();
 
     // 7. อัปเดตข้อมูล (ใช้ mapQuickwitHits ที่เราคุยกันก่อนหน้า)
-    allLogs = mapQuickwitHits(data.hits || []); 
-    
+    allLogs = mapQuickwitHits(data.hits || []);
+
     // 8. อัปเดต Dropdown Source IP
     const uniqueIps = (data.hits || [])
       .map(item => item.source_ip)
@@ -229,12 +229,12 @@ async function runSearch() {
       .concat(uniqueHosts.map(id => `<option value="${id}">${id}</option>`))
       .join("");
     // ล้าง filter source เพื่อให้แสดงผลการ search ใหม่แบบทั้งหมด
-    document.getElementById("hostFilter").value = ""; 
+    document.getElementById("hostFilter").value = "";
 
     // 9. อัปเดต UI ทั้งหมด
-    applyFilters(); 
+    applyFilters();
     updateStats();
-    
+
     // ถ้าหน้า Dashboard เปิดอยู่ ให้วาดกราฟใหม่ด้วย
     if (document.getElementById("dashboardView").classList.contains("active")) {
       renderDashboard();
@@ -245,7 +245,7 @@ async function runSearch() {
   } catch (err) {
     console.error("Search error:", err);
     showToast("Search failed");
-    allLogs = []; 
+    allLogs = [];
     applyFilters();
   } finally {
     btn.disabled = false;
@@ -255,7 +255,7 @@ async function runSearch() {
 function refreshAllUI() {
   applyFilters();   // อัปเดตตารางและตัวกรอง
   updateStats();    // อัปเดตตัวเลข Error/Warn/Info ด้านบน
-  
+
   // ถ้าหน้า Dashboard กำลังเปิดอยู่ ให้วาดกราฟและตัวเลขใหม่ทันที
   if (document.getElementById("dashboardView").classList.contains("active")) {
     renderDashboard();
@@ -408,7 +408,7 @@ function generateLogs(count = 500) {
 
 function formatTimestamp(date) {
   if (!date) return "";
-  
+
   // ใช้ Intl.DateTimeFormat เพื่อบังคับ Timezone เป็น Asia/Bangkok
   // และใช้ locale 'sv-SE' เพราะให้รูปแบบ YYYY-MM-DD ที่ใกล้เคียงกับที่เราต้องการที่สุด
   const formatter = new Intl.DateTimeFormat('sv-SE', {
@@ -423,7 +423,7 @@ function formatTimestamp(date) {
   });
 
   // ผลลัพธ์จะได้ประมาณ "2024-06-21 15:01:02"
-  return formatter.format(date).replace(/-/g, '-').replace(',', ''); 
+  return formatter.format(date).replace(/-/g, '-').replace(',', '');
 }
 
 function getActiveLevels() {
@@ -447,12 +447,12 @@ function applyFilters() {
 
     // กรอง Source
     if (sourceFilter && log.source !== sourceBreaker(sourceFilter)) return false;
-    
+
     // กรอง Host
     if (hostFilter && log.host !== hostFilter) return false;
 
     // กรอง Date (เพิ่มการเช็คเผื่อกรณีข้อมูลเป็นอนาคต เพื่อใช้ในการ Test)
-    // ถ้า dateTo มีค่า และ log.timestamp มันล้ำหน้าไปไกลเกินไป (เช่น ปี 2026) 
+    // ถ้า dateTo มีค่า และ log.timestamp มันล้ำหน้าไปไกลเกินไป (เช่น ปี 2026)
     // ในการทดสอบเราอาจจะข้ามการเช็ค dateTo ไปก่อน หรือขยาย range
     if (dateFrom && log.timestamp < dateFrom) return false;
     if (dateTo && log.timestamp > dateTo) {
@@ -751,7 +751,7 @@ function showLogDetail(id) {
     html += `<div class="detail-full-width" style="grid-column: 1/-1; margin-top: 20px; border-top: 1px solid #444; padding-top: 10px;">
                 <h4 style="margin-bottom: 10px;">Additional Properties</h4>
              </div>`;
-    
+
     html += Object.keys(log.extras).map(key => `
       <div class="detail-label">${key}</div>
       <div class="detail-value">${log.extras[key]}</div>
@@ -923,10 +923,10 @@ function toggleView() {
     toolbar.style.display = "none";
     btn.classList.add("active");
     btn.innerHTML = "📋 Logs";
-    
+
     // สำคัญ: ต้องสั่ง renderDashboard() ทุกครั้งที่สลับมาหน้า Dashboard
     // เพื่อให้กราฟและสถิติใช้ข้อมูลล่าสุดจาก allLogs
-    renderDashboard(); 
+    renderDashboard();
   }
 }
 
@@ -950,7 +950,7 @@ function renderDashboard() {
   const responseTimes = allLogs
     .map((l) => parseFloat(l.extras?.duration || l.extras?.response_time || l.extras?.res_time))
     .filter((t) => !isNaN(t));
-  const avgResponse = responseTimes.length > 0 
+  const avgResponse = responseTimes.length > 0
     ? (responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length).toFixed(2) + "ms"
     : "N/A";
   // คำนวณ Active Sources (นับจำนวน source ที่ไม่ซ้ำกัน)
@@ -969,7 +969,7 @@ function renderDashboard() {
 
   const dashAvgRespElem = document.getElementById("dashAvgResponse");
   if (dashAvgRespElem) dashAvgRespElem.textContent = avgResponse;
-  
+
   const dashSourcesElem = document.getElementById("dashSources");
   if (dashSourcesElem) dashSourcesElem.textContent = activeSourcesCount;
 
