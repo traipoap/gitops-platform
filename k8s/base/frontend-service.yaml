@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
-  namespace: log-management
+  name: frontend-svc
+  namespace: lumina
   labels:
     app: frontend
 spec:
