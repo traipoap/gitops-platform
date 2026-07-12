@@ -1,0 +1,61 @@
+    - name: Install K3s server
+      shell: |
+        curl -sfL https://get.k3s.io | sh -s - server \
+          --node-ip={{ node_ip }} \
+          --write-kubeconfig-mode 644 \
+          --disable=traefik
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Ensure K3s is started
+      systemd:
+        name: k3s
+        state: started
+        enabled: true
+
+    - name: Install Flux CLI on Master node
+      shell: curl -s https://fluxcd.io/install.sh | sudo bash
+      args:
+        creates: /usr/local/bin/flux
+
+    - name: Bootstrap Flux to bind cluster with GitHub/GitLab
+      shell: |
+        flux bootstrap github \
+          --owner={{ github_owner }} \
+          --repository={{ github_repo }} \
+          --branch=main \
+          --path=clusters/my-cluster \
+          --personal
+      environment:
+        GITHUB_TOKEN: "{{ github_personal_access_token }}"
+        KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
+      run_once: true
+      ignore_errors: true
+
+    - name: Download and Install Istio CLI to System Path
+      shell: |
+        ISTIO_VERSION=1.30.2 curl -L https://istio.io/downloadIstio | sh -
+        cp istio-1.30.2/bin/istioctl /usr/local/bin/istioctl
+        rm -rf istio-1.30.2
+        echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /root/.bashrc
+        source /root/.bashrc
+      args:
+        creates: /usr/local/bin/istioctl
+
+    - name: Install Istio with Ambient Profile (Fixed CNI Bin Path)
+      shell: |
+        /usr/local/bin/istioctl x status &> /dev/null || \
+        /usr/local/bin/istioctl install --set profile=ambient \
+          --set values.cni.cniConfDir=/var/lib/rancher/k3s/agent/etc/cni/net.d \
+          --set values.cni.cniBinDir=/var/lib/rancher/k3s/data/cni \
+          --set values.cni.privileged=true \
+          --skip-confirmation
+      register: istio_install
+      changed_when: "'Installation complete' in istio_install.stdout"
+
+    - name: Install Kubernetes Gateway API (CRD)
+      shell: |
+        kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
+        kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/experimental-install.yaml
+      register: gateway_api_install
+      changed_when: "'created' in gateway_api_install.stdout or 'configured' in gateway_api_install.stdout"
