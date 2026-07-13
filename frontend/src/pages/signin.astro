@@ -317,7 +317,6 @@ interface Props {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 clearErrors();
-
                 const email = emailInput.value.trim();
                 const password = passwordInput.value.trim();
                 const remember = document.getElementById("remember").checked;
@@ -350,7 +349,8 @@ interface Props {
                 showLoading(true);
 
                 // Make actual API call to backend
-                const loginUrl = "http://localhost:8080";
+                const loginUrl = `http://localhost:8080`;
+                console.log(loginUrl);
                 const apiUrl = `${loginUrl}/api/auth/login`;
 
                 try {

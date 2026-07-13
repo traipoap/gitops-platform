@@ -1,4 +1,4 @@
-- name: Deploy Lumina Super-Node (LB + S3 + NFS)
+- name: Deploy Lumina Super-Node (NFS)
   hosts: load-balance
   become: true
   vars:

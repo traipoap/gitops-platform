@@ -31,11 +31,9 @@ configMapGenerator:
     literals:
       - LOG_LEVEL=debug
 
-#images:
-#  - name: traipoap/frontend
-#    newName: traipoap/frontend
-#    newTag: dev-20260712-10
+images:
+  - name: ghcr.io/traipoap/frontend
+    newTag: latest # {"$imagepolicy": "flux-system:frontend-policy"}
 
-#  - name: traipoap/backend
-#    newName: traipoap/backend
-#    newTag: dev-20260712-10
+  - name: ghcr.io/traipoap/backend
+    newTag: latest # {"$imagepolicy": "flux-system:frontend-policy"}

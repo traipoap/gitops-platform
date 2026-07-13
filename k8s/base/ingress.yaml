@@ -16,7 +16,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: frontend-svc
                 port:
                   number: 4321
   tls:

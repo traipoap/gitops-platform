@@ -67,15 +67,29 @@ interface Props {
 
                 <!-- Error Message -->
                 <div class="error-message">
-                    <p>The page you're looking for doesn't exist or has been moved.</p>
+                    <p>
+                        The page you're looking for doesn't exist or has been
+                        moved.
+                    </p>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="form-options" style="margin-top: 24px; justify-content: center;">
-                    <button class="btn-login" onclick="window.location.href = '/dashboard'" style="margin-right: 12px;">
+                <div
+                    class="form-options"
+                    style="margin-top: 24px; justify-content: center;"
+                >
+                    <button
+                        class="btn-login"
+                        onclick="window.location.href = '/dashboard'"
+                        style="margin-right: 12px;"
+                    >
                         <span class="btn-text">Go to Dashboard</span>
                     </button>
-                    <button class="btn-login" onclick="window.history.back()" style="background: var(--bg-tertiary); border: 1px solid var(--border-color);">
+                    <button
+                        class="btn-login"
+                        onclick="window.history.back()"
+                        style="background: var(--bg-tertiary); border: 1px solid var(--border-color);"
+                    >
                         <span class="btn-text">Go Back</span>
                     </button>
                 </div>

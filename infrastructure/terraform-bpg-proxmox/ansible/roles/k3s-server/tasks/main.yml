@@ -44,7 +44,6 @@
 
     - name: Install Istio with Ambient Profile (Fixed CNI Bin Path)
       shell: |
-        /usr/local/bin/istioctl x status &> /dev/null || \
         /usr/local/bin/istioctl install --set profile=ambient \
           --set values.cni.cniConfDir=/var/lib/rancher/k3s/agent/etc/cni/net.d \
           --set values.cni.cniBinDir=/var/lib/rancher/k3s/data/cni \
@@ -52,6 +51,8 @@
           --skip-confirmation
       register: istio_install
       changed_when: "'Installation complete' in istio_install.stdout"
+      environment:
+        KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
 
     - name: Install Kubernetes Gateway API (CRD)
       shell: |

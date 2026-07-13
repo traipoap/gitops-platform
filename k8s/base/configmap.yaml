@@ -9,7 +9,7 @@ data:
   NODE_ENV: "development"
   BACKEND_HOST: "http://backend-svc.lumina.svc.cluster.local"
   BACKEND_INDEX_PREFIX: "logs"
-  BACKEND_SEARCH_BACKEND: "http://backend-svc.lumina.svc.cluster.local:8000"
+  BACKEND_SEARCH_BACKEND: "http://backend-svc.lumina.svc.cluster.local:8080"
 
   # Backend configuration
   QUICKWIT_URL: "http://quickwit-searcher.lumina.svc.cluster.local:7280"

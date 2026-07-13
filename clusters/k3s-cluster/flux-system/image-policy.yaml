@@ -5,11 +5,10 @@ metadata:
   namespace: flux-system
 spec:
   imageRepositoryRef:
-    name: frontend
+    name: dev-frontend  # deployment name
   policy:
     semver:
       range: "*"
-
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImagePolicy
@@ -18,7 +17,7 @@ metadata:
   namespace: flux-system
 spec:
   imageRepositoryRef:
-    name: backend
+    name: dev-backend  # deployment name
   policy:
     semver:
       range: "*"
