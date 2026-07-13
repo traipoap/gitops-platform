@@ -6,31 +6,6 @@ resources:
 
 namePrefix: dev-
 
-patches:
-  - target:
-      kind: Deployment
-      name: backend
-    patch: |
-      - op: replace
-        path: /spec/replicas
-        value: 1
-
-  - target:
-      kind: Deployment
-      name: frontend
-    patch: |
-      - op: replace
-        path: /spec/replicas
-        value: 1
-
-
-configMapGenerator:
-  - name: lumina-config
-    namespace: lumina
-    behavior: merge
-    literals:
-      - LOG_LEVEL=debug
-
 images:
   - name: ghcr.io/traipoap/frontend
     newTag: latest # {"$imagepolicy": "flux-system:frontend-policy"}
