@@ -22,9 +22,9 @@
       shell: |
         flux bootstrap github \
           --owner={{ github_owner }} \
-          --repository={{ github_repo }} \
+          --repository=fleet-infra \
           --branch=main \
-          --path=clusters/k3s-cluster \
+          --path=./clusters/my-cluster \
           --personal
       environment:
         GITHUB_TOKEN: "{{ github_personal_access_token }}"
