@@ -15,5 +15,5 @@ spec:
         type: PathPrefix
         value: /
     backendRefs:
-    - name: frontend-svc
+    - name: dev-frontend-svc
       port: 4321

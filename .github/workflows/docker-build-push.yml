@@ -9,7 +9,6 @@ on:
       - 'frontend/**'
       - 'backend/**'
       - 'docker-compose.yml'
-      - 'k8s/**'
   pull_request:
     branches: [main]
 

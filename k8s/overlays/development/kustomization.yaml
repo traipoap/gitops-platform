@@ -5,10 +5,3 @@ resources:
   - ../../base
 
 namePrefix: dev-
-
-images:
-  - name: ghcr.io/traipoap/frontend
-    newTag: latest # {"$imagepolicy": "flux-system:frontend-policy"}
-
-  - name: ghcr.io/traipoap/backend
-    newTag: latest # {"$imagepolicy": "flux-system:frontend-policy"}
