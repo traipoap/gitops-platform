@@ -15,12 +15,12 @@
   become: true
   vars:
     github_owner: "traipoap"
-    github_repo: "app"
+    github_repo: "fleet-infra"
     github_personal_access_token: "REDACTED_GITHUB_PAT"
 
   roles:
     - k3s-server
-
+    - common
   tasks:
     - name: Fetch kubeconfig from Master
       fetch:
@@ -56,7 +56,7 @@
     master_ip: "{{ groups['k3s-masters'][0] }}"
   roles:
     - k3s-agent
-
+    - common
 - name: Replace server kubeconfig playbooks/files/k3s-kubeconfig.yaml
   hosts: localhost
   tasks:

@@ -22,7 +22,7 @@
       shell: |
         flux bootstrap github \
           --owner={{ github_owner }} \
-          --repository=fleet-infra \
+          --repository={{ github_repo }} \
           --branch=main \
           --path=./clusters/my-cluster \
           --personal
