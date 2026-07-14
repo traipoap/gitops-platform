@@ -29,10 +29,10 @@ The APP system log management dashboard is a modern, secure, and scalable soluti
         │                       │                       │
         └───────────────────────┼───────────────────────┘
                                 │
-                    ┌─────────────────┐
-                    │   Authentication│
-                    │   (JWT)         │
-                    └─────────────────┘
+                        ┌─────────────────┐
+                        │   Authentication│
+                        │   (JWT)         │
+                        └─────────────────┘
 ```
 
 ### Component Diagram
