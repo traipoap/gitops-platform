@@ -57,7 +57,6 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: |
             ${{ matrix.image }}:latest
-            ${{ matrix.image }}:${{ github.sha }}
             ${{ matrix.image }}:${{ steps.version.outputs.TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
