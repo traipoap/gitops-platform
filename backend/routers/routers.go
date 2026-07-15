@@ -35,7 +35,7 @@ func getPort() string {
 // setupCORS configures CORS middleware
 func setupCORS() cors.Config {
 	return cors.Config{
-		AllowOrigins:     []string{"http://localhost:4321", "http://127.0.0.1:4321"},
+		AllowOrigins:     []string{"http://localhost:4321", "http://127.0.0.1:4321", "https://frontend.example.com"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

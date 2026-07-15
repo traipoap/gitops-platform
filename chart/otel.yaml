@@ -2,6 +2,11 @@
 # เป้าหมาย: ส่งข้อมูลไปยัง Quickwit (OTLP) เพื่อเทียบกับ Vector แบบ 100%
 
 mode: daemonset
+presets:
+  logsCollection:
+    enabled: true
+  kubernetesAttributes:
+    enabled: true
 
 image:
   repository: otel/opentelemetry-collector-contrib
@@ -38,7 +43,7 @@ config:
   exporters:
     # 4. ส่งไปยัง Quickwit (เลียนแบบ OTLP exporter ใน Vector เป๊ะๆ)
     otlp:
-      endpoint: "quickwit-indexer.dev.svc.cluster.local:7281"
+      endpoint: "quickwit-indexer.lumina.svc.cluster.local:7281"
       tls:
         insecure: true
       headers:

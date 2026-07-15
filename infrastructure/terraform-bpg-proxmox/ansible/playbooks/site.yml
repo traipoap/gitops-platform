@@ -21,6 +21,7 @@
   roles:
     - k3s-server
     - common
+
   tasks:
     - name: Fetch kubeconfig from Master
       fetch:
@@ -57,6 +58,7 @@
   roles:
     - k3s-agent
     - common
+
 - name: Replace server kubeconfig playbooks/files/k3s-kubeconfig.yaml
   hosts: localhost
   tasks:

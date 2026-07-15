@@ -93,6 +93,26 @@ import "../styles/main.css";
                 </div>
 
                 <div class="sidebar-section">
+                    <div class="sidebar-title">Device</div>
+                    <div class="search-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="deviceInput"
+                            placeholder="Search devices..."
+                        />
+                    </div>
+                    <button
+                        class="search-btn"
+                        id="deviceBtn"
+                        onclick="runSearch()"
+                    >
+                        🔍 Search
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
                     <div class="sidebar-title">Time Range</div>
                     <div class="filter-group">
                         <label class="filter-label">From</label>

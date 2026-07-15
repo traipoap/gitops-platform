@@ -7,7 +7,6 @@
 - name: Install common packages
   apt:
     name:
-      - qemu-guest-agent
       - curl
       - nfs-common
     state: present
