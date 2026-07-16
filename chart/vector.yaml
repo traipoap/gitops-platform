@@ -7,18 +7,17 @@ customConfig:
   sources:
     kubernetes_logs:
       type: kubernetes_logs
-  #    host_metrics:
-  #      filesystem:
-  #        devices:
-  #          excludes: [binfmt_misc]
-  #        filesystems:
-  #          excludes: [binfmt_misc]
-  #        mountpoints:
-  #          excludes: ["*/proc/sys/fs/binfmt_misc"]
-
-  #      type: host_metrics
-  #    internal_metrics:
-  #      type: internal_metrics
+      host_metrics:
+        filesystem:
+          devices:
+            excludes: [binfmt_misc]
+          filesystems:
+            excludes: [binfmt_misc]
+          mountpoints:
+            excludes: ["*/proc/sys/fs/binfmt_misc"]
+      type: host_metrics
+      internal_metrics:
+        type: internal_metrics
 
   sinks:
     #    prom_exporter:
@@ -26,24 +25,24 @@ customConfig:
     #      inputs: [host_metrics, internal_metrics]
     #      address: 0.0.0.0:9090
 
-    syslog_tcp:
-      type: socket
-      inputs: [kubernetes_logs]
-      address: 192.168.1.4:514
-      mode: tcp
-      encoding:
-        codec: "syslog"
-      buffer:
-        - type: memory
-          max_events: 25000
-          when_full: overflow
-        - type: disk
-          max_size: 1073741824 # 1GiB.
-          when_full: drop_newest
+  #    syslog_tcp:
+  #      type: socket
+  #      inputs: [kubernetes_logs]
+  #      address: 192.168.1.4:514
+  #      mode: tcp
+  #      encoding:
+  #        codec: "syslog"
+  #      buffer:
+  #        - type: memory
+  #          max_events: 25000
+  #          when_full: overflow
+  #        - type: disk
+  #          max_size: 1073741824 # 1GiB.
+  #          when_full: drop_newest
 
-    # useful to see the logs in the terminal
-#    emit_syslog:
-#      inputs: ["kubernetes_logs"]
-#      type: "console"
-#      encoding:
-#        codec: "syslog"
+      # useful to see the logs in the terminal
+  #    emit_syslog:
+  #      inputs: ["kubernetes_logs"]
+  #      type: "console"
+  #      encoding:
+  #        codec: "syslog"
