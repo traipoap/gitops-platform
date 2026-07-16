@@ -56,7 +56,6 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: ${{ github.event_name == 'push' }}
           tags: |
-            ${{ matrix.image }}:latest
             ${{ matrix.image }}:${{ steps.version.outputs.TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
