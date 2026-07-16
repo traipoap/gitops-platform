@@ -937,7 +937,7 @@ function toggleView() {
 
 function renderDashboard() {
   const total = allLogs.length;
-  const now = Date.running ? Date.now() : Date.now(); // Ensure current time
+  //const now = Date.running ? Date.now() : Date.now(); // Ensure current time
   const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
 
   // 1. คำนวณ Error Rate
