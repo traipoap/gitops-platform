@@ -43,7 +43,7 @@ async function loadEngine() {
     const localISOTime = `${year}-${month}-${day}T${hours}:${minutes}`;
     document.getElementById("dateTo").value = localISOTime;
 
-    runSearch();
+    //runSearch();
 
   } catch (err) {
     console.error("Fetch failed:", err);
@@ -68,8 +68,8 @@ function mapQuickwitHits(hits) {
       id: hit.id || Math.random().toString(36).substr(2, 9),
       timestamp: dateObj,
       level: normalizedLevel,
-      source: hit.source_ip || hit.srcip || hit.source || "unknown",
-      host: hit.host || hit.hostname || "unknown",
+      source: hit.source_ip || hit.srcip || hit.source || hit.kubernetes.pod_ip|| "unknown",
+      host: hit.host || hit.hostname || hit.kubernetes.container_name || "unknown",
       message: hit.message || "",
       pid: hit.pid || 0
     };
@@ -163,6 +163,7 @@ function dynamicMapper(hit) {
 }
 
 async function runSearch() {
+  const source = document.getElementById("sourceInput").value.trim();
   const query = document.getElementById("searchInput").value.trim();
   const index = document.getElementById("indexSelect").value;
   const btn = document.getElementById("searchBtn");
@@ -180,7 +181,11 @@ async function runSearch() {
   if (query) params.set("message", query);
 
   // 4. เพิ่ม Source IP
-  if (currentSourceFilter) params.set("source_ip", currentSourceFilter);
+  if (currentSourceFilter) {
+    params.set("source_ip", currentSourceFilter);
+  } else if (source) {
+    params.set("source_ip", source);
+  }
 
   // 5. เพิ่ม Host
   if (currentHostFilter) params.set("host", currentHostFilter);
