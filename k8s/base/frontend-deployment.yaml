@@ -22,7 +22,6 @@ spec:
         - name: github-registry
       containers:
         - name: frontend
-          # ratchet: image: ghcr.io/traipoap/frontend:latest
           image: ghcr.io/traipoap/frontend:latest # {"$imagepolicy": "flux-system:frontend-policy"}
           ports:
             - name: http
