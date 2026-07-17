@@ -1,0 +1,10 @@
+- name: Install FluxCD
+  hosts: k3s-masters
+  become: true
+  vars:
+    github_owner: "traipoap"
+    github_repo: "fleet-infra"
+    github_personal_access_token: "REDACTED_GITHUB_PAT"
+
+  roles:
+    - fluxcd
