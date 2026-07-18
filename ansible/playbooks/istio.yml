@@ -1,0 +1,6 @@
+- name: Install Istio
+  hosts: k3s-masters
+  become: true
+
+  roles:
+    - istio
