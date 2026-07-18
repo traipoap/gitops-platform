@@ -1,5 +1,5 @@
 # Phase 0: Deploy Lumina Super-Node (LB + S3 + NFS + Vector)
-- name: Deploy Lumina Super-Node (LB + S3 + NFS)
+- name: Deploy Lumina Super-Node (LB + S3 + NFS + Vector)
   hosts: load-balance
   become: true
   roles:

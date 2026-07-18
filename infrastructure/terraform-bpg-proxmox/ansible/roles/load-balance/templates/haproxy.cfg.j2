@@ -45,3 +45,38 @@ backend webservers
     cookie JSESSIONID insert indirect nocache
     server m1 192.168.1.11:80 check cookie m1
     server w1 192.168.1.21:80 check cookie w1
+
+# =====================================================================
+# 1. HANDLE TCP SYSLOG (Port 514)
+# =====================================================================
+frontend syslog_tcp_in
+    bind :514
+    mode tcp
+    option tcplog
+    default_backend syslog_tcp_backend
+
+backend syslog_tcp_backend
+    mode tcp
+    balance source
+    server m1 192.168.1.11:30514 check
+    server w1 192.168.1.21:30514 check
+
+
+# =====================================================================
+# 2. HANDLE UDP SYSLOG (Port 514)
+# =====================================================================
+log-forward syslog_udp_in
+    # dgram-bind is the proper keyword for UDP reception in HAProxy
+    dgram-bind :514
+
+    # This sends incoming UDP logs directly to our dedicated log backend
+    log backend@syslog_udp_backend local0
+
+backend syslog_udp_backend
+    # mode log is a special L4 optimization for handling UDP datagrams
+    mode log
+    balance roundrobin
+
+    # Note the 'udp@' prefix required for UDP destinations
+    server m1 udp@192.168.1.11:30514
+    server w1 udp@192.168.1.21:30514

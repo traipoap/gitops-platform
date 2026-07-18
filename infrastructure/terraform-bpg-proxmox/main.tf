@@ -30,7 +30,7 @@ resource "null_resource" "run_ansible_after_provisioning" {
     command = <<-EOT
       echo 'Waiting for VMs to be reachable via SSH...'
       nc -zv ${local.super_node_ip} 22
-      cd ansible && ansible-playbook -i inventory/hosts playbooks/site.yml && ansible-playbook -i inventory/hosts playbooks/garage.yml
+      cd ansible && ansible-playbook -i inventory/hosts playbooks/k3s.yml && ansible-playbook -i inventory/hosts playbooks/fluxcd.yml
     EOT
   }
 }
