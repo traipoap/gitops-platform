@@ -29,15 +29,13 @@ jobs:
             dockerfile: ./docker/backend/Dockerfile
             image: ghcr.io/traipoap/backend
 
+    # ส่งต่อ TAG ไปให้ Job ถัดไปใช้ได้
+    outputs:
+      image_tag: 0.0.${{ github.run_number }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Generate Version Tag
-        # dev-vYYMMDD-RunID
-        id: version
-        run: |
-          echo "TAG=0.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Log in to GHCR
         uses: docker/login-action@v4
@@ -49,6 +47,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      # ดึงค่า tag มาจากเลข run_number ตรงๆ ได้เลย
       - name: Build and push ${{ matrix.service }}
         uses: docker/build-push-action@v7
         with:
@@ -56,12 +55,39 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: ${{ github.event_name == 'push' }}
           tags: |
-            ${{ matrix.image }}:${{ steps.version.outputs.TAG }}
+            ${{ matrix.image }}:0.0.${{ github.run_number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Output Image Tag
-        if: github.event_name == 'push'
+  # ─── 🌟 เพิ่ม Job นี้ต่อท้าย เพื่อทำการอัปเดตไฟล์ YAML ───
+  update-manifest:
+    needs: build-and-push
+    if: github.event_name == 'push' # ทำเฉพาะตอน push เข้า main เท่านั้น
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # สำคัญมาก! เพื่อให้บอตมีสิทธิ์เขียนโค้ดกลับเข้า Repo
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          # แนะนำให้ใช้ TOKEN_REGISTRY ถ้ามีสิทธิ์ Bypass Branch Protection หรือใช้ PAT ของคุณเอง
+          token: ${{ secrets.TOKEN_REGISTRY }}
+
+      - name: Update Image Tags with yq
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            # เปลี่ยน path ไฟล์แก้ไขตามโครงสร้างโฟลเดอร์จริงของคุณ (ตัวอย่างนี้อิงจาก ./k8s/base)
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/frontend:0.0.${{ github.run_number }}"' ./k8s/base/frontend-deployment.yaml
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/backend:0.0.${{ github.run_number }}"' ./k8s/base/backend-deployment.yaml
+
+      - name: Commit and Push to Git
         run: |
-          echo "Image pushed with tag: ${{ steps.version.outputs.TAG }}"
-          echo "FluxCD will detect this tag shortly if configured correctly."
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          # ใส่ [skip ci] ไว้เพื่อไม่ให้ GitHub Actions วิ่งวนลูปนรกเวลาเรา push กลับไปเอง
+          git commit -m "chore: automated image update to 0.0.${{ github.run_number }} [skip ci]"
+          git push origin main

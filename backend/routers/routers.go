@@ -78,26 +78,13 @@ func setupAPIRoutes(r *gin.Engine) {
 
 // setupTaskRoutes configures task-related routes
 func setupTaskRoutes(r *gin.Engine) {
+	r.GET("/", HandleHome)
 	task := r.Group("/task")
-
 	task.GET("/indices", controllers.HandleIndices)
 	task.GET("/search", controllers.HandleSearch)
 	task.GET("/export", controllers.HandleExport)
 	task.GET("/exports", controllers.HandleExportsList)
 	task.GET("/exports/:filename", controllers.HandleDownload)
-	r.GET("/", HandleHome)
-	/*
-		r.GET("/", HandleHome)
-		r.LoadHTMLGlob("./pages/*.html")
-		r.Static("/static", "./static")
-		r.GET("/searcher", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "searcher.html", nil)
-		})
-
-		r.GET("/index", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "index.html", nil)
-		})
-	*/
 }
 
 // Auth handlers
