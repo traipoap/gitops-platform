@@ -6,7 +6,7 @@
     when: "'100' in item.value.size"
 
   # 1. Update and Install Core Packages
-  - name: Install fundamental packages (HAProxy, NFS)
+  - name: Install fundamental packages (NFS)
     apt:
       update_cache: yes
       name:

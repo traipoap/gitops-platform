@@ -18,9 +18,9 @@
       environment:
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
 
-    - name: Install Kubernetes Gateway API (CRD)
+    - name: Install Kubernetes Gateway API (CRD) https://github.com/kubernetes-sigs/gateway-api/releases
       shell: |
         kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
-        kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/experimental-install.yaml
+        kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ gatewayapi_version }}/experimental-install.yaml
       register: gateway_api_install
       changed_when: "'created' in gateway_api_install.stdout or 'configured' in gateway_api_install.stdout"
