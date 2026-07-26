@@ -30,6 +30,8 @@ resource "null_resource" "run_ansible_after_provisioning" {
     command = <<-EOT
       echo 'Waiting for VMs to be reachable via SSH...'
       nc -zv ${local.super_node_ip} 22
+      nc -zv ${local.master_node_ip} 22
+      nc -zv ${local.worker_node_ip} 22
     EOT
   }
 }
