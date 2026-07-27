@@ -18,9 +18,10 @@
       environment:
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
 
-    - name: Install Kubernetes Gateway API (CRD) https://github.com/kubernetes-sigs/gateway-api/releases
+    - name: Install Kubernetes Gateway API (CRID)
       shell: |
-        kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
-        kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v{{ gatewayapi_version }}/experimental-install.yaml
+        if ! kubectl get crd gateways.gateway.networking.k8s.io 2>/dev/null; then
+          kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ gatewayapi_version }}/experimental-install.yaml
+        fi
       register: gateway_api_install
       changed_when: "'created' in gateway_api_install.stdout or 'configured' in gateway_api_install.stdout"

@@ -3,13 +3,13 @@
       args:
         creates: /usr/local/bin/flux
 
-    - name: Bootstrap Flux to bind cluster with GitHub/GitLab
+    - name: Bootstrap Flux to bind cluster with GitHub
       shell: |
         flux bootstrap github \
           --owner={{ github_owner }} \
           --repository={{ github_repo }} \
           --branch=main \
-          --path=./clusters/my-cluster \
+          --path=./clusters/dev \
           --personal
       environment:
         GITHUB_TOKEN: "{{ github_personal_access_token }}"
