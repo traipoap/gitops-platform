@@ -81,8 +81,8 @@ jobs:
         with:
           cmd: |
             # แก้ไขไฟล์ใน repo ที่เพิ่ง Clone มา (fleet-infra)
-            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/frontend:${{steps.env.outputs.NEW_TAG}}"' ./applications/base/frontend-deployment.yaml
-            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/backend:${{steps.env.outputs.NEW_TAG}}"' ./applications/base/backend-deployment.yaml
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/frontend:${{ needs.build-and-push.outputs.version }}"' ./applications/base/frontend-deployment.yaml
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/backend:${{ needs.build-and-push.outputs.version }}"' ./applications/base/backend-deployment.yaml
 
       - name: Commit and Push to Fleet Infra
         run: |
