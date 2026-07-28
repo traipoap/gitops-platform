@@ -92,7 +92,7 @@ func HandleSearch(c *gin.Context) {
 func buildLuceneQuery(p models.SearchParams) string {
 	var parts []string
 
-	fmt.Printf("first query: %+v\n", p)
+	//fmt.Printf("first query: %+v\n", p)
 
 	// ✅ Timestamp range
 	if p.FromTimestamp != nil && p.ToTimestamp != nil {
@@ -121,7 +121,7 @@ func buildLuceneQuery(p models.SearchParams) string {
 		return "*"
 	}
 
-	fmt.Println("last query:", strings.Join(parts, " AND "))
+	//fmt.Println("last query:", strings.Join(parts, " AND "))
 	return strings.Join(parts, " AND ")
 }
 
