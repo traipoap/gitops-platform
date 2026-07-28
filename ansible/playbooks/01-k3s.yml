@@ -14,6 +14,7 @@
   hosts: k3s-masters
   become: true
   roles:
+    - runtime
     - k3s-server
     - common
 
@@ -51,6 +52,7 @@
     cluster_token: "{{ hostvars[groups['k3s-masters'][0]]['k3s_cluster_token'] }}"
     master_ip: "{{ groups['k3s-masters'][0] }}"
   roles:
+    - runtime
     - k3s-agent
     - common
 

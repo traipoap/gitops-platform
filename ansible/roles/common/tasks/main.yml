@@ -9,6 +9,9 @@
     name:
       - curl
       - nfs-common
+      - git
+      - btop
+      - fish
     state: present
 
 - name: Enable and start qemu-guest-agent

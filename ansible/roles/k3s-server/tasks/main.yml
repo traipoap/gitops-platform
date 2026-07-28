@@ -3,7 +3,9 @@
         curl -sfL https://get.k3s.io | sh -s - server \
           --node-ip={{ node_ip }} \
           --write-kubeconfig-mode 644 \
-          --disable=traefik
+          --disable=traefik \
+          --disable=local-storage \
+          --default-runtime youki
       args:
         creates: /usr/local/bin/k3s
 
@@ -11,9 +13,9 @@
       ansible.builtin.lineinfile:
         path: /root/.bashrc
         line: 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml'
-        regexp: '^export KUBECONFIG=' # Replaces any existing KUBECONFIG export
+        regexp: '^export KUBECONFIG='
         state: present
-        create: yes                   # Creates .bashrc if it doesn't exist
+        create: yes
         owner: root
         group: root
         mode: '0644'
