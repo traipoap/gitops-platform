@@ -23,8 +23,3 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 .terraform/
-
-.windsurf/skills/
-.continue/skills/
-.aider-desk/skills/
-.agents/skills/
