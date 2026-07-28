@@ -62,24 +62,10 @@ func setupAuthRoutes(r *gin.Engine, jwtService *services.JWTService) {
 	}
 }
 
-// setupAPIRoutes configures API endpoints
-func setupAPIRoutes(r *gin.Engine) {
-	api := r.Group("/api")
-	api.Use(middleware.JWTAuth())
-	{
-		api.GET("/dashboard", controllers.HandleDashboard)
-		api.GET("/data-inventory", controllers.HandleDataInventory)
-		api.GET("/logs", controllers.HandleLogs)
-		api.GET("/compliance", controllers.HandleCompliance)
-		api.GET("/settings", controllers.HandleSettings)
-		api.GET("/help", controllers.HandleHelp)
-	}
-}
-
 // setupTaskRoutes configures task-related routes
 func setupTaskRoutes(r *gin.Engine) {
 	r.GET("/", HandleHome)
-	task := r.Group("/task")
+	task := r.Group("/api")
 	task.GET("/indices", controllers.HandleIndices)
 	task.GET("/search", controllers.HandleSearch)
 	task.GET("/export", controllers.HandleExport)
@@ -127,7 +113,6 @@ func SetupRoutes(r *gin.Engine) {
 
 	// Setup route groups
 	setupAuthRoutes(r, jwtService)
-	//setupAPIRoutes(r)
 	setupTaskRoutes(r)
 
 	// Start server
