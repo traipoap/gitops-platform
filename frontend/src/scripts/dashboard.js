@@ -14,7 +14,7 @@ async function loadEngine() {
   const token = sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
 
   try {
-    const res = await fetch(`https://frontend.example.com/task/indices`, {
+    const res = await fetch(`https://frontend.example.com/api/indices`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return;
@@ -205,7 +205,7 @@ async function runSearch() {
 
   try {
     // 6. เรียก API พร้อม Params ใหม่
-    const res = await fetch(`https://frontend.example.com/task/search?${params.toString()}`);
+    const res = await fetch(`https://frontend.example.com/api/search?${params.toString()}`);
     if (!res.ok) throw new Error("Network response was not ok");
 
     const data = await res.json();
