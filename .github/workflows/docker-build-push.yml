@@ -9,6 +9,7 @@ on:
       - 'frontend/**'
       - 'backend/**'
       - 'docker-compose.yml'
+      - '.github/workflows/docker-build-push.yml'
   pull_request:
     branches: [main]
 
@@ -75,11 +76,13 @@ jobs:
 
       - name: Update Image Tags with yq
         uses: mikefarah/yq@master
+        env:
+          NEW_TAG: "0.0.${{ github.run_number }}"
         with:
           cmd: |
             # แก้ไขไฟล์ใน repo ที่เพิ่ง Clone มา (fleet-infra)
-            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/frontend:0.0.${{ github.run_number }}" ./applications/base/frontend-deployment.yaml
-            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/backend:0.0.${{ github.run_number }}" ./applications/base/backend-deployment.yaml
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/frontend:${{NEW_TAG}}"' ./applications/base/frontend-deployment.yaml
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/backend:${{NEW_TAG}}"' ./applications/base/backend-deployment.yaml
 
       - name: Commit and Push to Fleet Infra
         run: |
