@@ -78,20 +78,12 @@ The application uses JWT (JSON Web Token) authentication:
 - `GET /api/admin` - Admin-only endpoint
 - `POST /api/logout` - Logout
 
-### Dashboard
-- `GET /api/dashboard` - Dashboard data
-- `GET /api/data-inventory` - Data inventory
-- `GET /api/logs` - Logs data
-- `GET /api/compliance` - Compliance data
-- `GET /api/settings` - Settings
-- `GET /api/help` - Help information
-
 ### Search & Export
-- `GET /task/indices` - Get available indices
-- `GET /task/search` - Search logs with query parameters
-- `GET /task/export` - Export logs to CSV
-- `GET /task/exports` - List exported files
-- `GET /task/exports/:filename` - Download exported file
+- `GET /api/indices` - Get available indices
+- `GET /api/search` - Search logs with query parameters
+- `GET /api/export` - Export logs to CSV
+- `GET /api/exports` - List exported files
+- `GET /api/exports/:filename` - Download exported file
 
 ## 🐳 Deployment
 
@@ -126,41 +118,21 @@ kubectl apply -k k8s/overlays/development
 ### Root
 ```
 app
-├── backend
-│   ├── main.go             # Entry point using gin.Default()
-│   ├── routers/            # Route setup (SetupRoutes function)
-│   │   └── routers.go      # Route definitions
-│   ├── controllers/        # HTTP handlers
-│   │   ├── api_controller.go
-│   │   ├── export_controller.go
-│   │   ├── exports_list_controller.go
-│   │   ├── protected_controller.go
-│   │   └── search_controller.go
-│   ├── services/           # Business logic (JWTService, etc.)
-│   ├── middleware/         # Auth middleware (JWTAuth, RoleAuth)
-│   ├── models/             # JWT claims structures
-│   ├── config/             # Configuration loading
-│   └── pages/              # Static HTML/JS/CSS (optional)
-├── frontend
-│   ├── src/
-│   │   ├── components/     # Astro components
-│   │   ├── layouts/        # Layout templates
-│   │   └── pages/          # Route pages (dashboard, signin, signup)
-│   ├── styles/             # CSS files
-│   └── package.json
-├── chart
-│   ├── nfs-subdir-external-provisioner
-│   ├── quickwit
-│   └── vector
+.
+├── ansible
+│   ├── ansible.cfg
+│   ├── inventory
+│   ├── playbooks
+│   └── roles
 ├── docker
-│   ├── backend
-│   └── frontend
-├── docker-compose.yml
-├── k8s
-│   ├── base
-│   ├── overlays
-│   └── README.md
-└── config.json
+│   ├── backend
+│   └── frontend
+└── terraform
+    ├── backend.tf
+    ├── hosts.tpl
+    ├── id_ed25519.pub
+    ├── main.tf
+    └── provider.tf
 ```
 ### Backend
 ```

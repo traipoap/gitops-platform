@@ -1,4 +1,4 @@
-name: Docker Build and Push
+name: Docker Build and Push to GHCR & Update Fleet Infra
 
 on:
   push:
@@ -17,8 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
-
+      packages: write # สำคัญสำหรับการ Push Image เข้า GHCR
     strategy:
       matrix:
         include:
@@ -29,12 +28,12 @@ jobs:
             dockerfile: ./docker/backend/Dockerfile
             image: ghcr.io/traipoap/backend
 
-    # ส่งต่อ TAG ไปให้ Job ถัดไปใช้ได้
     outputs:
-      image_tag: 0.0.${{ github.run_number }}
+      # ส่งผ่าน run_number ไป job ถัดไป (เพื่อให้แน่ใจว่าเลขตรงกัน)
+      version: 0.0.${{ github.run_number }}
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v6
 
       - name: Log in to GHCR
@@ -42,52 +41,56 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
+          # ต้องมั่นใจว่า Token นี้มีสิทธิ์ write:packages สำหรับ org นี้
           password: ${{ secrets.TOKEN_REGISTRY }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      # ดึงค่า tag มาจากเลข run_number ตรงๆ ได้เลย
       - name: Build and push ${{ matrix.service }}
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.dockerfile }}
+          # Push เฉพาะตอน Push เข้า main (ไม่ Push ตอน Pull Request)
           push: ${{ github.event_name == 'push' }}
           tags: |
-            ${{ matrix.image }}:0.0.${{ github.run_number }}
+            ${{ matrix.image }}:${{ steps.build-and-push.outputs.version || format('0.0.{0}', github.run_number) }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ─── 🌟 เพิ่ม Job นี้ต่อท้าย เพื่อทำการอัปเดตไฟล์ YAML ───
+  # ──────────────────────────────────────────────────────
   update-manifest:
     needs: build-and-push
-    if: github.event_name == 'push' # ทำเฉพาะตอน push เข้า main เท่านั้น
+    if: github.event_name == 'push' # ทำงานเฉพาะตอน Push เข้า main จริงๆ
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # สำคัญมาก! เพื่อให้บอตมีสิทธิ์เขียนโค้ดกลับเข้า Repo
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Fleet Infra Repo (Target Repo)
         uses: actions/checkout@v6
         with:
-          # แนะนำให้ใช้ TOKEN_REGISTRY ถ้ามีสิทธิ์ Bypass Branch Protection หรือใช้ PAT ของคุณเอง
-          token: ${{ secrets.TOKEN_REGISTRY }}
+          repository: traipoap/fleet-infra # 👈 จุดนี้สำคัญที่สุด: บอกให้ไป clone repo ปลายทาง
+          token: ${{ secrets.TOKEN_REGISTRY }} # Token ต้องมีสิทธิ์ Write ใน fleet-infra ด้วย
+          ref: main
 
       - name: Update Image Tags with yq
         uses: mikefarah/yq@master
+        env:
+          NEW_TAG: "0.0.${{ github.run_number }}"
         with:
           cmd: |
-            # เปลี่ยน path ไฟล์แก้ไขตามโครงสร้างโฟลเดอร์จริงของคุณ (ตัวอย่างนี้อิงจาก ./k8s/base)
-            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/frontend:0.0.${{ github.run_number }}"' ./k8s/base/frontend-deployment.yaml
-            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/backend:0.0.${{ github.run_number }}"' ./k8s/base/backend-deployment.yaml
+            # แก้ไขไฟล์ใน repo ที่เพิ่ง Clone มา (fleet-infra)
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/frontend:$NEW_TAG"' ./applications/base/frontend-deployment.yaml
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/backend:$NEW_TAG"' ./applications/base/backend-deployment.yaml
 
-      - name: Commit and Push to Git
+      - name: Commit and Push to Fleet Infra
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           git add .
-          # ใส่ [skip ci] ไว้เพื่อไม่ให้ GitHub Actions วิ่งวนลูปนรกเวลาเรา push กลับไปเอง
-          git commit -m "chore: automated image update to 0.0.${{ github.run_number }} [skip ci]"
+
+          # ใช้ [skip ci] เพื่อไม่ให้ fleet-infra Repo มีการ Trigger Workflow ซ้ำซ้อน (Loop)
+          git commit -m "chore: sync image tags to ${{ needs.build-and-push.outputs.version }} [skip ci]" || exit 0
+
           git push origin main
