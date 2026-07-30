@@ -1,4 +1,3 @@
-# Phase 0: Deploy Lumina Super-Node (LB + S3 + NFS + Vector)
 - name: Deploy Lumina Super-Node (LB + S3 + NFS + Vector)
   hosts: load-balance
   become: true
@@ -9,7 +8,6 @@
   - name: Restart HAProxy
     service: name=haproxy state=restarted
 
-# Phase 1: Setup Master Node & Extract Token
 - name: Initialize K3s Server and Extract Token
   hosts: k3s-masters
   become: true
@@ -43,7 +41,6 @@
         msg: "Extracted Token is {{ k3s_cluster_token }}"
       no_log: true
 
-# Phase 2: Deploy K3s Agent on Worker Nodes
 - name: Prepare Workers with Join Information
   hosts: k3s-workers
   become: true
