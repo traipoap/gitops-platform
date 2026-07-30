@@ -46,7 +46,7 @@ resource "proxmox_virtual_environment_file" "cloud_configs" {
         shell: /bin/bash
         ssh_authorized_keys:
           - ${trimspace(data.local_file.ssh_public_key.content)}
-        sudo: ALL=(ALL) N_PASSWD:ALL
+        sudo: ALL=(ALL) NOPASSWD:ALL
     package_update: true
     packages:
       - qemu-guest-agent

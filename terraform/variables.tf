@@ -25,7 +25,7 @@ variable "cluster_nodes" {
         { datastore_id = "data-st1000", interface = "scsi1", size = 100 }
       ]
     },
-    k3s-master   = {
+    k3s-master-1   = {
       vm_id = 202, role = "master", cpu_cores = 1, ram_mb = 4096, ip_offset = 11, hostname = "k3s-master",
       disks = [
         { datastore_id = "st500", interface = "scsi0", size = 32 }
