@@ -7,11 +7,13 @@
 - name: Install common packages
   apt:
     name:
-      - curl
-      - nfs-common
       - git
       - btop
       - fish
+      - curl
+      - net-tools
+      - nfs-common
+
     state: present
 
 - name: Enable and start qemu-guest-agent

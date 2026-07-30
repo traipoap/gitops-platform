@@ -2,42 +2,34 @@ data "local_file" "ssh_public_key" {
   filename = "./id_ed25519.pub"
 }
 
-locals {
-  cluster_subnet = "192.168.1.0/24"
-  super_node_ip = cidrhost(local.cluster_subnet, 4)   # 192.168.1.4
-  master_node_ip = cidrhost(local.cluster_subnet, 11) # 192.168.1.11
-  worker_node_ip = cidrhost(local.cluster_subnet, 21) # 192.168.1.21
-}
-
 resource "local_file" "ansible_inventory" {
   filename = "../ansible/inventory/hosts"
   content = templatefile("${path.module}/hosts.tpl", {
-    super_ip = local.super_node_ip
-    master_ip = local.master_node_ip
-    worker_ip = local.worker_node_ip
+    super_ip  = local.super-node[0]
+    master_ip = local.master_nodes[0]
+    worker_ip = local.worker_nodes[0]
   })
 }
 
-# -2. Orchestrator: Trigger Ansible Playbook after all VMs are provisioned
 resource "null_resource" "run_ansible_after_provisioning" {
   depends_on = [
-    proxmox_virtual_environment_vm.super_node,
-    proxmox_virtual_environment_vm.k3s_master,
-    proxmox_virtual_environment_vm.k3s_worker
+    proxmox_virtual_environment_file.cloud_configs
   ]
 
   provisioner "local-exec" {
     command = <<-EOT
       echo 'Waiting for VMs to be reachable via SSH...'
-      nc -zv ${local.super_node_ip} 22
-      nc -zv ${local.master_node_ip} 22
-      nc -zv ${local.worker_node_ip} 22
+      nc -zv "${local.super-node[0]}" 22
+      nc -zv "${local.master_nodes[0]}" 22
+      nc -zv "${local.worker_nodes[0]}" 22
     EOT
   }
 }
 
-# -1. Create file Cloud-config keep in to Proxmox Node (Storage: local)
-resource "proxmox_virtual_environment_file" "user_data_cloud_config_for_super_node" {
+# สร้างไฟล์ Cloud-init Snippets แบบ Dynamic ทั้ง Cluster
+resource "proxmox_virtual_environment_file" "cloud_configs" {
+  for_each = var.cluster_nodes
+
   content_type = "snippets"
   datastore_id = "local"
   node_name    = "local"
@@ -45,17 +37,16 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config_for_super_no
   source_raw {
     data      = <<-EOF
     #cloud-config
-    hostname: super-node
+    hostname: ${each.value.hostname}
     timezone: Asia/Bangkok
     users:
       - default
       - name: traipoap
-        groups:
-          - sudo
+        groups: [sudo]
         shell: /bin/bash
         ssh_authorized_keys:
           - ${trimspace(data.local_file.ssh_public_key.content)}
-        sudo: ALL=(ALL) NOPASSWD:ALL
+        sudo: ALL=(ALL) N_PASSWD:ALL
     package_update: true
     packages:
       - qemu-guest-agent
@@ -64,217 +55,41 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config_for_super_no
       - systemctl start qemu-guest-agent
       - echo "done" > /tmp/cloud-config.done
     EOF
-    file_name = "super-node.yaml"
+    file_name = "${each.key}.yaml"
   }
 }
 
-# 0. Create file Cloud-config keep in to Proxmox Node (Storage: local)
-resource "proxmox_virtual_environment_file" "user_data_cloud_config_for_master" {
-  content_type = "snippets"
-  datastore_id = "local"
-  node_name    = "local"
+resource "proxmox_virtual_environment_vm" "nodes" {
+  for_each = var.cluster_nodes
 
-  source_raw {
-    data      = <<-EOF
-    #cloud-config
-    hostname: k3s-master
-    timezone: Asia/Bangkok
-    users:
-      - default
-      - name: traipoap
-        groups:
-          - sudo
-        shell: /bin/bash
-        ssh_authorized_keys:
-          - ${trimspace(data.local_file.ssh_public_key.content)}
-        sudo: ALL=(ALL) NOPASSWD:ALL
-    package_update: true
-    packages:
-      - qemu-guest-agent
-    runcmd:
-      - systemctl enable qemu-guest-agent
-      - systemctl start qemu-guest-agent
-      - echo "done" > /tmp/cloud-config.done
-    EOF
-    file_name = "k3s-master.yaml"
-  }
-}
-
-# 1. Create file Cloud-config keep in to Proxmox Node (Storage: local)
-resource "proxmox_virtual_environment_file" "user_data_cloud_config_for_worker" {
-  content_type = "snippets"
-  datastore_id = "local"
-  node_name    = "local"
-
-  source_raw {
-    data      = <<-EOF
-    #cloud-config
-    hostname: k3s-worker
-    timezone: Asia/Bangkok
-    users:
-      - default
-      - name: traipoap
-        groups:
-          - sudo
-        shell: /bin/bash
-        ssh_authorized_keys:
-          - ${trimspace(data.local_file.ssh_public_key.content)}
-        sudo: ALL=(ALL) NOPASSWD:ALL
-    package_update: true
-    packages:
-      - qemu-guest-agent
-    runcmd:
-      - systemctl enable qemu-guest-agent
-      - systemctl start qemu-guest-agent
-      - echo "done" > /tmp/cloud-config.done
-    EOF
-    file_name = "k3s-worker.yaml"
-  }
-}
-
-# 2. Create VM from template
-resource "proxmox_virtual_environment_vm" "super_node" {
-  name      = "super-node"
+  name      = each.key
   node_name = "local"
-  vm_id     = 201
+  vm_id     = each.value.vm_id
 
   clone {
     vm_id = 2000
     full  = false
   }
 
-  agent {
-    enabled = true
-  }
+  agent { enabled = true }
 
   cpu {
-    cores = 1
-    type = "host"
+    cores = each.value.cpu_cores
+    type  = "host"
   }
 
   memory {
-    dedicated = 2048
+    dedicated = each.value.ram_mb
   }
 
-  # For root filesystem
-  disk {
-    datastore_id = "st500"
-    interface    = "scsi0"
-    size         = 32
-
-  }
-
-  # For s3 and nfs storage
-  disk {
-    datastore_id = "data-st1000"
-    interface    = "scsi1"
-    size         = 100
-  }
-
-  network_device {
-    bridge = "vmbr0"
-  }
-
-  serial_device {}
-
-  initialization {
-    user_data_file_id = proxmox_virtual_environment_file.user_data_cloud_config_for_super_node.id
-
-    ip_config {
-      ipv4 {
-        address = "${local.super_node_ip}/24"
-        gateway = "192.168.1.1"
-      }
+  # --- THE DYNAMIC DISK LOOP ---
+  dynamic "disk" {
+    for_each = each.value.disks
+    content {
+      datastore_id = disk.value.datastore_id
+      interface    = disk.value.interface
+      size         = disk.value.size
     }
-    dns {
-      servers = ["8.8.8.8", "8.8.4.4"]
-      domain  = "."
-    }
-  }
-}
-
-# 3. Create VM from template
-resource "proxmox_virtual_environment_vm" "k3s_master" {
-  name      = "k3s-master"
-  node_name = "local"
-  vm_id     = 202
-
-  clone {
-    vm_id = 2000
-    full  = false
-  }
-
-  agent {
-    enabled = true
-  }
-
-  cpu {
-    cores = 1
-    type = "host"
-  }
-
-  memory {
-    dedicated = 4096
-  }
-
-  disk {
-    datastore_id = "st500"
-    interface    = "scsi0"
-    size         = 32
-
-  }
-
-  network_device {
-    bridge = "vmbr0"
-  }
-
-  serial_device {}
-
-  initialization {
-    user_data_file_id = proxmox_virtual_environment_file.user_data_cloud_config_for_master.id
-
-    ip_config {
-      ipv4 {
-        address = "${local.master_node_ip}/24"
-        gateway = "192.168.1.1"
-      }
-    }
-    dns {
-      servers = ["8.8.8.8", "8.8.4.4"]
-      domain  = "."
-    }
-  }
-}
-
-# 4. Create VM from template
-resource "proxmox_virtual_environment_vm" "k3s_worker" {
-  name      = "k3s-worker"
-  node_name = "local"
-  vm_id     = 203
-
-  clone {
-    vm_id = 2000
-    full  = false
-  }
-
-  agent {
-    enabled = true
-  }
-
-  cpu {
-    cores = 1
-    type = "host"
-  }
-
-  memory {
-    dedicated = 8192
-  }
-
-  disk {
-    datastore_id = "st500"
-    interface    = "scsi0"
-    size         = 32
-
   }
 
   network_device {
@@ -285,11 +100,10 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
 
   # --- Cloud-config for K3s Worker (agent only, joins the master) ---
   initialization {
-    user_data_file_id = proxmox_virtual_environment_file.user_data_cloud_config_for_worker.id
-
+    user_data_file_id = proxmox_virtual_environment_file.cloud_configs[each.key].id
     ip_config {
       ipv4 {
-        address = "${local.worker_node_ip}/24"
+        address = "${cidrhost(var.cluster_subnet, each.value.ip_offset)}/24"
         gateway = "192.168.1.1"
       }
     }
@@ -298,4 +112,7 @@ resource "proxmox_virtual_environment_vm" "k3s_worker" {
       domain  = "."
     }
   }
+  depends_on = [
+    proxmox_virtual_environment_file.cloud_configs
+  ]
 }

@@ -5,7 +5,6 @@
           --write-kubeconfig-mode 644 \
           --disable=traefik \
           --disable=local-storage \
-          --default-runtime youki
       args:
         creates: /usr/local/bin/k3s
 
