@@ -11,6 +11,7 @@ COPY backend/ ./
 ARG VERSION=unknown
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'main.Version=${VERSION}'" -o /backend/app .
 
+# ===================================================
 FROM alpine
 RUN apk --no-cache add ca-certificates sqlite-libs \
     && addgroup -S app \
