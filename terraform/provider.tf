@@ -1,12 +1,13 @@
 provider "proxmox" {
-  endpoint = "https://proxmox.example.com"
-  username = "root@pam"
-  password = "REDACTED_PROXMOX_PASSWORD"
+  endpoint = var.proxmox_endpoint
+  username = var.proxmox_username
+  password = var.proxmox_password
+
   insecure = true
 
   ssh {
     agent    = true
-    username = "root"
-    password = "REDACTED_PROXMOX_PASSWORD"
+    username = var.proxmox_username
+    password = var.proxmox_password
   }
 }

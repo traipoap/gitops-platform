@@ -1,9 +1,5 @@
-data "local_file" "ssh_public_key" {
-  filename = "./id_ed25519.pub"
-}
-
 resource "local_file" "ansible_inventory" {
-  filename = "../ansible/inventory/hosts"
+  filename = var.ansible_inventory_path
   content = templatefile("${path.module}/hosts.tpl", {
     super_ip  = local.super-node[0]
     master_ip = local.master_nodes[0]
@@ -31,21 +27,21 @@ resource "proxmox_virtual_environment_file" "cloud_configs" {
   for_each = var.cluster_nodes
 
   content_type = "snippets"
-  datastore_id = "local"
-  node_name    = "local"
+  datastore_id = var.datastore_id
+  node_name    = var.node_name
 
   source_raw {
     data      = <<-EOF
     #cloud-config
     hostname: ${each.value.hostname}
-    timezone: Asia/Bangkok
+    timezone: ${var.timezone}
     users:
       - default
-      - name: traipoap
+      - name: ${var.ssh_username}
         groups: [sudo]
         shell: /bin/bash
         ssh_authorized_keys:
-          - ${trimspace(data.local_file.ssh_public_key.content)}
+          - ${trimspace(var.ssh_public_key)}
         sudo: ALL=(ALL) NOPASSWD:ALL
     package_update: true
     packages:
@@ -63,11 +59,11 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   for_each = var.cluster_nodes
 
   name      = each.key
-  node_name = "local"
+  node_name = var.node_name
   vm_id     = each.value.vm_id
 
   clone {
-    vm_id = 2000
+    vm_id = var.clone_vm_id
     full  = false
   }
 
@@ -93,7 +89,7 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   }
 
   network_device {
-    bridge = "vmbr0"
+    bridge = var.network_bridge
   }
 
   serial_device {}
@@ -104,11 +100,11 @@ resource "proxmox_virtual_environment_vm" "nodes" {
     ip_config {
       ipv4 {
         address = "${cidrhost(var.cluster_subnet, each.value.ip_offset)}/24"
-        gateway = "192.168.1.1"
+        gateway = var.gateway_ip
       }
     }
     dns {
-      servers = ["8.8.8.8", "8.8.4.4"]
+      servers = var.dns_servers
       domain  = "."
     }
   }

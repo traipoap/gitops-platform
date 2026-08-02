@@ -3,6 +3,71 @@ variable "cluster_subnet" {
   default     = "192.168.1.0/24"
 }
 
+variable "proxmox_username" {
+  type    = string
+  default = "root@pam"
+}
+
+variable "proxmox_password" {
+  type    = string
+  default = "Password in secrets.auto.tfvars file."
+}
+
+variable "proxmox_endpoint" {
+  type    = string
+  default = "https://proxmox.example.com"
+}
+
+variable "ssh_username" {
+  type    = string
+  default = "traipoap"
+}
+
+variable "timezone" {
+  type    = string
+  default = "Asia/Bangkok"
+}
+
+variable "datastore_id" {
+  type    = string
+  default = "local"
+}
+
+variable "node_name" {
+  type    = string
+  default = "local"
+}
+
+variable "clone_vm_id" {
+  type    = number
+  default = 2000
+}
+
+variable "network_bridge" {
+  type    = string
+  default = "vmbr0"
+}
+
+variable "gateway_ip" {
+  type    = string
+  default = "192.168.1.1"
+}
+
+variable "dns_servers" {
+  type    = list(string)
+  default = ["8.8.8.8", "8.8.4.4"]
+}
+
+variable "ssh_public_key" {
+  type    = string
+  default = "ssh-ed25519"
+}
+
+variable "ansible_inventory_path" {
+  type    = string
+  default = "../ansible/inventory/hosts"
+}
+
 variable "cluster_nodes" {
   type = map(object({
     vm_id        = number
