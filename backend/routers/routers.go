@@ -53,7 +53,7 @@ func setupAuthRoutes(r *gin.Engine, jwtService *services.JWTService, db *gorm.DB
 	auth := r.Group("/api/auth")
 	{
 		auth.POST("/login", controllers.HandleSignIn(db, jwtService))
-		auth.POST("/register", controllers.HandleRegister(db))
+		//auth.POST("/register", controllers.HandleRegister(db))
 	}
 
 	// Protected routes
@@ -83,7 +83,7 @@ func setupAPIRoutes(r *gin.Engine, jwtService *services.JWTService) {
 // SetupRoutes configures all routes for the application
 func SetupRoutes(r *gin.Engine) {
 	// Initialize Database (SQLite)
-	db, err := gorm.Open(sqlite.Open("app.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
