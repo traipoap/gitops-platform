@@ -41,7 +41,7 @@ jobs:
           file: ${{ inputs.dockerfile }}
           push: true
           tags: |
-            ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }} # 👈 Tags image version
+            ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
