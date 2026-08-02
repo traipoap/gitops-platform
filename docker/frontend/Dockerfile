@@ -1,4 +1,5 @@
 FROM node:26.5.1-alpine3.24 AS builder
+
 WORKDIR /app
 
 COPY frontend/package*.json ./
@@ -9,6 +10,7 @@ RUN npm run build
 
 # ===================================================
 FROM node:26.5.1-alpine3.24
+
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
