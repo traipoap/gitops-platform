@@ -13,5 +13,4 @@ jobs:
     with:
       service: frontend
       dockerfile: ./docker/frontend/Dockerfile
-      image_name: ghcr.io/traipoap/frontend
     secrets: inherit

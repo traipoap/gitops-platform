@@ -6,6 +6,7 @@ on:
     paths:
       - 'docker/backend/**'
       - 'backend/**'
+      - 'docker-compose.yml'
 
 jobs:
   call-build:
@@ -13,5 +14,4 @@ jobs:
     with:
       service: backend
       dockerfile: ./docker/backend/Dockerfile
-      image_name: ghcr.io/traipoap/backend
     secrets: inherit

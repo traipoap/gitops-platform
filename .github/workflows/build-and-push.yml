@@ -1,4 +1,4 @@
-name: Docker Build and Push
+name: Docker Build and Push to GHCR
 
 on:
   workflow_call:
@@ -7,9 +7,6 @@ on:
         required: true
         type: string
       dockerfile:
-        required: true
-        type: string
-      image_name:
         required: true
         type: string
 
@@ -21,6 +18,7 @@ jobs:
       packages: write
     outputs:
       version: ${{ steps.set_version.outputs.version }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -32,7 +30,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.TOKEN_REGISTRY }}
 
-      # ปรับส่วน build ให้รับ input มาใช้
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
       - name: Build and push
         id: build-step
         uses: docker/build-push-action@v7
@@ -45,7 +45,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ส่ง output version ไปยัง workflow caller
       - name: Set Output Version
         id: set_version
         run: echo "version=0.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
@@ -58,20 +57,23 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: traipoap/fleet-infra
-          token: ${{ secrets.TOKEN_REGISTRY }} # ควรแยก Token สำหรับเขียน infra ดีกว่านี้
+          token: ${{ secrets.TOKEN_REGISTRY }}
           ref: main
 
-      # อัปเดตเฉพาะไฟล์ของ service นั้นๆ
-      - name: Update Image Tags
+      - name: Update Image Tags with yq
+        env:
+          SERVICE_NAME: ${{ inputs.service }}
+          NEW_VERSION: ${{ needs.build-and-push.outputs.version }}
         uses: mikefarah/yq@master
         with:
           cmd: |
-            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/${{ inputs.service }}:${{ needs.build-and-push.outputs.version }}"' ./applications/base/${{ inputs.service }}-deployment.yaml
+            yq -i ".spec.template.spec.containers[0].image = \"ghcr.io/traipoap/${SERVICE_NAME}:${NEW_VERSION}\"" \
+                  "./applications/base/${SERVICE_NAME}-deployment.yaml"
 
-      - name: Commit and Push
+      - name: Commit and Push to Fleet Infra
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "chore: sync image tags to ${{ needs.build-and-push.outputs.version }} [skip ci]" || exit 0
+          git commit -m "chore(${{ inputs.service }}): sync image tags to ${{ needs.build-and-push.outputs.version }} [skip ci]" || exit 0
           git push origin main
