@@ -1,0 +1,17 @@
+name: Frontend Build & Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docker/frontend/**'
+      - 'frontend/**'
+
+jobs:
+  call-build:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      service: frontend
+      dockerfile: ./docker/frontend/Dockerfile
+      image_name: ghcr.io/traipoap/frontend
+    secrets: inherit

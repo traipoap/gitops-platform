@@ -1,0 +1,77 @@
+name: Docker Build and Push
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      dockerfile:
+        required: true
+        type: string
+      image_name:
+        required: true
+        type: string
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN_REGISTRY }}
+
+      # ปรับส่วน build ให้รับ input มาใช้
+      - name: Build and push
+        id: build-step
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ inputs.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/traipoap/${{ inputs.service }}:${{ github.run_number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ส่ง output version ไปยัง workflow caller
+      - name: Set Output Version
+        id: set_version
+        run: echo "version=0.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+  update-infra:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Fleet Infra Repo
+        uses: actions/checkout@v6
+        with:
+          repository: traipoap/fleet-infra
+          token: ${{ secrets.TOKEN_REGISTRY }} # ควรแยก Token สำหรับเขียน infra ดีกว่านี้
+          ref: main
+
+      # อัปเดตเฉพาะไฟล์ของ service นั้นๆ
+      - name: Update Image Tags
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/${{ inputs.service }}:${{ needs.build-and-push.outputs.version }}"' ./applications/base/${{ inputs.service }}-deployment.yaml
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore(${{{ inputs.service }}}): update image to ${{ needs.build-and-push.outputs.version }}" || exit 0
+          git push origin main
