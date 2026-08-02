@@ -311,13 +311,12 @@ kubectl get helmreleases -A
 #### Example workflow:
 ```mermaid
 flowchart LR
-    git push
-      -> GitHub Actions
-        -> build image
-          -> push image to registry
-            -> update GitOps repo
-              -> FluxCD sync
-                -> application updated
+    A["git push"] --> B["GitHub Actions"]
+    B --> C["Build image"]
+    C --> D["Push image to registry"]
+    D --> E["Update GitOps repo"]
+    E --> F["FluxCD sync"]
+    F --> G["Application updated"]
 ```
 
 ---
