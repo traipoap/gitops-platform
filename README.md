@@ -12,7 +12,7 @@ This project demonstrates how to build a repeatable, declarative, and automated 
 
 ---
 
-## Overview
+## 🏗 Overview
 
 This project automates the deployment and management of a K3s Kubernetes cluster on Proxmox virtual machines using Terraform and Ansible.
 
