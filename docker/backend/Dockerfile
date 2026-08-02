@@ -1,5 +1,4 @@
 FROM golang:1.26.5-alpine3.24 AS backend-builder
-
 WORKDIR /backend
 RUN apk add --no-cache git
 
