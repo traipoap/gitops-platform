@@ -61,11 +61,14 @@ jobs:
           ref: main
 
       - name: Update Image Tags with yq
+        env:
+          SERVICE_NAME: ${{ inputs.service }}
+          NEW_VERSION: ${{ needs.build-and-push.outputs.version }}
         uses: mikefarah/yq@master
         with:
           cmd: |
-            yq -i ".spec.template.spec.containers[0].image = \"ghcr.io/traipoap/${{ inputs.service }}:${{ needs.build-and-push.outputs.version }}\"" \
-                  "./applications/base/${{ inputs.service }}-deployment.yaml"
+            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/${SERVICE_NAME}:${NEW_VERSION}"' \
+                  "./applications/base/${SERVICE_NAME}-deployment.yaml"
 
       - name: Commit and Push to Fleet Infra
         run: |
