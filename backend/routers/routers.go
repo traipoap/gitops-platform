@@ -3,6 +3,7 @@ package routers
 import (
 	"exporter/controllers"
 	"exporter/middleware"
+	"exporter/models"
 	"exporter/services"
 	"log"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 const (
@@ -45,59 +48,49 @@ func setupCORS() cors.Config {
 }
 
 // setupAuthRoutes configures authentication routes
-func setupAuthRoutes(r *gin.Engine, jwtService *services.JWTService) {
+func setupAuthRoutes(r *gin.Engine, jwtService *services.JWTService, db *gorm.DB) {
 	// Public routes
 	auth := r.Group("/api/auth")
 	{
-		auth.POST("/login", handleLogin(jwtService))
+		auth.POST("/login", controllers.HandleSignIn(db, jwtService))
+		auth.POST("/register", controllers.HandleRegister(db))
 	}
 
 	// Protected routes
-	protected := r.Group("/api")
-	protected.Use(middleware.JWTAuth())
+	api := r.Group("/api")
+	api.Use(middleware.JWTAuth())
 	{
-		protected.GET("/profile", controllers.HandleProfile)
-		protected.GET("/admin", middleware.RoleAuth("admin"), controllers.HandleAdmin)
-		protected.POST("/logout", controllers.HandleLogout)
+		api.GET("/profile", controllers.HandleProfile)
+		api.GET("/admin", middleware.RoleAuth("admin"), controllers.HandleAdmin)
+		api.POST("/logout", controllers.HandleLogout)
 	}
 }
 
-// setupTaskRoutes configures task-related routes
-func setupTaskRoutes(r *gin.Engine) {
+// setupAPIRoutes configures API-related routes
+func setupAPIRoutes(r *gin.Engine, jwtService *services.JWTService) {
 	r.GET("/", HandleHome)
-	task := r.Group("/api")
-	task.GET("/indices", controllers.HandleIndices)
-	task.GET("/search", controllers.HandleSearch)
-	task.GET("/export", controllers.HandleExport)
-	task.GET("/exports", controllers.HandleExportsList)
-	task.GET("/exports/:filename", controllers.HandleDownload)
-}
-
-// Auth handlers
-func handleLogin(jwtService *services.JWTService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		username, password, hasAuth := c.Request.BasicAuth()
-
-		// TODO: Move credentials to environment variables or use proper authentication
-		if username == "admin@example.com" && password == "admin123" && hasAuth {
-			token, err := jwtService.GenerateToken("0", "admin", "admin")
-			refreshToken, err := jwtService.GenerateRefreshToken("0")
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-				return
-			}
-			c.JSON(http.StatusOK, gin.H{
-				"token":         token,
-				"refresh_token": refreshToken,
-			})
-			return
-		}
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+	api := r.Group("/api")
+	api.Use(middleware.JWTAuth())
+	{
+		api.GET("/indices", controllers.HandleIndices)
+		api.GET("/search", controllers.HandleSearch)
+		api.GET("/export", controllers.HandleExport)
+		api.GET("/exports", controllers.HandleExportsList)
+		api.GET("/exports/:filename", controllers.HandleDownload)
 	}
 }
 
 // SetupRoutes configures all routes for the application
 func SetupRoutes(r *gin.Engine) {
+	// Initialize Database (SQLite)
+	db, err := gorm.Open(sqlite.Open("app.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	// Auto-migrate the User table
+	db.AutoMigrate(&models.User{})
+
 	if err := controllers.InitSearchController(); err != nil {
 		log.Fatal("Failed to initialize: ", err)
 	}
@@ -112,8 +105,8 @@ func SetupRoutes(r *gin.Engine) {
 	r.Use(cors.New(setupCORS()))
 
 	// Setup route groups
-	setupAuthRoutes(r, jwtService)
-	setupTaskRoutes(r)
+	setupAuthRoutes(r, jwtService, db)
+	setupAPIRoutes(r, jwtService)
 
 	// Start server
 	r.Run(":" + port)
