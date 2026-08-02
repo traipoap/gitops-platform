@@ -2,10 +2,10 @@
 192.168.1.4 ansible_user=traipoap
 
 [k3s-masters]
-192.168.1.11 ansible_user=traipoap node_ip=192.168.1.11
+192.168.1.11 ansible_user=traipoap
 
 [k3s-workers]
-192.168.1.21 ansible_user=traipoap node_ip=192.168.1.21
+192.168.1.21 ansible_user=traipoap
 
 [k3s-cluster:children]
 k3s-masters

@@ -1,7 +1,7 @@
     - name: Install K3s server
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server \
-          --node-ip={{ node_ip }} \
+          --node-ip={{ groups['k3s-masters'][0] }} \
           --write-kubeconfig-mode 644 \
           --disable=traefik \
           --disable=local-storage \
