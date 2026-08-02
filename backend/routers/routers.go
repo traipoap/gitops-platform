@@ -72,11 +72,11 @@ func setupAPIRoutes(r *gin.Engine, jwtService *services.JWTService) {
 	api := r.Group("/api")
 	api.Use(middleware.JWTAuth())
 	{
-		api.GET("/indices", controllers.HandleIndices)
-		api.GET("/search", controllers.HandleSearch)
-		api.GET("/export", controllers.HandleExport)
-		api.GET("/exports", controllers.HandleExportsList)
-		api.GET("/exports/:filename", controllers.HandleDownload)
+		api.GET("/indices", middleware.RoleAuth("admin"), controllers.HandleIndices)
+		api.GET("/search", middleware.RoleAuth("admin"), controllers.HandleSearch)
+		api.GET("/export", middleware.RoleAuth("admin"), controllers.HandleExport)
+		api.GET("/exports", middleware.RoleAuth("admin"), controllers.HandleExportsList)
+		api.GET("/exports/:filename", middleware.RoleAuth("admin"), controllers.HandleDownload)
 	}
 }
 
