@@ -203,9 +203,12 @@ async function runSearch() {
 
   btn.disabled = true;
 
+  const token = sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
   try {
     // 6. เรียก API พร้อม Params ใหม่
-    const res = await fetch(`https://frontend.example.com/api/search?${params.toString()}`);
+    const res = await fetch(`https://frontend.example.com/api/search?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     if (!res.ok) throw new Error("Network response was not ok");
 
     const data = await res.json();
