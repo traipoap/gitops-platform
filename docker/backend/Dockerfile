@@ -1,4 +1,5 @@
 FROM golang:1.26.5-alpine3.24 AS backend-builder
+
 WORKDIR /backend
 RUN apk add --no-cache git
 
@@ -12,6 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'main.Version=${VERSION
 
 # ===================================================
 FROM alpine
+
 RUN apk --no-cache add ca-certificates sqlite-libs \
     && addgroup -S app \
     && adduser -S app -G app
