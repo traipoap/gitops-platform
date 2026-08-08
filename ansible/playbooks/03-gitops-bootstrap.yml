@@ -1,10 +1,22 @@
 - name: Install FluxCD
-  hosts: k3s-masters
-  become: true
+  hosts: localhost
+  #become: true
+
+  vars_prompt:
+    - name: user_input_pat
+      prompt: "Enter your GitHub Personal Access Token (PAT)"
+      private: true # Behind syntax while typing or copying/pasting
+      unsafe: true  # Protect Ansible from special character conversion in PAT
+
   vars:
     github_owner: "traipoap"
     github_repo: "fleet-infra"
-    github_personal_access_token: "REDACTED_GITHUB_PAT"
+    github_personal_access_token: "{{ user_input_pat }}"
+
+  tasks:
+    - name: Debug Github PAT
+      ansible.builtin.debug:
+        msg: "PAT is set (Length: {{ github_personal_access_token | length }})"
 
   roles:
     - fluxcd
