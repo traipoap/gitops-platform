@@ -41,7 +41,7 @@ resource "proxmox_virtual_environment_file" "cloud_configs" {
         groups: [sudo]
         shell: /bin/bash
         ssh_authorized_keys:
-          - ${trimspace(var.ssh_public_key)}
+        ${indent(10, join("\n", [for k in var.ssh_public_keys : "\n${k}"]))}
         sudo: ALL=(ALL) NOPASSWD:ALL
     package_update: true
     packages:

@@ -30,9 +30,14 @@ variable "proxmox_username" {
   default = "root@pam"
 }
 
-variable "proxmox_password" {
-  description = "Another way create a variable password into secrets.auto.tfvars file following reference https://developer.hashicorp.com/terraform/language/values/variables"
+variable "proxmox_ssh_username" {
   type    = string
+  default = "root"
+}
+
+variable "proxmox_password" {
+  type    = string
+  description = "Another way create a variable password into secrets.auto.tfvars file following reference https://developer.hashicorp.com/terraform/language/values/variables"
   sensitive = true
 }
 
@@ -56,9 +61,10 @@ variable "ssh_username" {
   default = "traipoap"
 }
 
-variable "ssh_public_key" {
-  type    = string
-  default = "ssh-ed25519"
+variable "ssh_public_keys" {
+  type        = list(string)
+  description = "Another way create list of SSH public keys into secrets.auto.tfvars file"
+  default     = [""]
 }
 
 # Resource of main
