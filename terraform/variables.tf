@@ -1,51 +1,12 @@
-variable "cluster_subnet" {
-  type        = string
-  default     = "192.168.1.0/24"
-}
-
-variable "proxmox_username" {
-  type    = string
-  default = "root@pam"
-}
-
-variable "proxmox_password" {
-  type    = string
-  default = "Password in secrets.auto.tfvars file."
-}
-
-variable "proxmox_endpoint" {
-  type    = string
-  default = "https://proxmox.example.com"
-}
-
-variable "ssh_username" {
-  type    = string
-  default = "traipoap"
-}
-
-variable "timezone" {
-  type    = string
-  default = "Asia/Bangkok"
-}
-
-variable "datastore_id" {
-  type    = string
-  default = "local"
-}
-
-variable "node_name" {
-  type    = string
-  default = "local"
-}
-
-variable "clone_vm_id" {
-  type    = number
-  default = 2000
-}
-
+# Networking
 variable "network_bridge" {
   type    = string
   default = "vmbr0"
+}
+
+variable "cluster_subnet" {
+  type        = string
+  default     = "192.168.1.0/24"
 }
 
 variable "gateway_ip" {
@@ -58,14 +19,58 @@ variable "dns_servers" {
   default = ["8.8.8.8", "8.8.4.4"]
 }
 
+# Provider/Agent
+variable "proxmox_endpoint" {
+  type    = string
+  default = "https://proxmox.example.com"
+}
+
+variable "proxmox_username" {
+  type    = string
+  default = "root@pam"
+}
+
+variable "proxmox_password" {
+  description = "Another way create a variable password into secrets.auto.tfvars file following reference https://developer.hashicorp.com/terraform/language/values/variables"
+  type    = string
+  sensitive = true
+}
+
+# cloud_configs
+variable "datastore_id" {
+  type    = string
+  default = "local"
+}
+
+variable "node_name" {
+  type    = string
+  default = "local"
+}
+variable "timezone" {
+  type    = string
+  default = "Asia/Bangkok"
+}
+
+variable "ssh_username" {
+  type    = string
+  default = "traipoap"
+}
+
 variable "ssh_public_key" {
   type    = string
   default = "ssh-ed25519"
 }
 
+# Resource of main
 variable "ansible_inventory_path" {
   type    = string
   default = "../ansible/inventory/hosts"
+}
+
+# proxmox_virtual_environment_vm of main
+variable "clone_vm_id" {
+  type    = number
+  default = 2000
 }
 
 variable "cluster_nodes" {
