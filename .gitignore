@@ -25,3 +25,6 @@ pnpm-debug.log*
 .terraform/
 terraform/secrets.auto.tfvars
 ansible/group_vars/
+ansible/playbooks/files/k3s-kubeconfig.yaml
+ansible/group_vars/vault.yml
+terraform/.terraform.lock.hcl

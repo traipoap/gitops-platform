@@ -1,6 +1,6 @@
 - name: Install FluxCD
-  hosts: localhost
-  #become: true
+  hosts: k3s-masters
+  become: true
 
   vars_prompt:
     - name: user_input_pat
