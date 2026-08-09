@@ -31,6 +31,40 @@ The platform includes:
 
 ---
 
+## Lab Environment
+
+This platform is deployed on a single-node Proxmox lab environment.
+
+| Resource | Specification |
+|---|---:|
+| CPU | 4 x Intel(R) Core(TM) i5-3470S CPU @ 2.90GHz (1 Socket) |
+| RAM | 16 GB |
+| Storage | 2 x 1 TB HDD, 1 x 500 GB HDD |
+| Hypervisor | Proxmox VE 9.1.5 |
+
+### VM Allocation
+
+| VM | Role | vCPU | RAM | Disk | Network |
+|---|---:|---:|---:|---:|---:|
+| super-node-1 | LB / NFS / S3 | 1 | 2 GB | 32 GB / 100 GB | 10.10.16.2 / vLan 16 |
+| k3s-master-1 | K3s control plane | 1 | 4 GB | 32 GB | 10.10.16.11 / vLan 16 |
+| k3s-worker-1 | K3s worker node | 1 | 8 GB | 32 GB | 10.10.16.21 / vLan 16 |
+
+> Note: The lab environment has limited resources. Workloads are configured with resource requests/limits, and non-essential components can be disabled to reduce memory usage.
+
+### Traffic Flow
+```mermaid
+flowchart LR
+    EndUser[End User] -->|HTTPS| CloudFlare[Cloudflare]
+    CloudFlare -->|Cloudflare Tunnel| LB[Load Balancer]
+    LB -->|HTTP| GatewayAPI[Gateway API]
+    GatewayAPI -->|HTTP| HTTPRoute[HTTPRoute]
+    HTTPRoute -->|HTTP| Service[Kubernetes Service]
+    Service -->|HTTP| Apps[Application Pods]
+```
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -86,6 +120,8 @@ flowchart LR
 - Linux
 - NFS
 #### Kubernetes
+- CRUN Runtime
+- Youki Runtime
 - K3s
 - kubectl
 - Helm
