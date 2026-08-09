@@ -1,23 +1,28 @@
 resource "local_file" "ansible_inventory" {
   filename = var.ansible_inventory_path
   content = templatefile("${path.module}/hosts.tpl", {
-    super_ip  = local.super-node[0]
-    master_ip = local.master_nodes[0]
-    worker_ip = local.worker_nodes[0]
+    super_nodes  = local.super-node
+    master_nodes = local.master_nodes
+    worker_nodes = local.worker_nodes
   })
 }
 
-resource "null_resource" "run_ansible_after_provisioning" {
-  depends_on = [
-    proxmox_virtual_environment_file.cloud_configs
-  ]
+resource "null_resource" "wait_for_ssh" {
+  depends_on = [proxmox_virtual_environment_vm.nodes]
 
   provisioner "local-exec" {
     command = <<-EOT
-      echo 'Waiting for VMs to be reachable via SSH...'
-      nc -zv "${local.super-node[0]}" 22
-      nc -zv "${local.master_nodes[0]}" 22
-      nc -zv "${local.worker_nodes[0]}" 22
+      echo "Waiting for VMs to be SSH ready..."
+      HOSTS="${join(" ", concat(local.super-node, local.master_nodes, local.worker_nodes))}"
+
+      for host in $HOSTS; do
+        echo "Checking $host..."
+        until ssh -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=5 "$host" exit 0 2>/dev/null; do
+          echo "  - $host not ready yet, sleeping 5s..."
+          sleep 5
+        done
+        echo "  - $host is ready!"
+      done
     EOT
   }
 }

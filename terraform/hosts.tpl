@@ -1,11 +1,18 @@
 [load-balance]
-${ super_ip } ansible_user=traipoap
+%{ for ip in super_nodes ~}
+${ ip } ansible_user=traipoap
+%{ endfor ~}
 
 [k3s-masters]
-${ master_ip } ansible_user=traipoap
+%{ for ip in master_nodes ~}
+${ ip } ansible_user=traipoap
+%{ endfor ~}
 
 [k3s-workers]
-${ worker_ip } ansible_user=traipoap
+%{ for ip in worker_nodes ~}
+${ ip } ansible_user=traipoap
+%{ endfor ~}
+
 [k3s-cluster:children]
 k3s-masters
 k3s-workers
