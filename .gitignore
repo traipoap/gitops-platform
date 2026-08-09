@@ -29,3 +29,4 @@ ansible/playbooks/files/k3s-kubeconfig.yaml
 ansible/group_vars/vault.yml
 terraform/.terraform.lock.hcl
 terraform/errored.tfstate
+.scannerwork/
