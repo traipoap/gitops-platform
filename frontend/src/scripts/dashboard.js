@@ -132,7 +132,7 @@ function dynamicMapper(hit) {
 
   // 2. สกัดข้อมูลพื้นฐาน
   const levelRaw = getField(['severity', 'level', 'priority', 'log_level']);
-  const sourceRaw = getField(['source_ip', 'srcip', 'source_type', 'appname', 'facility', 'source']);
+  const sourceRaw = getField(['source_ip', 'srcip', 'source_type', 'appname', 'facility', 'source', 'pod_node_name']);
   const hostRaw = getField(['host', 'hostname', 'devname', 'source_host']);
   const timestampRaw = getField(['timestamp', 'index_timestamp', 'eventtime', 'time']);
   const messageRaw = getField(['message', 'msg', 'content']);
