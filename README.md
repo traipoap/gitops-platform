@@ -287,7 +287,7 @@ flowchart LR
 ## Quickstart
 #### Clone the repository:
 ```
-git clone https://github.com/traipoap/app.git
+git clone https://github.com/traipoap/gitops-platform.git
 cd app
 ```
 
