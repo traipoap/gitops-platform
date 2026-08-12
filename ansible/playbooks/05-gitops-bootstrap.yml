@@ -3,12 +3,12 @@
   become: true
 
   vars_prompt:
-    - name: user_input_pat_app-git-secret
+    - name: input_pat_app_git_secret
       prompt: "Enter your GitHub Personal Access Token (PAT)"
       private: true # Behind syntax while typing or copying/pasting
       unsafe: true  # Protect Ansible from special character conversion in PAT
 
-    - name: user_input_pat_github-registry
+    - name: input_pat_github_registry
       prompt: "Enter your GitHub Registry PAT"
       private: true
       unsafe: true
@@ -17,16 +17,18 @@
     # Create GitOps and git app secrets
     github_owner: "traipoap"
     github_repo: "fleet-infra"
-    app-git-secret: "{{ user_input_pat_app-git-secret }}"
+    app_git_secret: "{{ input_pat_app_git_secret }}"
 
     # Create namespace and secrets docker-registry
     namespace: "lumina"
-    github-registry: "{{ user_input_pat_github-registry }}"
+    github_registry: "{{ input_pat_github_registry }}"
 
   tasks:
     - name: Debug Github PAT
       ansible.builtin.debug:
-        msg: "PAT is set (Length: {{ app-git-secret | length }})"
+        msg: |
+          "PAT is set (Length: {{ app_git_secret | length }})"
+          "PAT is set (Length: {{ github_registry | length }})"
 
   roles:
     - fluxcd
