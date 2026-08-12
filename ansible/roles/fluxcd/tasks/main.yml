@@ -12,7 +12,7 @@
           --path=./clusters/dev \
           --personal
       environment:
-        GITHUB_TOKEN: "{{ github_personal_access_token }}"
+        GITHUB_TOKEN: "{{ app-git-secret }}"
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
       run_once: true
       ignore_errors: true
@@ -22,7 +22,26 @@
         kubectl create secret generic app-git-secret \
           --namespace=flux-system \
           --from-literal=username={{ github_owner }} \
-          --from-literal=password={{ github_personal_access_token }}
+          --from-literal=password={{ app-git-secret }}
+      environment:
+        KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
+      run_once: true
+      ignore_errors: true
+
+    - name: Create namespace for {{ namespace }}
+      shell: kubectl create namespace {{ namespace }}
+      environment:
+        KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
+      run_once: true
+      ignore_errors: true
+
+    - name: Create secret for GitHub docker-registry
+      shell: |
+        kubectl -n {{ namespace }} create secret docker-registry github-registry \
+          --docker-server ghcr.io \
+          --docker-username {{ github_owner }} \
+          --docker-password {{ github-registry }} \
+          --docker-email {{ github_owner }}
       environment:
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
       run_once: true

@@ -1,4 +1,4 @@
-ansible-playbook -i inventory/hosts playbooks/00-inventory.yml
+ansible-playbook -i inventory/hosts playbooks/00-prerequisites.yml
 ansible-playbook -i inventory/hosts playbooks/01-cluster-setup.yml
 ansible-playbook -i inventory/hosts playbooks/02-servicemesh.yml
 ansible-playbook -i inventory/hosts playbooks/03-gitops-bootstrap.yml # Request user input for GitHub PAT
