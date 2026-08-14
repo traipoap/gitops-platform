@@ -1,5 +1,9 @@
 # K3s GitOps Platform on Proxmox
 
+[![Frontend Build & Deploy](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml)
+[![Backend Build & Deploy](https://github.com/traipoap/gitops-platform/actions/workflows/backend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/backend-build.yml)
+
+![License](https://img.shields.io/github/license/traipoap/gitops-platform)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-K3s-326ce5)
 ![GitOps](https://img.shields.io/badge/GitOps-FluxCD-5468ff)
@@ -9,6 +13,28 @@
 A production-oriented home lab / portfolio platform for provisioning and managing a Kubernetes cluster using Infrastructure as Code, GitOps, CI/CD, observability, and security best practices.
 
 This project demonstrates how to build a repeatable, declarative, and automated Kubernetes platform from bare-metal/virtual infrastructure to application deployment.
+
+---
+
+## Table of Contents
+- [Overview](#-overview)
+- [Lab Environment](#lab-environment)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Repository Structure](#repository-structure)
+- [Quickstart](#quickstart)
+- [GitOps Workflow](#gitops-workflow)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Observability](#observability)
+- [Storage](#storage)
+- [Security](#security)
+- [Backup and Restore](#backup-and-restore)
+- [Troubleshooting](#troubleshooting)
+- [Results](#results--impact)
+- [Lessons Learned](#lessons-learned)
+- [Roadmap](#roadmap)
+- [License](#license)
 
 ---
 
@@ -46,7 +72,7 @@ This platform is deployed on a single-node Proxmox lab environment.
 
 | VM | Role | vCPU | RAM | Disk | Network |
 |---|---:|---:|---:|---:|---:|
-| super-node-1 | LB / NFS / S3 | 1 | 2 GB | 32 GB / 100 GB | 10.10.16.2 / vLan 16 |
+| super-node-1 | LB / NFS / S3 | 1 | 2 GB | 32 GB / 100 GB | 10.10.16.4 / vLan 16 |
 | k3s-master-1 | K3s control plane | 1 | 4 GB | 32 GB | 10.10.16.11 / vLan 16 |
 | k3s-worker-1 | K3s worker node | 1 | 8 GB | 32 GB | 10.10.16.21 / vLan 16 |
 
@@ -288,7 +314,7 @@ flowchart LR
 #### Clone the repository:
 ```
 git clone https://github.com/traipoap/gitops-platform.git
-cd app
+cd gitops-platform
 ```
 
 #### Copy the example environment file:
@@ -297,11 +323,31 @@ cp .env.example .env
 ```
 #### Edit .env with your environment values:
 ```
-export PROXMOX_HOST="proxmox.example.local"
-export PROXMOX_USER="root@pam"
-export VM_COUNT=3
-export REGISTRY="ghcr.io/YOUR_USERNAME"
-export CLUSTER_NAME="k3s-home-lab"
+export RPC_SECRET="xxx"
+export ADMIN_TOKEN="xxx"
+export GARAGE_DEFAULT_ACCESS_KEY="xxx"
+export GARAGE_DEFAULT_SECRET_KEY="xxx"
+export APP_GIT_SECRET="xxx"
+export GITHUB_REGISTRY="xxx"
+```
+
+##### Provision infrastructure
+```
+cd terraform
+terraform init
+terraform plan
+terraform apply
+```
+
+##### Run Ansible playbooks
+```
+cd ../ansible
+ansible-playbook -i inventory/hosts playbooks/00-prerequisites.yml
+ansible-playbook -i inventory/hosts playbooks/01-cluster-setup.yml
+ansible-playbook -i inventory/hosts playbooks/02-servicemesh.yml
+ansible-playbook -i inventory/hosts playbooks/03-storage-networking.yml
+ansible-playbook -i inventory/hosts playbooks/04-garage-deploy.yml # Request user input for garage credentials (blank to generate)
+ansible-playbook -i inventory/hosts playbooks/05-gitops-bootstrap.yml # Request user input for FluxCD and GitHub PAT
 ```
 
 ---
@@ -316,11 +362,12 @@ FluxCD watches this Git repository and reconciles the cluster state using:
 
 Bootstrap FluxCD:
 ```
-flux bootstrap git \
-  --url=ssh://git@github.com/YOUR_USERNAME/k3s-gitops-platform.git \
-  --branch=main \
-  --path=clusters/k3s/flux/bootstrap \
-  --personal
+flux bootstrap github \
+      --owner={{ github_owner }} \
+      --repository={{ github_repo }} \
+      --branch=main \
+      --path=./clusters/dev \
+      --personal
 ```
 Check FluxCD status:
 ```
@@ -362,7 +409,7 @@ flowchart LR
 #### Prometheus is used to collect metrics from the cluster and workloads.
 #### Access Prometheus locally:
 ```
-kubectl -n monitoring port-forward svc/prometheus-server 9090:9090
+kubectl -n istio-system port-forward svc/prometheus-server 9090:9090
 ```
 #### Open:
 ```
@@ -372,7 +419,7 @@ http://localhost:9090
 #### Grafana is used for dashboards and visualization.
 #### Access Grafana locally:
 ```
-kubectl -n monitoring port-forward svc/grafana 3000:3000
+kubectl -n istio-system port-forward svc/grafana 3000:3000
 ```
 #### Open:
 ```
@@ -417,10 +464,10 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: nfs-client
-provisioner: nfs.example.local
+provisioner: cluster.local/nfs-subdir-external-provisioner
 parameters:
-  server: nfs.example.local
-  path: /exports/kubernetes
+  server: 10.10.16.4
+  path: /nfs
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
 ```

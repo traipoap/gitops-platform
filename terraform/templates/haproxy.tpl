@@ -44,9 +44,13 @@ backend webservers
     mode http
     cookie JSESSIONID insert indirect nocache
 
-    server m1 10.10.16.11:80 check cookie m1
+%{ for i, ip in master_nodes ~}
+    server m${i + 1} ${ip}:80 check cookie m${i + 1}
+%{ endfor ~}
 
-    server w1 10.10.16.21:80 check cookie w1
+%{ for i, ip in worker_nodes ~}
+    server w${i + 1} ${ip}:80 check cookie w${i + 1}
+%{ endfor ~}
 
 
 # =====================================================================
@@ -62,9 +66,13 @@ backend syslog_tcp_backend
     mode tcp
     balance source
 
-    server m1 10.10.16.11:30514 check
+%{ for i, ip in master_nodes ~}
+    server m${i + 1} ${ip}:30514 check
+%{ endfor ~}
 
-    server w1 10.10.16.21:30514 check
+%{ for i, ip in worker_nodes ~}
+    server w${i + 1} ${ip}:30514 check
+%{ endfor ~}
 
 # =====================================================================
 # 2. HANDLE UDP SYSLOG (Port 514)
@@ -83,6 +91,10 @@ backend syslog_udp_backend
 
     # Note the 'udp@' prefix required for UDP destinations
 
-    server m1 udp@10.10.16.11:30514
+%{ for i, ip in master_nodes ~}
+    server m${i + 1} udp@${ip}:30514
+%{ endfor ~}
 
-    server w1 udp@10.10.16.21:30514
+%{ for i, ip in worker_nodes ~}
+    server w${i + 1} udp@${ip}:30514
+%{ endfor ~}

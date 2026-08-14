@@ -1,7 +1,15 @@
 resource "local_file" "ansible_inventory" {
   filename = var.ansible_inventory_path
-  content = templatefile("${path.module}/hosts.tpl", {
+  content = templatefile("${path.module}/templates/hosts.tpl", {
     super_nodes  = local.super-node
+    master_nodes = local.master_nodes
+    worker_nodes = local.worker_nodes
+  })
+}
+
+resource "local_file" "ansible_haproxy" {
+  filename = var.ansible_haproxy_path
+  content = templatefile("${path.module}/templates/haproxy.tpl", {
     master_nodes = local.master_nodes
     worker_nodes = local.worker_nodes
   })
@@ -17,7 +25,7 @@ resource "null_resource" "wait_for_ssh" {
 
       for host in $HOSTS; do
         echo "Checking $host..."
-        until ssh -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=5 "$host" exit 0 2>/dev/null; do
+        until ssh -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=5 ${var.ssh_username}@"$host" exit 0 2>/dev/null; do
           echo "  - $host not ready yet, sleeping 5s..."
           sleep 5
         done

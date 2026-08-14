@@ -1,17 +1,17 @@
 # Networking
 variable "network_bridge" {
   type    = string
-  default = "vmbr0"
+  default = "vmbr16"
 }
 
 variable "cluster_subnet" {
   type        = string
-  default     = "192.168.1.0/24"
+  default     = "10.10.16.0/24"
 }
 
 variable "gateway_ip" {
   type    = string
-  default = "192.168.1.1"
+  default = "10.10.16.1"
 }
 
 variable "dns_servers" {
@@ -71,6 +71,11 @@ variable "ssh_public_keys" {
 variable "ansible_inventory_path" {
   type    = string
   default = "../ansible/inventory/hosts"
+}
+
+variable "ansible_haproxy_path" {
+  type = string
+  default = "../ansible/roles/load-balance/templates/haproxy.cfg.j2"
 }
 
 # proxmox_virtual_environment_vm of main
