@@ -69,3 +69,25 @@ func (s *JWTService) ValidateToken(tokenString string) (*models.CustomClaims, er
 
 	return nil, errors.New("invalid token")
 }
+
+// ValidateRefreshToken validates a refresh-only JWT (RegisteredClaims, no custom claims).
+// Returns the userID extracted from Subject.
+func (s *JWTService) ValidateRefreshToken(tokenString string) (string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(s.secretKey), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok || !token.Valid {
+		return "", errors.New("invalid refresh token")
+	}
+
+	return claims.Subject, nil
+}

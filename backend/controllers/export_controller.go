@@ -27,7 +27,7 @@ func InitExportController() error {
 	qwClient := services.NewQuickwitClient(config.AppConfig.QuickwitURL)
 
 	// Create export dir if not exists
-	exportDir := filepath.Join(os.TempDir(), "exports")
+	exportDir := filepath.Join(".", "exports")
 	if err := os.MkdirAll(exportDir, 0755); err != nil {
 		return err
 	}

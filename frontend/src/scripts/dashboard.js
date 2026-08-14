@@ -10,15 +10,97 @@ let liveMode = true;
 let liveInterval = null;
 let selectedIndex = "syslogs";
 
-async function loadEngine() {
-  const token = sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
+const API_BASE = "https://frontend.example.com";
+
+// ── Token helpers ──────────────────────────────────────────────
+function getAuthToken() {
+  return sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
+}
+
+function getRefreshToken() {
+  return sessionStorage.getItem("refreshToken") || localStorage.getItem("refreshToken");
+}
+
+function setTokens(accessToken, refreshToken) {
+  localStorage.setItem("authToken", accessToken);
+  localStorage.setItem("refreshToken", refreshToken);
+}
+
+function clearTokens() {
+  sessionStorage.removeItem("authToken");
+  sessionStorage.removeItem("refreshToken");
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("refreshToken");
+}
+
+async function tryRefreshToken() {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return false;
 
   try {
-    const res = await fetch(`https://frontend.example.com/api/indices`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refreshToken }),
     });
+
     if (!res.ok) {
+      clearTokens();
       window.location.href = "/signin";
+      return false;
+    }
+
+    const data = await res.json();
+    setTokens(data.token, data.refresh_token);
+    return true;
+  } catch {
+    clearTokens();
+    window.location.href = "/signin";
+    return false;
+  }
+}
+
+async function authenticatedFetch(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`,
+      ...options.headers,
+    },
+  });
+
+  // On 401, try refreshing once then retry
+  if (res.status === 401) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      return fetch(url, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+          ...options.headers,
+        },
+      });
+    }
+    return res; // already redirected
+  }
+
+  return res;
+}
+
+async function loadEngine() {
+  try {
+    const res = await authenticatedFetch(`${API_BASE}/api/indices`);
+
+    if (res.status === 403) {
+      clearTokens();
+      window.location.href = "/signin";
+      return;
+    }
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      console.error(`API error (${res.status}):`, errText);
+      showToast(`Server error (${res.status}). Please try again.`);
       return;
     }
 
@@ -206,13 +288,17 @@ async function runSearch() {
 
   btn.disabled = true;
 
-  const token = sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
   try {
-    // 6. เรียก API พร้อม Params ใหม่
-    const res = await fetch(`https://frontend.example.com/api/search?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error("Network response was not ok");
+    // 6. เรียก API พร้อม Params ใหม่ (auto-refresh on 401)
+    const res = await authenticatedFetch(`${API_BASE}/api/search?${params.toString()}`);
+
+    if (res.status === 403) {
+      clearTokens();
+      window.location.href = "/signin";
+      return;
+    }
+
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
 
     const data = await res.json();
 
@@ -779,72 +865,150 @@ function closeModal() {
   document.getElementById("logModal").classList.remove("active");
 }
 
-function showExportHistoryModal() {
-  const exportHistory = [
-    {
-      time: "Jun 25, 12:30 AM",
-      fileName: "192_168_1_109_1782322199.csv",
-      hash: "SHA256:5243b297ef13d970e3f15bee25c1f0aaf95052b5bca2fe5476fde1062c5f0063",
-      size: "223.9 MB"
-    },
-    {
-      time: "Jun 25, 12:28 AM",
-      fileName: "all_1782322102.csv",
-      hash: "SHA256:ca25b482fe0cc83a283505d59a199f8e370347da6e795ce58e39627ce408842b",
-      size: "226.1 MB"
-    },
-    {
-      time: "Jun 24, 09:48 PM",
-      fileName: "all_1782312508.csv",
-      hash: "SHA256:a2853c128b1880b98157599f8f131a723d56b8c694b995d3d865118f8cee70eb",
-      size: "106.1 MB"
-    }
-  ];
-
-  const html = `
-    <table class="export-history-table">
-      <thead>
-        <tr>
-          <th>Export Time</th>
-          <th>File Name</th>
-          <th>HASH</th>
-          <th>Size</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${exportHistory.map(item => `
-          <tr>
-            <td>${item.time}</td>
-            <td>${item.fileName}</td>
-            <td class="hash-cell" title="${item.hash}">${item.hash}</td>
-            <td>${item.size}</td>
-            <td>
-              <button class="btn-action" onclick="downloadExport('${item.fileName}')">⬇️</button>
-              <button class="btn-action" onclick="deleteExport('${item.fileName}')">🗑️</button>
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-
-  document.getElementById("modalContent").innerHTML = html;
+async function showExportHistoryModal() {
+  document.getElementById("modalContent").innerHTML = `
+    <div style="padding:2rem;text-align:center;color:#94a3b8">
+      <span class="spinner" style="display:inline-block"></span>
+      <p>Loading export history...</p>
+    </div>`;
   document.getElementById("exportHistoryModal").classList.add("active");
+
+  try {
+    const res = await authenticatedFetch(`${API_BASE}/api/exports`);
+    if (!res.ok) {
+      throw new Error(`Failed to load exports (${res.status})`);
+    }
+
+    const data = await res.json();
+    const exports = data.exports || [];
+
+    const rows = exports.map(item => `
+      <tr>
+        <td>${formatExportTime(item.time)}</td>
+        <td title="${item.name}">${truncate(item.name, 40)}</td>
+        <td class="hash-cell" title="${item.hash}" onclick="copyHash('${escapeHtml(item.hash)}')">${truncate(item.hash, 20)}</td>
+        <td>${formatFileSize(item.size)}</td>
+        <td>
+          <button class="btn-action" onclick="downloadExport('${escapeHtml(item.name)}')" title="Download">⬇️</button>
+          <button class="btn-action" onclick="deleteExport('${escapeHtml(item.name)}')" title="Delete">🗑️</button>
+        </td>
+      </tr>
+    `).join("");
+
+    const html = `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1rem">
+        <h3 style="margin:0;font-size:1.1rem">📂 Export History</h3>
+        <span class="badge" style="background:#334155;color:#94a3b8;padding:2px 10px;border-radius:999px;font-size:0.8rem">
+          ${exports.length} file${exports.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+      <table class="export-history-table">
+        <thead>
+          <tr>
+            <th>Export Time</th>
+            <th>File Name</th>
+            <th>HASH (click to copy)</th>
+            <th>Size</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows || '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem">No exports yet</td></tr>'}
+        </tbody>
+      </table>
+    `;
+
+    document.getElementById("modalContent").innerHTML = html;
+  } catch (err) {
+    console.error("Export history error:", err);
+    document.getElementById("modalContent").innerHTML = `
+      <div style="padding:2rem;text-align:center;color:#ef4444">
+        Failed to load export history. Please try again.
+      </div>`;
+  }
+}
+
+// ── Utility helpers for export modal ──────────────────────
+function formatExportTime(iso) {
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return iso;
+  }
+}
+
+function formatFileSize(bytes) {
+  if (!bytes || bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
+}
+
+function truncate(str, maxLen) {
+  if (!str) return '';
+  return str.length > maxLen ? str.slice(0, maxLen - 3) + '...' : str;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function copyHash(hash) {
+  navigator.clipboard.writeText(hash).then(() => {
+    showToast("Hash copied to clipboard");
+  }).catch(() => {
+    showToast("Failed to copy hash");
+  });
 }
 
 function closeExportHistoryModal() {
   document.getElementById("exportHistoryModal").classList.remove("active");
 }
 
-function downloadExport(fileName) {
+async function downloadExport(fileName) {
   showToast(`Downloading ${fileName}...`);
-  // TODO: Implement download logic
+
+  try {
+    const res = await authenticatedFetch(`${API_BASE}/api/exports/${encodeURIComponent(fileName)}`);
+    if (!res.ok) throw new Error(`Download failed (${res.status})`);
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast(`Downloaded ${fileName}`);
+  } catch (err) {
+    console.error("Download error:", err);
+    showToast("Download failed. Please try again.");
+  }
 }
 
-function deleteExport(fileName) {
+async function deleteExport(fileName) {
+  if (!confirm(`Are you sure you want to delete "${fileName}"?`)) return;
   showToast(`Deleting ${fileName}...`);
-  // TODO: Implement delete logic
+
+  try {
+    const res = await authenticatedFetch(`${API_BASE}/api/exports/${encodeURIComponent(fileName)}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error(`Delete failed (${res.status})`);
+
+    showToast(`Deleted ${fileName}`);
+    // Refresh the export history modal
+    showExportHistoryModal();
+  } catch (err) {
+    console.error("Delete error:", err);
+    showToast("Delete failed. Please try again.");
+  }
 }
 
 function copyLogDetail() {

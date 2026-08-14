@@ -53,6 +53,7 @@ func setupAuthRoutes(r *gin.Engine, jwtService *services.JWTService, db *gorm.DB
 	auth := r.Group("/api/auth")
 	{
 		auth.POST("/login", controllers.HandleSignIn(db, jwtService))
+		auth.POST("/refresh", controllers.HandleRefresh(db, jwtService))
 		//auth.POST("/register", controllers.HandleRegister(db))
 	}
 
@@ -76,6 +77,7 @@ func setupAPIRoutes(r *gin.Engine, jwtService *services.JWTService) {
 		api.GET("/search", middleware.RoleAuth("admin"), controllers.HandleSearch)
 		api.GET("/export", middleware.RoleAuth("admin"), controllers.HandleExport)
 		api.GET("/exports", middleware.RoleAuth("admin"), controllers.HandleExportsList)
+		api.DELETE("/exports/:filename", middleware.RoleAuth("admin"), controllers.HandleDeleteExport)
 		api.GET("/exports/:filename", middleware.RoleAuth("admin"), controllers.HandleDownload)
 	}
 }

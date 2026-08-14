@@ -5,6 +5,7 @@ import (
 	"exporter/services"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -34,14 +35,12 @@ func HandleSignIn(db *gorm.DB, jwtService *services.JWTService) gin.HandlerFunc 
 		}
 
 		// 3. Verify password using bcrypt
-		// Compare the input password with the stored hash in the database
 		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 			return
 		}
 
-		// 4. Generate JWT tokens using the retrieved user data
-		// Convert user.ID (uint) to string for the JWT service
+		// 4. Generate JWT tokens
 		userID := fmt.Sprintf("%d", user.ID)
 
 		accessToken, err := jwtService.GenerateToken(userID, user.Username, user.Role)
@@ -60,6 +59,54 @@ func HandleSignIn(db *gorm.DB, jwtService *services.JWTService) gin.HandlerFunc 
 		c.JSON(http.StatusOK, gin.H{
 			"token":         accessToken,
 			"refresh_token": refreshToken,
+		})
+	}
+}
+
+type refreshRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+// HandleRefresh validates a refresh token and issues new access + refresh tokens.
+func HandleRefresh(db *gorm.DB, jwtService *services.JWTService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req refreshRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing refresh_token"})
+			return
+		}
+
+		// 1. Validate the refresh token
+		userID, err := jwtService.ValidateRefreshToken(req.RefreshToken)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired refresh token"})
+			return
+		}
+
+		// 2. Look up user by ID
+		var user models.User
+		idUint, _ := strconv.ParseUint(userID, 10, 64)
+		if err := db.First(&user, idUint).Error; err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			return
+		}
+
+		// 3. Issue new tokens (rotation: old refresh token is single-use by design)
+		accessToken, err := jwtService.GenerateToken(userID, user.Username, user.Role)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+			return
+		}
+
+		newRefreshToken, err := jwtService.GenerateRefreshToken(userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"token":         accessToken,
+			"refresh_token": newRefreshToken,
 		})
 	}
 }

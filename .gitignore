@@ -31,3 +31,4 @@ terraform/.terraform.lock.hcl
 terraform/errored.tfstate
 .scannerwork/
 .env.example
+roadmap.md

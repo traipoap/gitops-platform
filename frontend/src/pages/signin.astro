@@ -364,9 +364,10 @@ interface Props {
                     });
 
                     if (response.ok) {
-                        // Success - user logged in, store the token
+                        // Success - user logged in, store both tokens
                         const data = await response.json();
                         localStorage.setItem("authToken", data.token);
+                        localStorage.setItem("refreshToken", data.refresh_token);
 
                         const searchParams = new URLSearchParams();
                         if (remember) searchParams.set("remember", "true");
