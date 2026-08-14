@@ -17,7 +17,10 @@ async function loadEngine() {
     const res = await fetch(`https://frontend.example.com/api/indices`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) return;
+    if (!res.ok) {
+      window.location.href = "/signin";
+      return;
+    }
 
     const data = await res.json();
 
