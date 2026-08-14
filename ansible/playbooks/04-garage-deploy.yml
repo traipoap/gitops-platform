@@ -5,16 +5,16 @@
   vars_prompt:
     - name: user_input_rpc_secret
       private: true
-      prompt: "Enter RPC secret run echo $(openssl rand -hex 32) (blank to generate)"
+      prompt: "Enter RPC secret (or run `echo $(openssl rand -hex 32)` to generate, leave blank for auto)"
     - name: user_input_admin_token
       private: true
-      prompt: "Enter admin token run echo $(openssl rand -base64 32) (blank to generate)"
+      prompt: "Enter admin token (or run `echo $(openssl rand -base64 32)` to generate, leave blank for auto)"
     - name: user_input_access_key
       private: true
-      prompt: "Enter access key run echo $(openssl rand -hex 32) (blank to generate)"
+      prompt: "Enter Garage access key (leave blank for auto)"
     - name: user_input_secret_key
       private: true
-      prompt: "Enter secret key run echo $(openssl rand -hex 32) (blank to generate)"
+      prompt: "Enter Garage secret key (leave blank for auto)"
 
   vars:
     garage_version: "2.3.0"
@@ -29,24 +29,36 @@
     garage_config_file: "/etc/garage.toml"
     garage_metadata_dir: "/var/lib/garage"
     garage_data_dir: "/nfs/data"
-    my_rpc_secret: "{{ user_input_rpc_secret | default(lookup('password', '/dev/null chars=hexdigits length=64'), true) }}" # Example: "REDACTED_RPC_SECRET"
-    my_admin_token: "{{ user_input_admin_token | default(lookup('password', '/dev/null chars=ascii_letters,digits length=64'), true) }}" # Example: "REDACTED_ADMIN_TOKEN"
+
+    # Priority: 1) env var → 2) user input → 3) auto-generate
+    rpc_secret_env: "{{ lookup('env', 'RPC_SECRET') }}"
+    admin_token_env: "{{ lookup('env', 'ADMIN_TOKEN') }}"
+    access_key_env: "{{ lookup('env', 'GARAGE_DEFAULT_ACCESS_KEY') }}"
+    secret_key_env: "{{ lookup('env', 'GARAGE_DEFAULT_SECRET_KEY') }}"
+
+    my_rpc_secret: >-
+      {{ rpc_secret_env | default(user_input_rpc_secret, true) | default(lookup('password', '/dev/null chars=hexdigits length=64'), true) }}
+    my_admin_token: >-
+      {{ admin_token_env | default(user_input_admin_token, true) | default(lookup('password', '/dev/null chars=ascii_letters,digits length=64'), true) }}
 
     garage_service_template: "garage.service.j2"
     garage_systemd_service: "garage"
 
-    GARAGE_DEFAULT_ACCESS_KEY: "{{ user_input_access_key | default('GK' + lookup('password', '/dev/null chars=hexdigits length=32'), true) }}" # Example: "REDACTED_GARAGE_ACCESS_KEY"
-    GARAGE_DEFAULT_SECRET_KEY: "{{ user_input_secret_key | default(lookup('password', '/dev/null chars=hexdigits length=64'), true) }}" # Example: "REDACTED_GARAGE_SECRET_KEY"
+    GARAGE_DEFAULT_ACCESS_KEY: >-
+      {{ access_key_env | default(user_input_access_key, true) | default('GK' + lookup('password', '/dev/null chars=hexdigits length=32'), true) }}
+    GARAGE_DEFAULT_SECRET_KEY: >-
+      {{ secret_key_env | default(user_input_secret_key, true) | default(lookup('password', '/dev/null chars=hexdigits length=64'), true) }}
     GARAGE_DEFAULT_BUCKET: "default-bucket"
 
   tasks:
-    - name: Display generated credentials (Securely)
+    - name: Display credentials (Securely)
       ansible.builtin.debug:
         msg:
-          - "RPC Secret: {{ my_rpc_secret }}"
-          - "Admin Token: {{ my_admin_token }}"
-          - "Access Key: {{ GARAGE_DEFAULT_ACCESS_KEY }}"
-          - "Secret Key: {{ GARAGE_DEFAULT_SECRET_KEY }}"
+          - "Source: {{ 'environment variables' if rpc_secret_env else 'user input / auto-generated' }}"
+          - "RPC Secret: {{ my_rpc_secret | regex_replace('(.{4}).*?(.{4})', '\\1...\\2') }}"
+          - "Admin Token: {{ my_admin_token | regex_replace('(.{4}).*?(.{4})', '\\1...\\2') }}"
+          - "Access Key: {{ GARAGE_DEFAULT_ACCESS_KEY | regex_replace('(.{4}).*?(.{4})', '\\1...\\2') }}"
+          - "Secret Key: {{ GARAGE_DEFAULT_SECRET_KEY | regex_replace('(.{4}).*?(.{4})', '\\1...\\2') }}"
 
   handlers:
     - name: reload systemd
@@ -56,5 +68,5 @@
     - name: Check garage status
       systemd: name={{garage_systemd_service}} state=started
 
-  roles:
-    - garage
+  #roles:
+  #  - garage
