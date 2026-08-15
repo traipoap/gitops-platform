@@ -2,6 +2,7 @@ package services
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"exporter/models"
@@ -9,8 +10,6 @@ import (
 	"io"
 	"net/http"
 	"time"
-
-	"github.com/tidwall/gjson"
 )
 
 type QuickwitClient struct {
@@ -19,10 +18,17 @@ type QuickwitClient struct {
 }
 
 func NewQuickwitClient(baseURL string) *QuickwitClient {
+	// Reuse connections (HTTP keep-alive) for better perf
+	transport := &http.Transport{
+		MaxIdleConns:        10,
+		MaxIdleConnsPerHost: 5,
+		IdleConnTimeout:     90 * time.Second,
+	}
 	return &QuickwitClient{
 		baseURL: baseURL,
 		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout:   30 * time.Second,
+			Transport: transport,
 		},
 	}
 }
@@ -32,6 +38,7 @@ func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int
 		Query:       query,
 		MaxHits:     *max_hits,
 		SortByField: "index_timestamp",
+		SortOrder:   "desc", // newest first — matches UI expectation
 	}
 
 	body, err := json.Marshal(payload)
@@ -49,9 +56,9 @@ func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	fmt.Println("request body:", string(body))
-
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept-Encoding", "gzip") // request compressed response
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("execute request: %w", err)
@@ -62,20 +69,36 @@ func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int
 		return nil, fmt.Errorf("quickwit API error: status %d", resp.StatusCode)
 	}
 
-	// Read body as []byte don't unmarshal
-	body, _ = io.ReadAll(resp.Body)
+	// Decompress body if needed
+	var reader io.Reader = resp.Body
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		gz, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("gzip reader: %w", err)
+		}
+		defer gz.Close()
+		reader = gz
+	}
 
-	hits := gjson.GetBytes(body, "hits").Array()
-	total := gjson.GetBytes(body, "num_hits").Uint()
+	// Stream-decode JSON (faster than ReadAll + gjson for large payloads)
+	var quickwitResp struct {
+		NumHits uint64 `json:"num_hits"`
+		Hits    []struct {
+			Source map[string]interface{} `json:"_source"`
+		} `json:"hits"`
+	}
 
-	// Convert []gjson.Result -> []map[string]interface{}
-	hitMaps := make([]map[string]interface{}, len(hits))
-	for i, h := range hits {
-		hitMaps[i] = h.Value().(map[string]interface{})
+	if err := json.NewDecoder(reader).Decode(&quickwitResp); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	hits := make([]map[string]interface{}, len(quickwitResp.Hits))
+	for i, h := range quickwitResp.Hits {
+		hits[i] = h.Source
 	}
 
 	return &models.SearchResponse{
-		Hits:  hitMaps,
-		Total: total,
+		Hits:  hits,
+		Total: quickwitResp.NumHits,
 	}, nil
 }
