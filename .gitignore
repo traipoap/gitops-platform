@@ -31,3 +31,5 @@ terraform/.terraform.lock.hcl
 terraform/errored.tfstate
 .scannerwork/
 .env.example
+frontend/.vscode/
+frontend/astro-dev.log
