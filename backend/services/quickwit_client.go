@@ -2,12 +2,10 @@ package services
 
 import (
 	"bytes"
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"exporter/models"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 )
@@ -23,6 +21,8 @@ func NewQuickwitClient(baseURL string) *QuickwitClient {
 		MaxIdleConns:        10,
 		MaxIdleConnsPerHost: 5,
 		IdleConnTimeout:     90 * time.Second,
+		// Go's Transport auto-handshake for gzip by default (DisableCompression: false).
+		// It will decompress response automatically AND strip Content-Encoding header.
 	}
 	return &QuickwitClient{
 		baseURL: baseURL,
@@ -57,7 +57,6 @@ func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept-Encoding", "gzip") // request compressed response
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -69,18 +68,8 @@ func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int
 		return nil, fmt.Errorf("quickwit API error: status %d", resp.StatusCode)
 	}
 
-	// Decompress body if needed
-	var reader io.Reader = resp.Body
-	if resp.Header.Get("Content-Encoding") == "gzip" {
-		gz, err := gzip.NewReader(resp.Body)
-		if err != nil {
-			return nil, fmt.Errorf("gzip reader: %w", err)
-		}
-		defer gz.Close()
-		reader = gz
-	}
-
-	// Stream-decode JSON (faster than ReadAll + gjson for large payloads)
+	// Go's http.Transport already decompresses gzip transparently,
+	// so resp.Body is always plain JSON here. Just stream-decode it.
 	var quickwitResp struct {
 		NumHits uint64 `json:"num_hits"`
 		Hits    []struct {
@@ -88,7 +77,7 @@ func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int
 		} `json:"hits"`
 	}
 
-	if err := json.NewDecoder(reader).Decode(&quickwitResp); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&quickwitResp); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
