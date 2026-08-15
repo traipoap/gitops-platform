@@ -10,7 +10,7 @@ export default defineConfig({
       // proxy is the reliable way to do this (Astro runs on Vite under the hood).
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',
+          target: 'https://frontend.example.com',
           changeOrigin: true,
         },
       },

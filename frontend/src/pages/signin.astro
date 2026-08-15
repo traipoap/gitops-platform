@@ -354,7 +354,6 @@ interface Props {
                 // http://localhost:8080 — so the browser sees a same-origin
                 // request and CORS is not involved. (This inline <script> is
                 // not a module, so import.meta is unavailable here.)
-                console.log("API base: (same-origin /api)");
                 const apiUrl = `/api/auth/login`;
 
                 const controller = new AbortController();
@@ -384,9 +383,9 @@ interface Props {
                         );
 
                         // Show redirecting state (immediate feedback)
-                        btnText.style.display = "inline";
-                        btnText.textContent = "Redirecting...";
-                        btnLoader.style.display = "none";
+                        //btnText.style.display = "inline";
+                        //btnText.textContent = "Redirecting...";
+                        //btnLoader.style.display = "none";
 
                         const searchParams = new URLSearchParams();
                         if (remember) searchParams.set("remember", "true");
@@ -411,20 +410,6 @@ interface Props {
                         showGlobalError(errorMessage);
                         showLoading(false);
                     }
-                } catch (error) {
-                    // Network error, timeout, or unreachable backend
-                    if (error.name === "AbortError") {
-                        showGlobalError(
-                            "Request timed out. Please check the server and try again.",
-                        );
-                    } else {
-                        showGlobalError(
-                            `Cannot reach /api/auth/login via the dev proxy. ` +
-                                "Is the backend running at http://localhost:8080? " +
-                                "(The Astro dev server forwards /api/* to it.)",
-                        );
-                    }
-                    showLoading(false);
                 } finally {
                     clearTimeout(timeout);
                 }
