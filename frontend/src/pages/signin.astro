@@ -348,10 +348,13 @@ interface Props {
                 // Show loading state
                 showLoading(true);
 
-                // Make actual API call to backend
+                // Make actual API call to backend (with 10s timeout)
                 const loginUrl = `https://frontend.example.com`;
                 console.log(loginUrl);
                 const apiUrl = `${loginUrl}/api/auth/login`;
+
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 10000);
 
                 try {
                     const response = await fetch(apiUrl, {
@@ -361,6 +364,7 @@ interface Props {
                             "Content-Type": "application/json",
                         },
                         credentials: "include",
+                        signal: controller.signal,
                     });
 
                     if (response.ok) {
@@ -368,6 +372,11 @@ interface Props {
                         const data = await response.json();
                         localStorage.setItem("authToken", data.token);
                         localStorage.setItem("refreshToken", data.refresh_token);
+
+                        // Show redirecting state (immediate feedback)
+                        btnText.style.display = "inline";
+                        btnText.textContent = "Redirecting...";
+                        btnLoader.style.display = "none";
 
                         const searchParams = new URLSearchParams();
                         if (remember) searchParams.set("remember", "true");
@@ -393,11 +402,19 @@ interface Props {
                         showLoading(false);
                     }
                 } catch (error) {
-                    // Network error or unreachable backend
-                    showGlobalError(
-                        "Cannot connect to the server. Please check your network connection.",
-                    );
+                    // Network error, timeout, or unreachable backend
+                    if (error.name === "AbortError") {
+                        showGlobalError(
+                            "Request timed out. Please check the server and try again.",
+                        );
+                    } else {
+                        showGlobalError(
+                            "Cannot connect to the server. Please check your network connection.",
+                        );
+                    }
                     showLoading(false);
+                } finally {
+                    clearTimeout(timeout);
                 }
             });
 

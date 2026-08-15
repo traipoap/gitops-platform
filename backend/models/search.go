@@ -15,17 +15,9 @@ type SearchResponse struct {
 	Total uint64                   `json:"total"`
 }
 
-// Quickwit API request/response (internal use)
+// Quickwit API request (internal use)
 type QuickwitSearchRequest struct {
-	Query       string `json:"query"`
-	MaxHits     int    `json:"max_hits"`
-	SortByField string `json:"sort_by_field"`
-	SortOrder   string `json:"sort_order,omitempty"`
-}
-
-type QuickwitSearchResponse struct {
-	NumHits uint64 `json:"num_hits"`
-	Hits    []struct {
-		Source map[string]interface{} `json:"_source"`
-	} `json:"hits"`
+	Query   string `json:"query"`
+	MaxHits int    `json:"max_hits"`
+	SortBy  string `json:"sort_by,omitempty"` // Quickwit expects a single field name for fast-field sort
 }

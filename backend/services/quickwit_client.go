@@ -16,13 +16,12 @@ type QuickwitClient struct {
 }
 
 func NewQuickwitClient(baseURL string) *QuickwitClient {
-	// Reuse connections (HTTP keep-alive) for better perf
+	// Reuse connections (HTTP keep-alive) for better perf.
+	// Go's http.Transport auto-decompresses gzip responses by default.
 	transport := &http.Transport{
 		MaxIdleConns:        10,
 		MaxIdleConnsPerHost: 5,
 		IdleConnTimeout:     90 * time.Second,
-		// Go's Transport auto-handshake for gzip by default (DisableCompression: false).
-		// It will decompress response automatically AND strip Content-Encoding header.
 	}
 	return &QuickwitClient{
 		baseURL: baseURL,
@@ -33,12 +32,26 @@ func NewQuickwitClient(baseURL string) *QuickwitClient {
 	}
 }
 
+// quickwitSearchResponse matches the actual Quickwit search response shape:
+//
+//	{
+//	  "hits": [
+//	    { "timestamp": 1782322199000, "message": "...", "source_ip": "...", ... },
+//	    ...
+//	  ],
+//	  "num_hits": 1234,
+//	  "took_ms": 45
+//	}
+type quickwitSearchResponse struct {
+	Hits    []map[string]interface{} `json:"hits"`
+	NumHits uint64                   `json:"num_hits"`
+}
+
 func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int, index_id *string) (*models.SearchResponse, error) {
 	payload := models.QuickwitSearchRequest{
-		Query:       query,
-		MaxHits:     *max_hits,
-		SortByField: "index_timestamp",
-		SortOrder:   "desc", // newest first — matches UI expectation
+		Query:   query,
+		MaxHits: *max_hits,
+		SortBy:  "index_timestamp", // sort by fast-field timestamp (newest-first by doc-id default)
 	}
 
 	body, err := json.Marshal(payload)
@@ -69,25 +82,14 @@ func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int
 	}
 
 	// Go's http.Transport already decompresses gzip transparently,
-	// so resp.Body is always plain JSON here. Just stream-decode it.
-	var quickwitResp struct {
-		NumHits uint64 `json:"num_hits"`
-		Hits    []struct {
-			Source map[string]interface{} `json:"_source"`
-		} `json:"hits"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&quickwitResp); err != nil {
+	// so resp.Body is always plain JSON here. Stream-decode directly.
+	var qwResp quickwitSearchResponse
+	if err := json.NewDecoder(resp.Body).Decode(&qwResp); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
-	hits := make([]map[string]interface{}, len(quickwitResp.Hits))
-	for i, h := range quickwitResp.Hits {
-		hits[i] = h.Source
-	}
-
 	return &models.SearchResponse{
-		Hits:  hits,
-		Total: quickwitResp.NumHits,
+		Hits:  qwResp.Hits,
+		Total: qwResp.NumHits,
 	}, nil
 }

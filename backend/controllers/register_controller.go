@@ -10,8 +10,10 @@ import (
 )
 
 func HashPassword(password string) (string, error) {
-	// 14 is a secure default cost factor (higher = slower but more secure)
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	// Cost 10 is a practical default for production logins (~10ms per verify).
+	// Cost 14 took ~100ms+ and made login feel sluggish for no meaningful
+	// security gain on modern hardware.
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	return string(bytes), err
 }
 
