@@ -1063,21 +1063,62 @@ function exportCSV() {
   showToast(`Exported ${filteredLogs.length} log entries as CSV`);
 }
 
-function exportJSON() {
-  if (filteredLogs.length === 0) {
-    showToast("No logs to export");
+// Trigger a SERVER-SIDE export via backend HandleExport (/api/export).
+// The backend queries Quickwit, saves a CSV to ./exports as
+// "{sourceIP|any}_{YYYYMMDD_HHMMSS}.csv", then we download it to the browser.
+async function exportLargeCSV() {
+  const indexEl = document.getElementById("indexSelect");
+  const index = indexEl ? indexEl.value : "";
+  if (!index) {
+    showToast("Select an index first");
     return;
   }
-  const blob = new Blob([JSON.stringify(filteredLogs, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `logs_export_${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast(`Exported ${filteredLogs.length} log entries as JSON`);
+
+  const source = (document.getElementById("sourceInput")?.value || "").trim();
+  const query = (document.getElementById("searchInput")?.value || "").trim();
+  const currentSourceFilter = document.getElementById("sourceFilter")?.value || "";
+  const dateFromVal = document.getElementById("dateFrom")?.value || "";
+  const dateToVal = document.getElementById("dateTo")?.value || "";
+
+  const params = new URLSearchParams({ index_id: index, max_hits: 50000 });
+  const src = currentSourceFilter || source; // source IP drives the filename
+  if (src) params.set("source_ip", src);
+  if (query) params.set("message", query);
+  if (dateFromVal) params.set("from_timestamp", new Date(dateFromVal).getTime());
+  if (dateToVal) params.set("to_timestamp", new Date(dateToVal).getTime());
+
+  showToast("Exporting to server...");
+  try {
+    const res = await authenticatedFetch(`${API_BASE}/api/export?${params.toString()}`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
+    const data = await res.json();
+    const fileName = data.filename;
+    const total = data.total || 0;
+
+    // Also download the saved file to the user's machine for convenience.
+    if (data.download) {
+      const dl = await authenticatedFetch(`${API_BASE}${data.download}`);
+      if (dl.ok) {
+        const blob = await dl.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    showToast(`Saved ${fileName} to /exports (${total} rows)`);
+  } catch (err) {
+    console.error("Export error:", err);
+    showToast("Export failed: " + err.message);
+  }
 }
 
 function toggleView() {
@@ -1334,7 +1375,7 @@ const exportedFunctions = {
   copyLogDetail,
   exportSingleLog,
   exportCSV,
-  exportJSON,
+  exportLargeCSV,
   goToPage,
   changePageSize,
   sortLogs,
