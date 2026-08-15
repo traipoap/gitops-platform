@@ -349,9 +349,15 @@ interface Props {
                 showLoading(true);
 
                 // Make actual API call to backend (with 10s timeout)
-                const loginUrl = `https://frontend.example.com`;
-                console.log(loginUrl);
-                const apiUrl = `${loginUrl}/api/auth/login`;
+                // Resolve base URL: local dev → :8080, production → example.com
+                const apiBase =
+                    import.meta.env?.PUBLIC_API_BASE ||
+                    (location.hostname === "localhost" ||
+                    location.hostname === "127.0.0.1"
+                        ? "http://localhost:8080"
+                        : "https://frontend.example.com");
+                console.log("API base:", apiBase);
+                const apiUrl = `${apiBase}/api/auth/login`;
 
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 10000);
@@ -371,7 +377,10 @@ interface Props {
                         // Success - user logged in, store both tokens
                         const data = await response.json();
                         localStorage.setItem("authToken", data.token);
-                        localStorage.setItem("refreshToken", data.refresh_token);
+                        localStorage.setItem(
+                            "refreshToken",
+                            data.refresh_token,
+                        );
 
                         // Show redirecting state (immediate feedback)
                         btnText.style.display = "inline";
@@ -409,7 +418,8 @@ interface Props {
                         );
                     } else {
                         showGlobalError(
-                            "Cannot connect to the server. Please check your network connection.",
+                            `Cannot connect to backend at ${apiUrl}. ` +
+                                "Is the backend running? For local dev it should be at http://localhost:8080.",
                         );
                     }
                     showLoading(false);

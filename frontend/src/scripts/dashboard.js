@@ -10,7 +10,20 @@ let liveMode = true;
 let liveInterval = null;
 let selectedIndex = "syslogs";
 
-const API_BASE = "https://frontend.example.com";
+// Resolve API base URL based on environment:
+//  - Local dev (localhost/127.0.0.1) → Go backend on :8080 (CORS already allows it)
+//  - Production (frontend.example.com) → same-origin backend
+//  - Can be overridden with PUBLIC_API_BASE env var at build time
+function resolveApiBase() {
+  if (import.meta.env?.PUBLIC_API_BASE) return import.meta.env.PUBLIC_API_BASE;
+  const host = location.hostname;
+  if (host === "localhost" || host === "127.0.0.1") {
+    return "http://localhost:8080";
+  }
+  return "https://frontend.example.com";
+}
+
+const API_BASE = resolveApiBase();
 
 // ── Token helpers ──────────────────────────────────────────────
 function getAuthToken() {
