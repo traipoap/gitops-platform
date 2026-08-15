@@ -61,7 +61,7 @@ func HandleExport(c *gin.Context) {
 	}
 
 	// Default page size if the client didn't send one.
-	maxHits := 5000
+	maxHits := 10000
 	if params.MaxHits != nil && *params.MaxHits > 0 {
 		maxHits = *params.MaxHits
 	}
