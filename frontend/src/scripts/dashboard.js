@@ -10,20 +10,12 @@ let liveMode = true;
 let liveInterval = null;
 let selectedIndex = "syslogs";
 
-// Resolve API base URL based on environment:
-//  - Local dev (localhost/127.0.0.1) → Go backend on :8080 (CORS already allows it)
-//  - Production (frontend.example.com) → same-origin backend
-//  - Can be overridden with PUBLIC_API_BASE env var at build time
-function resolveApiBase() {
-  if (import.meta.env?.PUBLIC_API_BASE) return import.meta.env.PUBLIC_API_BASE;
-  const host = location.hostname;
-  if (host === "localhost" || host === "127.0.0.1") {
-    return "http://localhost:8080";
-  }
-  return "https://frontend.example.com";
-}
-
-const API_BASE = resolveApiBase();
+// Use SAME-ORIGIN relative /api/* URLs. The Vite dev proxy (astro.config.mjs)
+// forwards these to http://localhost:8080 locally, and the production
+// reverse proxy does the same at frontend.example.com — so no CORS and no
+// need for import.meta.env. (This file loads as a plain <script>, NOT a
+// module, so import.meta is unavailable and would throw.)
+const API_BASE = "";
 
 // ── Token helpers ──────────────────────────────────────────────
 function getAuthToken() {

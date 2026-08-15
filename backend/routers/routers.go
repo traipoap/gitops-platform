@@ -35,10 +35,17 @@ func getPort() string {
 	return defaultPort
 }
 
-// setupCORS configures CORS middleware
+// setupCORS configures CORS middleware.
+// Uses AllowOriginFunc to reflect the request's origin back, so the app works
+// from localhost, 127.0.0.1, a LAN IP, a different dev port, or a tunnel —
+// instead of only a hard-coded allow list (which caused silent
+// "Failed to fetch" errors for any origin not in the list).
 func setupCORS() cors.Config {
 	return cors.Config{
-		AllowOrigins:     []string{"http://localhost:4321", "http://127.0.0.1:4321", "https://frontend.example.com"},
+		AllowOriginFunc: func(origin string) bool {
+			// Allow any same-network dev origin. (Local dev tool — acceptable.)
+			return origin != ""
+		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

@@ -1,0 +1,23 @@
+
+> frontend@0.0.1 dev
+> astro dev
+
+14:56:04 [vite] connected.
+14:56:05 [types] Generated 0ms
+14:56:05 [vite] connected.
+14:56:05 [vite] Re-optimizing dependencies because vite config has changed
+ astro  v7.0.3 ready in 607 ms
+┃ Local    http://localhost:4321/
+┃ Network  use --host to expose
+14:56:05 watching for file changes...
+14:56:06 [200] /signin 9ms
+14:56:06 [200] /signin 2ms
+14:56:21 [200] /signin 1ms
+14:56:26 [200] /signin 4ms
+14:58:08 [200] /signin 2ms
+14:58:10 [200] /signin 3ms
+14:58:19 [200] /signin 7ms
+14:59:08 [200] /signin 1ms
+14:59:53 [200] /signin 5ms
+15:00:17 [200] /signin 6ms
+15:00:33 [200] /signin 11ms

@@ -349,15 +349,13 @@ interface Props {
                 showLoading(true);
 
                 // Make actual API call to backend (with 10s timeout)
-                // Resolve base URL: local dev → :8080, production → example.com
-                const apiBase =
-                    import.meta.env?.PUBLIC_API_BASE ||
-                    (location.hostname === "localhost" ||
-                    location.hostname === "127.0.0.1"
-                        ? "http://localhost:8080"
-                        : "https://frontend.example.com");
-                console.log("API base:", apiBase);
-                const apiUrl = `${apiBase}/api/auth/login`;
+                // Use a SAME-ORIGIN relative URL (/api/auth/login). The Vite
+                // dev proxy (astro.config.mjs) forwards it to
+                // http://localhost:8080 — so the browser sees a same-origin
+                // request and CORS is not involved. (This inline <script> is
+                // not a module, so import.meta is unavailable here.)
+                console.log("API base: (same-origin /api)");
+                const apiUrl = `/api/auth/login`;
 
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 10000);
@@ -374,6 +372,9 @@ interface Props {
                     });
 
                     if (response.ok) {
+                        // Clear any stale error from a previous failed attempt
+                        clearErrors();
+
                         // Success - user logged in, store both tokens
                         const data = await response.json();
                         localStorage.setItem("authToken", data.token);
@@ -418,8 +419,9 @@ interface Props {
                         );
                     } else {
                         showGlobalError(
-                            `Cannot connect to backend at ${apiUrl}. ` +
-                                "Is the backend running? For local dev it should be at http://localhost:8080.",
+                            `Cannot reach /api/auth/login via the dev proxy. ` +
+                                "Is the backend running at http://localhost:8080? " +
+                                "(The Astro dev server forwards /api/* to it.)",
                         );
                     }
                     showLoading(false);
