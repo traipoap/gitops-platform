@@ -42,7 +42,7 @@ func getPort() string {
 // "Failed to fetch" errors for any origin not in the list).
 func setupCORS() cors.Config {
 	return cors.Config{
-		AllowOrigins:     []string{"http://localhost:4321", "http://127.0.0.1:4321", "https://frontend.example.com"},
+		AllowAllOrigins:  []string{"http://localhost:" + getPort(), "http://127.0.0.1:" + getPort(), "https://frontend.example.com"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -73,7 +73,7 @@ func setupAuthRoutes(r *gin.Engine, jwtService *services.JWTService, db *gorm.DB
 
 // setupAPIRoutes configures API-related routes
 func setupAPIRoutes(r *gin.Engine, jwtService *services.JWTService) {
-	r.GET("/", HandleHome)
+	r.GET("/metrics", HandleHome)
 	api := r.Group("/api")
 	api.Use(middleware.JWTAuth())
 	{
