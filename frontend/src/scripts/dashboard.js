@@ -265,7 +265,7 @@ async function runSearch() {
   const currentHostFilter = document.getElementById("hostFilter").value;
 
   // 2. เตรียม Params พื้นฐาน
-  const params = new URLSearchParams({ index_id: index, max_hits: 2000 });
+  const params = new URLSearchParams({ index_id: index, max_hits: 10000 });
 
   // 3. เพิ่ม Query/Message
   if (query) params.set("message", query);
@@ -1080,7 +1080,7 @@ async function exportLargeCSV() {
   const dateFromVal = document.getElementById("dateFrom")?.value || "";
   const dateToVal = document.getElementById("dateTo")?.value || "";
 
-  const params = new URLSearchParams({ index_id: index, max_hits: 50000 });
+  const params = new URLSearchParams({ index_id: index, max_hits: 10000 });
   const src = currentSourceFilter || source; // source IP drives the filename
   if (src) params.set("source_ip", src);
   if (query) params.set("message", query);

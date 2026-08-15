@@ -122,7 +122,12 @@ func HandleExport(c *gin.Context) {
 	if params.SourceIP != nil && *params.SourceIP != "" {
 		base = sanitizeFileName(*params.SourceIP)
 	}
-	now := time.Now()
+	// Timestamp in Thai time (Asia/Bangkok, UTC+7, no DST) for the filename.
+	bangkokLoc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		bangkokLoc = time.FixedZone("ICT", 7*60*60) // fallback: fixed UTC+7
+	}
+	now := time.Now().In(bangkokLoc)
 	fileName := fmt.Sprintf("%s_%s.csv", base, now.Format("20060102_150405"))
 	filePath := filepath.Join(exportDirPath, fileName)
 
@@ -131,13 +136,14 @@ func HandleExport(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"filename": fileName,
-		"path":     "exports/" + fileName,
-		"total":    len(result.Hits),
-		"size":     len(buf.Bytes()),
-		"download": "/api/exports/" + fileName,
-	})
+	//c.JSON(http.StatusOK, gin.H{
+	//	"filename": fileName,
+	//	"path":     "exports/" + fileName,
+	//	"total":    len(result.Hits),
+	//	"size":     len(buf.Bytes()),
+	//	"download": "/api/exports/" + fileName,
+	//})
+
 }
 
 // cellString safely converts a Quickwit value to a CSV cell string.
