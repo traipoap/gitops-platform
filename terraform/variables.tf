@@ -27,12 +27,12 @@ variable "proxmox_endpoint" {
 
 variable "proxmox_username" {
   type    = string
-  default = "root@pam"
+  default = "example@pam"
 }
 
 variable "proxmox_ssh_username" {
   type    = string
-  default = "root"
+  default = "example"
 }
 
 variable "proxmox_password" {
@@ -58,7 +58,7 @@ variable "timezone" {
 
 variable "ssh_username" {
   type    = string
-  default = "traipoap"
+  default = "example"
 }
 
 variable "ssh_public_keys" {
