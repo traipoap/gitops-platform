@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ===================================================
-FROM node:26.5.1-alpine3.24
+FROM node:26.7.0-alpine3.24
 
 RUN apk --no-cache add ca-certificates
 
