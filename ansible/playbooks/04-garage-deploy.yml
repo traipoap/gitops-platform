@@ -1,5 +1,5 @@
 - name: Deploy Garage
-  hosts: load-balance
+  hosts: load_balance
   become: true
 
   vars_prompt:

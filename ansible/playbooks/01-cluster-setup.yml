@@ -1,5 +1,5 @@
 - name: Deploy Lumina Super-Node (LB + S3 + NFS + Vector)
-  hosts: load-balance
+  hosts: load_balance
   become: true
   roles:
     - load-balance
@@ -9,7 +9,7 @@
     service: name=haproxy state=restarted
 
 - name: Initialize K3s Server and Extract Token
-  hosts: k3s-masters
+  hosts: k3s_masters
   become: true
   roles:
     - runtime
@@ -42,12 +42,12 @@
       no_log: true
 
 - name: Prepare Workers with Join Information
-  hosts: k3s-workers
+  hosts: k3s_workers
   become: true
   vars:
     # Get the token we prepared in the previous step
-    cluster_token: "{{ hostvars[groups['k3s-masters'][0]]['k3s_cluster_token'] }}"
-    master_ip: "{{ groups['k3s-masters'][0] }}"
+    cluster_token: "{{ hostvars[groups['k3s_masters'][0]]['k3s_cluster_token'] }}"
+    master_ip: "{{ groups['k3s_masters'][0] }}"
   roles:
     - runtime
     - k3s-agent
@@ -60,7 +60,7 @@
       ansible.builtin.replace:
         path: files/k3s-kubeconfig.yaml
         regexp: "server: https://127.0.0.1:6443"
-        replace: "server: https://{{ groups['k3s-masters'][0] }}:6443"
+        replace: "server: https://{{ groups['k3s_masters'][0] }}:6443"
     - name: Copy kubeconfig to local machine
       ansible.builtin.copy:
         src: files/k3s-kubeconfig.yaml

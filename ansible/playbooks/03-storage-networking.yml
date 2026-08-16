@@ -1,5 +1,5 @@
 - name: Deploy Lumina Super-Node (NFS)
-  hosts: load-balance
+  hosts: load_balance
   become: true
   vars:
     nfs_mount_point: "/nfs"

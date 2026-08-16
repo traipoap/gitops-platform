@@ -1,5 +1,5 @@
 - name: Install FluxCD
-  hosts: k3s-masters
+  hosts: k3s_masters
   become: true
 
   vars_prompt:
