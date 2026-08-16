@@ -3,7 +3,6 @@
 
 [k3s_masters]
 10.10.16.11 ansible_user=traipoap
-10.10.16.12 ansible_user=traipoap
 
 [k3s_workers]
 10.10.16.21 ansible_user=traipoap

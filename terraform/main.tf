@@ -37,7 +37,7 @@ resource "null_resource" "wait_for_ssh" {
 
 # สร้างไฟล์ Cloud-init Snippets แบบ Dynamic ทั้ง Cluster
 resource "proxmox_virtual_environment_file" "cloud_configs" {
-  for_each = var.cluster_nodes
+  for_each = local.cluster_nodes
 
   content_type = "snippets"
   datastore_id = var.datastore_id
@@ -69,7 +69,7 @@ resource "proxmox_virtual_environment_file" "cloud_configs" {
 }
 
 resource "proxmox_virtual_environment_vm" "nodes" {
-  for_each = var.cluster_nodes
+  for_each = local.cluster_nodes
 
   name      = each.key
   node_name = var.node_name

@@ -33,3 +33,4 @@ terraform/errored.tfstate
 .env.example
 frontend/.vscode/
 frontend/astro-dev.log
+roadmap.md

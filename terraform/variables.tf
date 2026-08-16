@@ -84,44 +84,67 @@ variable "clone_vm_id" {
   default = 2000
 }
 
-variable "cluster_nodes" {
+# --- Dynamic node scaling ---
+# How many VMs of each role to create.
+# e.g. super_nodes = 2, master_nodes = 2, worker_nodes = 2
+variable "cluster_node_counts" {
+  type = object({
+    super  = number
+    master = number
+    worker = number
+  })
+  default = {
+    super  = 1
+    master = 1
+    worker = 1
+  }
+}
+
+# Per-role VM specs. Node N (1-based) of a role gets:
+#   name = "<name_base>-N"
+#   vm_id = <vm_id_base> + (N - 1)
+#   ip    = <ip_base>    + (N - 1)
+variable "cluster_node_specs" {
   type = map(object({
-    vm_id        = number
-    role         = string
-    cpu_cores    = number
-    ram_mb       = number
-    ip_offset    = number
-    hostname     = string
-    disks        = list(object({
+    vm_id_base = number
+    name_base  = string
+    cpu_cores  = number
+    ram_mb     = number
+    ip_base    = number
+    disks = list(object({
       datastore_id = string
       interface    = string
       size         = number
     }))
   }))
   default = {
-    super-node-1   = {
-      vm_id = 204, role = "super", cpu_cores = 1, ram_mb = 2048, ip_offset = 4, hostname = "super-node-1",
+    super = {
+      vm_id_base = 200
+      name_base  = "super-node"
+      cpu_cores  = 1
+      ram_mb     = 2048
+      ip_base    = 4
       disks = [
         { datastore_id = "st500", interface = "scsi0", size = 32 },
         { datastore_id = "data-st1000", interface = "scsi1", size = 100 }
       ]
-    },
-
-    k3s-master-1   = {
-      vm_id = 211, role = "master", cpu_cores = 1, ram_mb = 4096, ip_offset = 11, hostname = "k3s-master-1",
+    }
+    master = {
+      vm_id_base = 210
+      name_base  = "k3s-master"
+      cpu_cores  = 1
+      ram_mb     = 4096
+      ip_base    = 11
       disks = [
         { datastore_id = "st500", interface = "scsi0", size = 32 }
       ]
-    },
-    k3s-master-2   = {
-      vm_id = 212, role = "master", cpu_cores = 1, ram_mb = 4096, ip_offset = 12, hostname = "k3s-master-2",
-      disks = [
-        { datastore_id = "st500", interface = "scsi0", size = 32 }
-      ]
-    },
-
-    k3s-worker-1 = {
-      vm_id = 221, role = "worker", cpu_cores = 1, ram_mb = 8192, ip_offset = 21, hostname = "k3s-worker-1",
+    }
+    worker = {
+      vm_id_base = 220
+      name_base  = "k3s-worker"
+      cpu_cores  = 1
+      ram_mb     = 8192
+      ip_base    = 21
       disks = [
         { datastore_id = "st500", interface = "scsi0", size = 32 }
       ]
