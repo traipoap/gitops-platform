@@ -233,7 +233,7 @@
 3. Terratest — test infrastructure จริง
 ~~~
 
-~~~
+~~~mermaid
 sequenceDiagram
     participant Client
     participant API

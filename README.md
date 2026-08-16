@@ -166,24 +166,51 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    subgraph Proxmox ["Proxmox Host (vLan 16)"]
-        SN1[super-node-1<br/>10.10.16.4<br/>LB/NFS/S3]
-        SN2[super-node-2<br/>10.10.16.5<br/>NFS/S3 Replica]
-        M1[k3s-master-1<br/>10.10.16.11<br/>Control Plane Leader]
-        M2[k3s-master-2<br/>10.10.16.12<br/>Control Plane HA]
-        W1[k3s-worker-1<br/>10.10.16.21<br/>Worker]
-        W2[k3s-worker-2<br/>10.10.16.22<br/>Worker]
+    subgraph Proxmox ["Proxmox Host (vLan 16) - 10.10.16.1/24"]
+        direction TB
+        SN0[super-node-0<br/>10.10.16.4<br/>HAProxy/Keepalived]
+        subgraph Storage ["Storage Nodes"]
+            SN1[super-node-1<br/>10.10.16.5<br/>NFS Primary / S3]
+            SN2[super-node-2<br/>10.10.16.6<br/>NFS Replica / S3]
+        end    
+        subgraph K3s_Cluster ["K3s HA Cluster"]
+            direction TB      
+            subgraph ControlPlane ["Control Plane (Server Nodes)"]
+                M1[k3s-master-1<br/>10.10.16.11<br/>etcd Member]
+                M2[k3s-master-2<br/>10.10.16.12<br/>etcd Member]
+                M3[k3s-master-3<br/>10.10.16.13<br/>etcd Member]
+            end
+
+            subgraph Workers ["Worker Nodes"]
+                W1[k3s-worker-1<br/>10.10.16.21]
+                W2[k3s-worker-2<br/>10.10.16.22]
+            end
+        end
     end
-    Internet[Internet] -->|via Cloudflare Tunnel| SN1
-    SN1 <-->|etcd HA| M1
-    SN1 -->|LB/Failover| M2
-    M1 <-->|etcd HA| M2
-    SN1 --> W1
-    SN1 --> W2
-    M1 -->|mounted NFS| SN1 & SN2
-    M2 -->|mounted NFS| SN1 & SN2
-    W1 -->|mounted NFS| SN1 & SN2
-    W2 -->|mounted NFS| SN1 & SN2
+
+    Internet[Internet] -->|Cloudflare Tunnel| SN0
+    SN1 <-->|NFS Replication| SN2
+    
+    %% Correct LB Flow
+    SN0 --> M1
+    SN0 --> M2
+    SN0 --> M3
+    
+    %% Correct etcd Flow (Embedded)
+    M1 <-->|Embedded etcd Quorum| M2
+    M2 <-->|Embedded etcd Quorum| M3
+    M1 <-->|Embedded etcd Quorum| M3
+    
+    %% Worker Connections
+    SN0 --> W1
+    SN0 --> W2
+    M1 --> W1
+    M2 --> W2
+    
+    %% Storage Flow (Application Data ONLY)
+    W1 -->|RWX Storage| SN1
+    W2 -->|RWX Storage| SN1
+    M1 & M2 & M3 -.->|etcd Snapshots Backup| SN1   
 ```
 
 ---
@@ -447,11 +474,22 @@ cp .env.example .env
 ```bash
 # Proxmox API token
 cat >> terraform/secrets.auto.tfvars <<'EOF'
+proxmox_endpoint = "https://proxmox.xxx.xxx"
+proxmox_username = "xxx@pam"
 proxmox_password = "xxx"
+proxmox_ssh_username = "xxx"
+
+ssh_username = "xxx"
 ssh_public_keys = [
-  "ssh-ed25519 xxx xxx@localhost"
+  "ssh-ed25519 xxx xxx@xxx-MacBook-Air.local",
+  "ssh-ed25519 xxx xxx@xxx-desktop",
+  "ssh-ed25519 xxx xxx@local"
 ]
-cluster_node_counts = { super = 2, master = 2, worker = 2 }
+cluster_node_counts = {
+  super  = 1
+  master = 1
+  worker = 1
+}
 EOF
 
 # RPC secret between nodes 
