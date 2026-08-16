@@ -208,13 +208,11 @@
 2. **เพิ่ม CI for IaC** — tflint + ansible-lint ใน GitHub Actions → แสดงว่าเข้าใจ quality gates
 3. **เขียน Terratest** — test infrastructure จริงๆ → skill นี้น้อยคนมี และเป็น differentiator ใหญ่
 
----
-
 > *Last updated: 2026-08-14*
 > *Based on analysis of gitops-platform repository*
 
+---
 
-~~~
 เขียนเสร็จแล้ว — `roadmap.md` มีเนื้อหา 5 stage:
 
 | Stage | เวลา | Focus |
@@ -225,13 +223,14 @@
 | **4. Advanced** | ปี 2+ | Multi-cloud, Crossplane, eBPF/Cilium, zero-trust, CRD controllers |
 | **5. Staff/Principal** | ปี 3-5+ | Architecture strategy, mentoring, open-source, tech radar |
 
-**คะแนนรวม你现在อยู่:** Junior → Mid-Level (เพราะทำ full pipeline provisioning→GitOps→observability เองได้จริง ไม่ใช่แค่ follow tutorial)
+**คะแนนรวมอยู่:** Junior → Mid-Level (เพราะทำ full pipeline provisioning→GitOps→observability เองได้จริง ไม่ใช่แค่ follow tutorial)
 
 **Top 3 immediate actions** ที่ roadmap แนะนำ:
 1. Terraform modules — refactor code ให้เป็น reusable
 2. CI for IaC — tflint + ansible-lint ใน pipeline
 3. Terratest — test infrastructure จริง
-~~~
+
+---
 
 ~~~mermaid
 sequenceDiagram
@@ -253,3 +252,124 @@ sequenceDiagram
         Client->>Client: Redirect to /signin
     end
 ~~~
+
+---
+สถาปัตยกรรม (Architecture) ที่คุณวาดมานั้น **ถูกต้องในภาพรวม (Conceptually Correct)** สำหรับการทำ GitOps แบบ Modern แต่มี **จุดสำคัญ 2-3 จุด** ที่ควรปรับปรุงเพื่อให้การทำงานเป็นไปอย่างอัตโนมัติสมบูรณ์และถูกต้องตามหลักการของ FluxCD ครับ
+
+นี่คือรายละเอียดการวิเคราะห์และข้อแนะนำ:
+
+### 1. จุดที่ต้องปรับปรุง: วงจรการอัปเดต Image (Image Update Loop)
+ในแผนภาพเดิม คุณเขียนว่า `GHActions -->|update image tag| GitOpsRepo` ซึ่งหมายถึงให้ GitHub Actions ไปแก้ไฟล์ใน GitOps Repo โดยตรง
+*   **ปัญหา:** วิธีนี้ทำได้แต่ **ไม่ใช่ Best Practice ของ FluxCD** เพราะทำให้ GitOps Repo มี Commit จาก 2 แหล่ง (คนแก้ Manifest vs CI แก้ Image Tag) ซึ่งอาจเกิด Conflict ได้ และ FluxCD มีเครื่องมือทำเรื่องนี้ได้ดีกว่า
+*   **ทางแก้ที่ถูกต้อง:** ให้ใช้ **Flux Image Automation**
+    1.  **GitHub Actions**: ทำหน้าที่แค่ **Build & Push** Image ลง Registry (จบแค่นี้)
+    2.  **Flux Image Reflector**: ใน Cluster จะคอยส่อง Registry ว่ามี Image ใหม่หรือยัง
+    3.  **Flux Image Automation**: เมื่อเจอ Image ใหม่ จะทำการ **Commit กลับไปที่ GitOpsRepo** เองเพื่ออัปเดต Tag
+    4.  **FluxCD**: Detect การเปลี่ยนแปลงและ Deploy
+
+**แผนภาพที่ปรับแก้:**
+
+```mermaid
+flowchart LR
+    Dev[Developer]
+    AppRepo[Application Repository]
+    GHActions[GitHub Actions]
+    Registry[Container Registry]
+    GitOpsRepo[GitOps Repository]
+    
+    subgraph FluxCD_Components [FluxCD Components]
+        ImageReflector[Image Reflector]
+        ImageAuto[Image Automation]
+        FluxCore[Flux Core]
+    end
+    
+    K3s[K3s Cluster]
+
+    Dev -->|git push| AppRepo
+    AppRepo -->|trigger pipeline| GHActions
+    GHActions -->|build and push image| Registry
+    
+    %% Corrected Flow
+    Registry -.->|scan for new tags| ImageReflector
+    ImageReflector -->|notify new version| ImageAuto
+    ImageAuto -->|commit image tag update| GitOpsRepo
+    
+    FluxCore -->|sync manifests| GitOpsRepo
+    FluxCore -->|deploy workloads| K3s
+```
+
+### 2. การเชื่อมต่อ Storage (NFS / Garage)
+*   **ความถูกต้อง:** การแยก Object Storage (Garage) และ NFS ออกมาถือว่าดีแล้ว
+*   **ข้อแนะนำ:** ในทางปฏิบัติ Application ใน K3s จะไม่คุยกับ NFS/Garage โดยตรง แต่จะคุยผ่าน **CSI Driver** หรือ **S3 Compatible Client**
+    *   **Garage:** ควรระบุว่า K3s ต่อผ่าน **S3 CSI Driver** หรือ **MinIO Client** เพื่อ mount เป็น Volume
+    *   **NFS:** ควรระบุว่าใช้ **NFS Subdir External Provisioner** เพื่อสร้าง Dynamic PV
+
+### 3. Monitoring & Logging Stack
+*   **ความถูกต้อง:** การเลือก **Quickwit + Vector** เป็นตัวเลือกที่ยอดเยี่ยมมากสำหรับยุคปัจจุบัน (ประหยัด Resource กว่า ELK Stack มาก และเหมาะกับ K3s)
+*   **ข้อแนะนำ:**
+    *   **Vector:** ควุณควรวางแผนว่า Vector จะรันเป็น **Agent** (DaemonSet บนทุก Node เพื่อเก็บ Log) ส่งไปให้ **Quickwit** (StatefulSet)
+    *   **Grafana:** ควรระบุว่ามี **Grafana Data Source** ต่อทั้ง Prometheus (Metrics) และ Quickwit (Logs) เพื่อให้ดู Dashboard ได้ที่เดียว
+
+### สรุปสถาปัตยกรรมที่สมบูรณ์ (Revised Architecture)
+
+```mermaid
+flowchart TD
+    subgraph CI_CD ["CI/CD Pipeline"]
+        Dev[Developer] -->|git push code| AppRepo[App Repo]
+        AppRepo -->|trigger| GHActions[GitHub Actions]
+        GHActions -->|1. Build & Push Image| Registry[Container Registry]
+    end
+
+    subgraph GitOps_Layer ["GitOps Layer"]
+        GitOpsRepo[GitOps Repo <br/> Manifests Only]
+        ImageAuto[Flux Image Automation]
+    end
+
+    subgraph Cluster ["K3s Cluster"]
+        FluxCD[FluxCD Controller]
+        
+        subgraph Observability ["Observability"]
+            Vector[Vector Agent]
+            Quickwit[Quickwit]
+            Prometheus[Prometheus]
+            Grafana[Grafana]
+        end
+
+        subgraph Storage_Layer ["Storage Layer"]
+            NFS_Prov[NFS Provisioner]
+            S3_CSI[Garage S3 CSI]
+            NFS[NFS Storage]
+            Garage[Garage Object Storage]
+        end
+        
+        Apps[Applications]
+    end
+
+    %% Flows
+    Registry -.->|Scan Tags| ImageAuto
+    ImageAuto -->|Update Tag| GitOpsRepo
+    FluxCD -->|Sync| GitOpsRepo
+    FluxCD -->|Deploy| Apps
+    
+    %% Observability Flow
+    Apps -->|Logs| Vector
+    Vector -->|Forward| Quickwit
+    Apps -->|Metrics| Prometheus
+    Quickwit & Prometheus -->|Data Source| Grafana
+    
+    %% Storage Flow
+    Apps -->|PVC| NFS_Prov
+    Apps -->|Bucket| S3_CSI
+    NFS_Prov --> NFS
+    S3_CSI --> Garage
+```
+
+### คำแนะนำเพิ่มเติมสำหรับการนำไปใช้จริง
+1.  **Flux Image Automation:** คุณต้องติดตั้ง `image-reflector-controller` และ `image-automation-controller` เพิ่มเติมจาก Flux ปกติ และกำหนด `ImagePolicy` ใน GitOps Repo
+2.  **Garage S3:** เนื่องจาก Garage เป็น S3 Compatible คุณสามารถใช้ **CSI Driver** ทั่วไป (เช่น `csi-s3` หรือ `s3fs`) เพื่อ mount ให้ Pod ใช้งานได้เหมือน NFS แต่เป็น Object Storage
+3.  **Vector Config:** ตั้งค่า Vector ให้รันเป็น `Agent` (DaemonSet) เพื่อเก็บ log จาก `/var/log/pods` แล้วส่งไปเก็บที่ Quickwit โดยตรง จะช่วยประหยัด Resource ได้มากที่สุด
+
+
+
+
+
