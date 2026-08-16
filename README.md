@@ -168,14 +168,12 @@ flowchart LR
 flowchart TD
     subgraph Proxmox ["Proxmox Host (vLan 16) - 10.10.16.1/24"]
         SN0[super-node-0<br/>10.10.16.4<br/>HAProxy/Keepalived]
-        direction TB
         subgraph Storage ["Storage Nodes"]
             SN1[super-node-1<br/>10.10.16.5<br/>NFS Primary / S3]
             SN2[super-node-2<br/>10.10.16.6<br/>NFS Replica / S3]
         end    
         
         subgraph K3s_Cluster ["K3s HA Cluster"]
-            direction TB      
             subgraph ControlPlane ["Control Plane (Server Nodes)"]
                 M1[k3s-master-1<br/>10.10.16.11<br/>etcd Member]
                 M2[k3s-master-2<br/>10.10.16.12<br/>etcd Member]
