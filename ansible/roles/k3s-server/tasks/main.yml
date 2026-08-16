@@ -3,6 +3,7 @@
         curl -sfL https://get.k3s.io | sh -s - server \
           --node-ip={{ groups['k3s_masters'][0] }} \
           --write-kubeconfig-mode 644 \
+          --cluster-init \
           --disable=traefik \
           --disable=local-storage \
       args:

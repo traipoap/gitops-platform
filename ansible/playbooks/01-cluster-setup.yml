@@ -1,5 +1,5 @@
 - name: Deploy Lumina Super-Node (LB + S3 + NFS + Vector)
-  hosts: load-balance
+  hosts: load_balance
   become: true
   roles:
     - load-balance
@@ -9,10 +9,10 @@
     service: name=haproxy state=restarted
 
 - name: Initialize K3s Server (first master) and Extract Token
-  hosts: k3s-masters
+  hosts: k3s_masters
   become: true
   vars:
-    is_first_master: "{{ inventory_hostname == groups['k3s-masters'][0] }}"
+    is_first_master: "{{ inventory_hostname == groups['k3s_masters'][0] }}"
   roles:
     - runtime
     - role: k3s-server
@@ -38,7 +38,6 @@
       # Convert base64 back to normal string and store in a variable that all Hosts can see
       set_fact:
         k3s_cluster_token: "{{ master_token_encoded['content'] | b64decode | trim }}"
-      delegate_to: localhost # Store on the machine running Ansible (Control Node)
       when: is_first_master
 
     - name: Debug Token
@@ -48,18 +47,18 @@
       when: is_first_master
 
 - name: Join Additional Master Nodes to the Control Plane
-  hosts: k3s-masters
+  hosts: k3s_masters
   become: true
   serial: 1
   tasks:
     - name: Skip first master (already initialized)
-      meta: skip
-      when: inventory_hostname == groups['k3s-masters'][0]
+      meta: end_host
+      when: inventory_hostname == groups['k3s_masters'][0]
 
     - name: Read K3s Token from first master
       ansible.builtin.slurp:
         src: /var/lib/rancher/k3s/server/node-token
-      delegate_to: "{{ groups['k3s-masters'][0] }}"
+      delegate_to: "{{ groups['k3s_masters'][0] }}"
       register: master_token_encoded
 
     - name: Decode Token
@@ -81,8 +80,8 @@
             mode: '0755'
             content: |
               #!/bin/bash
-              curl -sfL https://get.k3s.io | K3S_URL=https://{{ groups['k3s-masters'][0] }}:6443 K3S_TOKEN={{ cluster_token }} sh -s - server \
-              --node-ip={{ ansible_default_ipv4.address }} \
+              curl -sfL https://get.k3s.io | K3S_URL=https://{{ groups['k3s_masters'][0] }}:6443 K3S_TOKEN={{ cluster_token }} sh -s - server \
+              --node-ip={{ ansible_facts.default_ipv4.address }} \
               --write-kubeconfig-mode 644 \
               --disable=traefik \
               --disable=local-storage
@@ -103,7 +102,7 @@
       rescue:
         - name: Handle Installation Failure
           fail:
-            msg: "K3s Server join failed! Check connectivity to {{ groups['k3s-masters'][0] }}:6443 or the Cluster Token."
+            msg: "K3s Server join failed! Check connectivity to {{ groups['k3s_masters'][0] }}:6443 or the Cluster Token."
 
     - name: Verify K3s Server is Up and Running
       command: systemctl is-active k3s
@@ -112,12 +111,12 @@
       failed_when: final_check.rc != 0
 
 - name: Prepare Workers with Join Information
-  hosts: k3s-workers
+  hosts: k3s_workers
   become: true
   vars:
     # Get the token we prepared in the previous step
-    cluster_token: "{{ hostvars[groups['k3s-masters'][0]]['k3s_cluster_token'] }}"
-    master_ip: "{{ groups['k3s-masters'][0] }}"
+    cluster_token: "{{ hostvars[groups['k3s_masters'][0]]['k3s_cluster_token'] }}"
+    master_ip: "{{ groups['k3s_masters'][0] }}"
   roles:
     - runtime
     - k3s-agent
@@ -130,7 +129,7 @@
       ansible.builtin.replace:
         path: files/k3s-kubeconfig.yaml
         regexp: "server: https://127.0.0.1:6443"
-        replace: "server: https://{{ groups['k3s-masters'][0] }}:6443"
+        replace: "server: https://{{ groups['k3s_masters'][0] }}:6443"
     - name: Copy kubeconfig to local machine
       ansible.builtin.copy:
         src: files/k3s-kubeconfig.yaml

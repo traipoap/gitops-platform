@@ -8,8 +8,8 @@ replication_factor = 1
 block_size = 1048576
 compression_level = 1
 
-rpc_bind_addr = "{{ ansible_default_ipv4.address }}:3901"
-rpc_public_addr = "{{ ansible_default_ipv4.address }}:3901"
+rpc_bind_addr = "{{ ansible_facts.default_ipv4.address }}:3901"
+rpc_public_addr = "{{ ansible_facts.default_ipv4.address }}:3901"
 rpc_secret = "{{ my_rpc_secret }}"
 
 bootstrap_peers = []
