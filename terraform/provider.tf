@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 provider "proxmox" {
   endpoint = var.proxmox_endpoint
   username = var.proxmox_username

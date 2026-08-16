@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 resource "local_file" "ansible_inventory" {
   filename = var.ansible_inventory_path
   content = templatefile("${path.module}/templates/hosts.tpl", {

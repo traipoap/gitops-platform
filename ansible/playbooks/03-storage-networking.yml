@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 - name: Deploy Lumina Super-Node (NFS)
   hosts: load_balance
   become: true

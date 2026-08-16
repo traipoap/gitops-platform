@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
     # 1. Check if k3s-agent service exists and is active via systemd
     - name: Check K3s Agent service status
       command: systemctl is-active k3s-agent

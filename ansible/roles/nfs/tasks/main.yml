@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
   # 0. Find disk by size 100G automatically
   - name: Find disk by size 100G automatically
     set_fact:

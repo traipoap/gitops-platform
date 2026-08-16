@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 # Generate the node list from counts + per-role specs
 locals {
   cluster_nodes = merge(

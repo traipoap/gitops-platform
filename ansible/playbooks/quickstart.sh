@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 ansible-playbook -i inventory/hosts playbooks/00-prerequisites.yml
 ansible-playbook -i inventory/hosts playbooks/01-cluster-setup.yml
 ansible-playbook -i inventory/hosts playbooks/02-servicemesh.yml

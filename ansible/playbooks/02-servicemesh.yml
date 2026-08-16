@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 - name: Install Istio
   hosts: k3s_masters
   become: true

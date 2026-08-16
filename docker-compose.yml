@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 services:
   frontend:
     image: ghcr.io/traipoap/frontend:0.0.5

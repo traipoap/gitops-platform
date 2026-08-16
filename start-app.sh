@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 # 1. เข้าไปสั่งรัน Gin เป็น Background และปล่อยให้พอร์ต 8080 ทำงาน
 (cd backend && go run main.go) &
 
