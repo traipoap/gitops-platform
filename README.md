@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 # K3s GitOps Platform on Proxmox
 
 [![Frontend Build & Deploy](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml)
@@ -5,7 +7,7 @@
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-K3s-326ce5)
 ![GitOps](https://img.shields.io/badge/GitOps-FluxCD-5468ff)
 ![IaC](https://img.shields.io/badge/IaC-Terraform%20%7C%20Ansible-7b42bc)
-![License](https://img.shields.io/github/license/traipoap/gitops-platform)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 A Production-style practices applied to a constrained home lab / portfolio platform for provisioning and managing a Kubernetes cluster using Infrastructure as Code, GitOps, CI/CD, observability, and security best practices.
 
