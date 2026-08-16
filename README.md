@@ -754,4 +754,5 @@ When contributing, please ensure your changes follow the existing style and incl
 ---
 
 ## License
-This project is licensed under the MIT License.
+
+This project is licensed under the Apache 2.0 license – see the [LICENSE](LICENSE) file for details.
