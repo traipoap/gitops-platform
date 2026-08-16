@@ -1063,6 +1063,7 @@ function exportCSV() {
   showToast(`Exported ${filteredLogs.length} log entries as CSV`);
 }
 
+// Should fix because still export json type. to fix with backend
 // Trigger a SERVER-SIDE export via backend HandleExport (/api/export).
 // The backend queries Quickwit, saves a CSV to ./exports as
 // "{sourceIP|any}_{YYYYMMDD_HHMMSS}.csv", then we download it to the browser.
@@ -1094,27 +1095,7 @@ async function exportLargeCSV() {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || `Server error ${res.status}`);
     }
-    const data = await res.json();
-    const fileName = data.filename;
-    const total = data.total || 0;
-
-    // Also download the saved file to the user's machine for convenience.
-    if (data.download) {
-      const dl = await authenticatedFetch(`${API_BASE}${data.download}`);
-      if (dl.ok) {
-        const blob = await dl.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-    }
-
-    showToast(`Saved ${fileName} to /exports (${total} rows)`);
+    showToast(`Exported to Export History`);
   } catch (err) {
     console.error("Export error:", err);
     showToast("Export failed: " + err.message);
@@ -1291,6 +1272,7 @@ function renderDashboard() {
 
 function refreshLogs() {
   applyFilters();
+  runSearch();
   showToast("Logs refreshed");
 }
 
@@ -1386,6 +1368,7 @@ const exportedFunctions = {
   mapQuickwitHits,
   parseFlexibleTimestamp,
   dynamicMapper,
+  copyHash,
 };
 
 // Attach ไปยัง window object
