@@ -28,8 +28,8 @@
       run_once: true
       ignore_errors: true
 
-    - name: Create namespace for {{ namespace }}
-      shell: kubectl create namespace {{ namespace }}
+    - name: Create namespace for {{ ns_name }}
+      shell: kubectl create namespace {{ ns_name }}
       environment:
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
       run_once: true
@@ -37,7 +37,7 @@
 
     - name: Create secret for GitHub docker-registry
       shell: |
-        kubectl -n {{ namespace }} create secret docker-registry github-registry \
+        kubectl -n {{ ns_name }} create secret docker-registry github-registry \
           --docker-server ghcr.io \
           --docker-username {{ github_owner }} \
           --docker-password {{ github_registry }} \

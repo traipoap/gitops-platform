@@ -68,5 +68,5 @@
     - name: Check garage status
       systemd: name={{garage_systemd_service}} state=started
 
-  #roles:
-  #  - garage
+  roles:
+    - garage

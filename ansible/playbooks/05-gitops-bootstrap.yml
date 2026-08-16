@@ -4,11 +4,11 @@
 
   vars_prompt:
     - name: input_pat_app_git_secret
-      prompt: "Enter your GitHub Personal Access Token (PAT)"
+      prompt: "Enter your GitHub Personal Access Token (PAT) leave blank for secret from environment variable"
       private: true
       unsafe: true
     - name: input_pat_github_registry
-      prompt: "Enter your GitHub Registry PAT"
+      prompt: "Enter your GitHub Registry PAT leave blank for secret from environment variable"
       private: true
       unsafe: true
 
@@ -24,7 +24,7 @@
       {{ app_git_secret_env | default(input_pat_app_git_secret, true) }}
 
     # Create namespace and secrets docker-registry
-    namespace: "lumina"
+    ns_name: "lumina"
     github_registry: >-
       {{ github_registry_env | default(input_pat_github_registry, true) }}
 
