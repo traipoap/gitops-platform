@@ -7,7 +7,7 @@
 ![IaC](https://img.shields.io/badge/IaC-Terraform%20%7C%20Ansible-7b42bc)
 ![License](https://img.shields.io/github/license/traipoap/gitops-platform)
 
-A production-oriented home lab / portfolio platform for provisioning and managing a Kubernetes cluster using Infrastructure as Code, GitOps, CI/CD, observability, and security best practices.
+A Production-style practices applied to a constrained home lab / portfolio platform for provisioning and managing a Kubernetes cluster using Infrastructure as Code, GitOps, CI/CD, observability, and security best practices.
 
 This project demonstrates how to build a repeatable, declarative, and automated Kubernetes platform from bare-metal/virtual infrastructure to application deployment.
 
@@ -243,12 +243,12 @@ Before you begin, ensure the following tools are installed on your workstation:
 │   │   ├── 00-prerequisites.yml
 │   │   ├── 01-cluster-setup.yml
 │   │   ├── 02-servicemesh.yml
-│   │   ├── 03-gitops-bootstrap.yml
-│   │   ├── 04-storage-networking.yml
-│   │   ├── 05-garage-deploy.yml
+│   │   ├── 03-storage-networking.yml
+│   │   ├── 04-garage-deploy.yml
+│   │   ├── 05-gitops-bootstrap.yml
 │   │   ├── files
 │   │   │   └── k3s-kubeconfig.yaml
-│   │   └── pipeline.sh
+│   │   └── quickstart.sh
 │   └── roles
 │       ├── common
 │       │   └── tasks
@@ -296,9 +296,6 @@ Before you begin, ensure the following tools are installed on your workstation:
 │   │   ├── register_controller.go
 │   │   ├── search_controller.go
 │   │   └── signin_controller.go
-│   ├── exports
-│   │   ├── 192.168.1.1_20260401_213305.csv
-│   │   └── 192.168.1.1_20260401_213305.zip
 │   ├── go.mod
 │   ├── go.sum
 │   ├── main.go
@@ -325,7 +322,7 @@ Before you begin, ensure the following tools are installed on your workstation:
 ├── docker-compose.yml
 ├── frontend
 │   ├── astro.config.mjs
-│   ├── frontend.md
+│   ├── astro-dev.log
 │   ├── package.json
 │   ├── package-lock.json
 │   ├── public
@@ -355,17 +352,19 @@ Before you begin, ensure the following tools are installed on your workstation:
 │   │       └── signup.css
 │   └── tsconfig.json
 ├── README.md
+├── roadmap.md
 ├── start-app.sh
 └── terraform
     ├── backend.tf
-    ├── hosts.tpl
     ├── locals.tf
     ├── main.tf
     ├── provider.tf
-    ├── secrets.auto.tfvars
+    ├── templates
+    │   ├── haproxy.tpl
+    │   └── hosts.tpl
     └── variables.tf
 
-49 directories, 81 files
+49 directories, 80 files
 ```
 
 ---
