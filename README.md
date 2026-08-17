@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
-
 # K3s GitOps Platform on Proxmox
 
 [![Frontend Build & Deploy](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml)
