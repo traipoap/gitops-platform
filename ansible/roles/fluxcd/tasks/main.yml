@@ -19,17 +19,6 @@
       run_once: true
       ignore_errors: true
 
-    - name: Create secret for GitHub token
-      shell: |
-        kubectl create secret generic app-git-secret \
-          --namespace=flux-system \
-          --from-literal=username={{ github_owner }} \
-          --from-literal=password={{ app_git_secret }}
-      environment:
-        KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
-      run_once: true
-      ignore_errors: true
-
     - name: Create namespace for {{ ns_name }}
       shell: kubectl create namespace {{ ns_name }}
       environment:
