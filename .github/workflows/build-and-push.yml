@@ -67,7 +67,7 @@ jobs:
         with:
           cmd: |
             yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/${{ inputs.service }}:${{ needs.build-and-push.outputs.version }}"' \
-                  "./applications/base/${{ inputs.service }}-deployment.yaml"
+                  "./app/base/${{ inputs.service }}-deployment.yaml"
 
       - name: Commit and Push to Fleet Infra
         run: |
