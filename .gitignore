@@ -34,3 +34,4 @@ terraform/errored.tfstate
 frontend/.vscode/
 frontend/astro-dev.log
 roadmap.md
+README-gitops.md

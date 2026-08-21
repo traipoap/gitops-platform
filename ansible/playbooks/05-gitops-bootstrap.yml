@@ -33,10 +33,10 @@
   tasks:
     - name: Debug Github PAT
       ansible.builtin.debug:
-        msg: |
-          "Source: {{ 'environment variables' if app_git_secret_env else 'user input' }}"
-          "APP_GIT_SECRET is set (Length: {{ app_git_secret | length }})"
-          "GITHUB_REGISTRY is set (Length: {{ github_registry | length }})"
+        msg:
+          - "Source: {{ 'environment variables' if app_git_secret_env else 'user input' }}"
+          - "APP_GIT_SECRET is set (Length: {{ app_git_secret | length }})"
+          - "GITHUB_REGISTRY is set (Length: {{ github_registry | length }})"
 
   roles:
     - fluxcd

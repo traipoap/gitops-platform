@@ -4,10 +4,15 @@
     - name: Check K3s Agent service status
       command: systemctl is-active k3s-agent
       register: k3s_service_status
-      ignore_errors: true
       changed_when: false
+      failed_when: false  # Prevents failure on non-zero exit codes (inactive/failed)
 
-    # 2. Logic: If service is NOT active or NOT found, then Install and Join
+    # 2. Display the result
+    - name: Display K3s Agent service status
+      debug:
+        msg: "k3s-agent service status: {{ k3s_service_status.stdout }}"
+
+    # 3. Logic: If service is NOT active or NOT found, then Install and Join
     - name: Install and Join K3s Agent to Cluster
       when: k3s_service_status.rc != 0
       block:
@@ -39,7 +44,7 @@
           fail:
             msg: "K3s Agent installation failed! Please check connectivity to {{ master_ip }} or the Cluster Token."
 
-    # 3. Final Verification: Check if service is now running after our action
+    # 4. Final Verification: Check if service is now running after our action
     - name: Verify K3s Agent is Up and Running
       command: systemctl is-active k3s-agent
       register: final_check

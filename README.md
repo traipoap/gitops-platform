@@ -629,12 +629,12 @@ Logs are collected using Vector and stored/queryable in Quickwit.
 
 **View log pods:**
 ```bash
-kubectl -n logging get pods
-kubectl -n logging logs -l app.kubernetes.io/name=vector
+kubectl -n lumina get pods
+kubectl -n lumina logs -l app.kubernetes.io/name=vector
 ```
 **Access Quickwit UI:**
 ```bash
-kubectl -n logging port-forward svc/quickwit 7280:7280
+kubectl -n lumina port-forward svc/quickwit-searcher 7280:7280
 ```
 Open: <http://localhost:7280>
 

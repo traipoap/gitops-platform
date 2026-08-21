@@ -127,7 +127,7 @@ variable "cluster_node_specs" {
       ram_mb     = 2048
       ip_base    = 4
       disks = [
-        { datastore_id = "st500", interface = "scsi0", size = 32 },
+        { datastore_id = "data-st1000", interface = "scsi0", size = 32 },
         { datastore_id = "data-st1000", interface = "scsi1", size = 100 }
       ]
     }
