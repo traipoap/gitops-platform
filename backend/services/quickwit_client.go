@@ -94,6 +94,67 @@ func (c *QuickwitClient) Search(ctx context.Context, query string, max_hits *int
 	}, nil
 }
 
+// SearchRaw fetches a search page and returns the `hits` array as raw JSON
+// bytes plus the total count. Because the hits are never decoded into Go
+// values, the caller can splice them straight into its response — no
+// per-field interface{} boxes on the way in, no reflection-based re-encode
+// on the way out (cheaper even than the Rust handler, which re-serializes
+// its serde_json::Value tree).
+func (c *QuickwitClient) SearchRaw(ctx context.Context, query string, maxHits *int, indexID *string) ([]byte, uint64, error) {
+	limit := 10000
+	if maxHits != nil && *maxHits > 0 {
+		limit = *maxHits
+	}
+
+	payload := models.QuickwitSearchRequest{
+		Query:   query,
+		MaxHits: limit,
+		SortBy:  "index_timestamp",
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, 0, fmt.Errorf("marshal request: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		c.baseURL+"/api/v1/"+*indexID+"/search",
+		bytes.NewReader(body),
+	)
+	if err != nil {
+		return nil, 0, fmt.Errorf("create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, 0, fmt.Errorf("execute request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, 0, fmt.Errorf("quickwit API error: status %d", resp.StatusCode)
+	}
+
+	// `hits` stays raw: the decoder skips over the array instead of building
+	// a Go value for every field of every log line.
+	var raw struct {
+		Hits  json.RawMessage `json:"hits"`
+		Total uint64          `json:"num_hits"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
+		return nil, 0, fmt.Errorf("decode response: %w", err)
+	}
+
+	hits := raw.Hits
+	if len(hits) == 0 || bytes.Equal(hits, []byte("null")) {
+		hits = []byte("[]")
+	}
+	return hits, raw.Total, nil
+}
+
 // QuickwitPage is one search page. Hits are kept as raw JSON so the export
 // path can render CSV cells without boxing every value into interface{}
 // (cheaper decode, far less GC pressure on large exports).

@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"exporter/config"
@@ -47,15 +47,9 @@ func HandleIndices(c *gin.Context) {
 		return
 	}
 
-	// แปลงข้อมูล JSON ดิบเพื่อส่งต่อให้ฝั่ง Client ของคุณทันที
-	var quickwitResponse []interface{} // Quickwit คืนค่ากลับมาเป็น Array ของ Index Object
-	if err := json.Unmarshal(bodyBytes, &quickwitResponse); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse JSON: " + err.Error()})
-		return
-	}
-
-	// ส่งผลลัพธ์กลับในรูปแบบ JSON สวยงาม
-	c.JSON(http.StatusOK, quickwitResponse)
+	// Pass Quickwit's JSON through as-is. Decoding it into []interface{}
+	// and re-encoding it bought nothing — only CPU time and GC churn.
+	c.Data(http.StatusOK, "application/json; charset=utf-8", bodyBytes)
 }
 
 func HandleSearch(c *gin.Context) {
@@ -65,14 +59,23 @@ func HandleSearch(c *gin.Context) {
 		return
 	}
 
-	query := buildLuceneQuery(params)
-	result, err := quickwitClient.Search(c.Request.Context(), query, params.MaxHits, params.IndexID)
+	// SearchRaw keeps Quickwit's `hits` array as raw JSON, so no log field
+	// is ever boxed into interface{} or re-encoded through reflection.
+	hits, total, err := quickwitClient.SearchRaw(c.Request.Context(), buildLuceneQuery(params), params.MaxHits, params.IndexID)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Search failed: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	// Splice the raw hits straight into the response body:
+	// {"hits":<raw array>,"total":<n>}
+	buf := make([]byte, 0, len(hits)+64)
+	buf = append(buf, `{"hits":`...)
+	buf = append(buf, hits...)
+	buf = append(buf, `,"total":`...)
+	buf = strconv.AppendUint(buf, total, 10)
+	buf = append(buf, '}')
+	c.Data(http.StatusOK, "application/json; charset=utf-8", buf)
 }
 
 // luceneReplacer escapes Lucene special characters in a single pass.
