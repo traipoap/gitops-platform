@@ -16,6 +16,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w -X 'main.Version=${VERSION
 # ===================================================
 FROM alpine
 RUN apk --no-cache add ca-certificates sqlite-libs
+RUN mkdir -p /backend/exports/
 
 WORKDIR /backend
 
