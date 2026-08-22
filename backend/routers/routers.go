@@ -92,11 +92,12 @@ func SetupRoutes(r *gin.Engine) {
 	// Initialize Database (SQLite)
 	db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		log.Fatalf("failed to connect database: %v", err)
 	}
 
 	// Auto-migrate the User table
 	db.AutoMigrate(&models.User{})
+
 	var count int64
 	db.Model(&models.User{}).Where("username = ?", "admin@example.com").Count(&count)
 	if count == 0 {
