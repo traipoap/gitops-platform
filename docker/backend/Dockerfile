@@ -1,29 +1,46 @@
+# syntax=docker/dockerfile:1.7
+
 FROM golang:1.26.6-alpine3.24 AS backend-builder
 
-WORKDIR /backend
+WORKDIR /src
 
 RUN apk add --no-cache git gcc musl-dev sqlite-dev
 
 COPY backend/go.mod backend/go.sum ./
-RUN go mod download
 
-COPY backend/ ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
+
+COPY backend/ .
 
 ARG VERSION=unknown
 
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w -X 'main.Version=${VERSION}'" -o /backend/app .
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=1 GOOS=linux go build -trimpath \
+      -ldflags="-s -w -X main.Version=${VERSION}" \
+      -o /out/app .
 
 # ===================================================
-FROM alpine
-RUN apk --no-cache add ca-certificates sqlite-libs
-RUN mkdir -p /backend/exports/
+
+FROM alpine:3.24
+
+RUN apk add --no-cache ca-certificates sqlite-libs tzdata \
+ && addgroup -g 10001 app \
+ && adduser -u 10001 -G app -s /sbin/nologin -D app \
+ && mkdir -p /backend/exports \
+ && chown -R app:app /backend
 
 WORKDIR /backend
 
-COPY --from=backend-builder /backend/app /backend/app
-COPY --from=backend-builder /backend/exports/ /backend/exports/
+COPY --from=backend-builder --chown=app:app /out/app /backend/app
+
+USER app
 
 EXPOSE 8080
-ENV GIN_MODE=release
-ENV PORT=8080
+
+ENV GIN_MODE=release \
+    PORT=8080
+
 CMD ["/backend/app"]
