@@ -5,6 +5,8 @@ import (
 	"exporter/models"
 	"exporter/routers"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -13,31 +15,61 @@ import (
 )
 
 func main() {
+	// Get database path from environment variable
+	dbPath := os.Getenv("DATABASE_PATH")
+	if dbPath == "" {
+		dbPath = "data/users.db" // default path
+	}
+
+	// Ensure the directory exists
+	dbDir := filepath.Dir(dbPath)
+	if err := os.MkdirAll(dbDir, 0755); err != nil {
+		log.Fatalf("failed to create database directory: %v", err)
+	}
+
 	// Initialize Database (SQLite)
-	db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
 	// Auto-migrate the User table
-	db.AutoMigrate(&models.User{})
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		log.Fatalf("failed to migrate database: %v", err)
+	}
 
 	var count int64
 	db.Model(&models.User{}).Where("username = ?", "admin@example.com").Count(&count)
 	if count == 0 {
-		hash, _ := bcrypt.GenerateFromPassword([]byte("admin123"), 10)
-		db.Create(&models.User{Username: "admin@example.com", PasswordHash: string(hash), Role: "admin"})
+		hash, err := bcrypt.GenerateFromPassword([]byte("admin123"), 10)
+		if err != nil {
+			log.Fatalf("failed to hash password: %v", err)
+		}
+		db.Create(&models.User{
+			Username:     "admin@example.com",
+			PasswordHash: string(hash),
+			Role:         "admin",
+		})
 		log.Println("Seeded demo admin user")
 	}
 
 	if err := controllers.InitSearchController(); err != nil {
-		log.Fatal("Failed to initialize: ", err)
+		log.Fatal("Failed to initialize search controller: ", err)
 	}
 	if err := controllers.InitExportController(); err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to initialize export controller: ", err)
 	}
 
 	r := gin.Default()
 	routers.SetupRoutes(r, db)
-	r.Run()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Starting server on port %s", port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }

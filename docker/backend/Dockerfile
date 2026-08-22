@@ -29,6 +29,7 @@ FROM alpine:3.24
 RUN apk add --no-cache ca-certificates sqlite-libs tzdata \
  && addgroup -g 10001 app \
  && adduser -u 10001 -G app -s /sbin/nologin -D app \
+ && mkdir -p /backend/data \
  && mkdir -p /backend/exports \
  && chown -R app:app /backend
 
@@ -41,6 +42,7 @@ USER app
 EXPOSE 8080
 
 ENV GIN_MODE=release \
-    PORT=8080
+    PORT=8080 \
+    DATABASE_PATH=/backend/data/users.db
 
 CMD ["/backend/app"]

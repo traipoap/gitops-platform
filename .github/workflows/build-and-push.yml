@@ -29,7 +29,7 @@ jobs:
         run: podman login ghcr.io -u ${{ github.actor }} -p ${{ secrets.TOKEN_REGISTRY }}
 
       - name: Build image
-        run: podman build -t ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }} -f ${{ inputs.dockerfile }} .
+        run: podman build -t ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }} --build-arg VERSION=0.0.${{ github.run_number }} -f ${{ inputs.dockerfile }} .
 
       - name: Push image
         run: podman push ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }}
