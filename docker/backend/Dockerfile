@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.26.6-alpine3.24 AS backend-builder
+FROM golang:1.26.6-alpine3.24 AS backend-builder
 
 WORKDIR /backend
 

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -16,9 +15,12 @@ var AppConfig *ConfigQW
 func Load() error {
 	_ = godotenv.Load() // ignore error if .env not found
 
-	url := os.Getenv("QUICKWIT_URL")
+	url, port := os.Getenv("QUICKWIT_URL"), os.Getenv("BACKEND_PORT")
 	if url == "" {
-		return fmt.Errorf("QUICKWIT_URL environment variable is required")
+		url = "http://quickwit-searcher:7280"
+	}
+	if port == "" {
+		port = "8080"
 	}
 
 	AppConfig = &ConfigQW{
