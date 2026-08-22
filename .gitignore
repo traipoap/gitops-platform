@@ -36,3 +36,5 @@ frontend/astro-dev.log
 roadmap.md
 README-gitops.md
 backend/users.db
+backend/controllers/handle_export.rs
+backend/controllers/handle_search.rs

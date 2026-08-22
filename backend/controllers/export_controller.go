@@ -183,7 +183,7 @@ func runExport(ctx context.Context, params models.SearchParams) error {
 			break // no cursor, or the bound did not move (avoids looping forever)
 		}
 		prevBound = bound
-		params.EndIndexTimestamp = bound
+		params.EndIndexTimestamp = &bound
 
 		select {
 		case <-ctx.Done():
