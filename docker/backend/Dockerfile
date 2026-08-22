@@ -1,4 +1,4 @@
-FROM golang:1.26.6-alpine3.24 AS backend-builder
+FROM docker.io/library/golang:1.26.6-alpine3.24 AS backend-builder
 
 WORKDIR /backend
 
@@ -20,7 +20,6 @@ RUN apk --no-cache add ca-certificates sqlite-libs
 WORKDIR /backend
 
 COPY --from=backend-builder /backend/app /backend/app
-COPY --from=backend-builder /backend/users.db /backend/users.db
 COPY --from=backend-builder /backend/exports/ /backend/exports/
 
 EXPOSE 8080
