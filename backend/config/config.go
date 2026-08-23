@@ -17,7 +17,7 @@ func Load() error {
 
 	url, port := os.Getenv("QUICKWIT_URL"), os.Getenv("BACKEND_PORT")
 	if url == "" {
-		url = "http://quickwit-searcher:7280"
+		url = "http://127.0.0.1:7280"
 	}
 	if port == "" {
 		port = "8080"

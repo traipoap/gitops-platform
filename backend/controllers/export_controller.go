@@ -3,9 +3,12 @@ package controllers
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
 	"encoding/csv"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -32,6 +35,13 @@ const (
 	exportPagePause = 100 * time.Millisecond
 	exportMaxAge    = 30 * time.Minute // hard cap for a single export job
 )
+
+// HashRecord models the JSON Lines hash registry entry (same as Rust's HashRecord).
+type HashRecord struct {
+	Hash      string `json:"hash"`
+	Timestamp string `json:"timestamp"`
+	Source    string `json:"source"`
+}
 
 func InitExportController() error {
 	if err := config.Load(); err != nil {
@@ -72,6 +82,7 @@ func HandleExport(c *gin.Context) {
 		return
 	}
 
+	// Rate limit: only one export at a time (like Rust's ACTIVE_EXPORTS)
 	if !atomic.CompareAndSwapInt32(&activeExports, 0, 1) {
 		c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many exports in progress"})
 		return
@@ -132,9 +143,6 @@ func runExport(ctx context.Context, params models.SearchParams) error {
 	bufw := bufio.NewWriterSize(file, 1<<20)
 	wtr := csv.NewWriter(bufw)
 
-	headerIndex := make(map[string]int)
-	var headers []string
-	var row []string
 	var processed int
 	prevBound := ""
 
@@ -147,31 +155,25 @@ func runExport(ctx context.Context, params models.SearchParams) error {
 			break
 		}
 
-		if len(headers) == 0 {
-			// Stable schema per index: the first page defines the columns.
-			for _, hit := range page.Hits {
-				for k := range hit {
-					if _, ok := headerIndex[k]; !ok {
-						headerIndex[k] = len(headers)
-						headers = append(headers, k)
-					}
-				}
-			}
-			row = make([]string, len(headers))
-			if err := wtr.Write(headers); err != nil {
+		if processed == 0 {
+			if err := wtr.Write([]string{"message"}); err != nil {
 				return fmt.Errorf("write CSV header: %w", err)
 			}
 		}
 
 		for _, hit := range page.Hits {
-			for i, h := range headers {
-				row[i] = csvCell(hit[h])
+			msg, ok := hit["message"]
+			value := ""
+			if ok && len(msg) > 0 {
+				value = csvCell(msg)
 			}
-			if err := wtr.Write(row); err != nil {
+
+			if err := wtr.Write([]string{value}); err != nil {
 				return fmt.Errorf("write CSV row: %w", err)
 			}
 			processed++
 		}
+
 		if err := bufw.Flush(); err != nil {
 			return fmt.Errorf("flush CSV buffer: %w", err)
 		}
@@ -198,6 +200,17 @@ func runExport(ctx context.Context, params models.SearchParams) error {
 	}
 	if processed == 0 {
 		_ = os.Remove(filePath) // drop the empty file; deferred Close is harmless
+	} else if hash, err := computeSHA256(filePath); err == nil {
+		// Log hash to registry (mirroring Rust's append_hash_record pattern)
+		record := HashRecord{
+			Hash:      hash,
+			Timestamp: time.Now().Format(time.RFC3339),
+			Source:    filePath,
+		}
+		jsonLine, _ := json.Marshal(record)
+		file, _ := os.OpenFile(filepath.Join(exportDirPath, ".hash_registry.jsonl"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		defer file.Close()
+		file.WriteString(string(jsonLine) + "\n")
 	}
 	if err := file.Sync(); err != nil {
 		return fmt.Errorf("sync file: %w", err)
@@ -282,4 +295,46 @@ func HandleDownload(c *gin.Context) {
 	c.Header("Content-Length", fmt.Sprintf("%d", fileInfo.Size()))
 
 	c.File(filePath)
+}
+
+// appendHashRecord logs an export file's SHA256 hash to the registry.
+// This mirrors Rust's append_hash_record function.
+func appendHashRecord(hash, source string) error {
+	record := HashRecord{
+		Hash:      hash,
+		Timestamp: time.Now().Format(time.RFC3339),
+		Source:    source,
+	}
+
+	jsonLine, err := json.Marshal(record)
+	if err != nil {
+		return fmt.Errorf("marshal hash record: %w", err)
+	}
+
+	registryPath := filepath.Join("exports", ".hash_registry.jsonl")
+	file, err := os.OpenFile(registryPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("open hash registry: %w", err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(string(jsonLine) + "\n")
+	return err
+}
+
+// computeSHA256 calculates SHA256 hash of a file.
+func computeSHA256(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("open file: %w", err)
+	}
+	defer file.Close()
+
+	hasher := sha256.New()
+	_, err = io.Copy(hasher, file)
+	if err != nil {
+		return "", fmt.Errorf("read file: %w", err)
+	}
+
+	return fmt.Sprintf("SHA256:%s", hex.EncodeToString(hasher.Sum(nil))), nil
 }

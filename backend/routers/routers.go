@@ -6,6 +6,7 @@ import (
 	"exporter/services"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -33,13 +34,18 @@ func getPort() string {
 }
 
 // setupCORS configures CORS middleware.
-// Uses AllowOriginFunc to reflect the request's origin back, so the app works
-// from localhost, 127.0.0.1, a LAN IP, a different dev port, or a tunnel —
-// instead of only a hard-coded allow list (which caused silent
-// "Failed to fetch" errors for any origin not in the list).
+// Same-origin proxying (npm run dev / dev:k3s) never triggers CORS; CORS_ORIGINS
+// (comma-separated) only matters when a browser on another origin calls the
+// backend directly, e.g. a local frontend testing the K3s backend:
+//
+//	CORS_ORIGINS="http://localhost:4321" go run main.go
 func setupCORS() cors.Config {
+	origins := []string{"http://localhost:4321", "http://127.0.0.1:4321", "https://frontend.example.com"}
+	if v := strings.TrimSpace(os.Getenv("CORS_ORIGINS")); v != "" {
+		origins = strings.Split(v, ",")
+	}
 	return cors.Config{
-		AllowOrigins:     []string{"http://localhost:4321", "http://127.0.0.1:4321", "https://frontend.example.com"},
+		AllowOrigins:     origins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
