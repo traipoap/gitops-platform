@@ -1,16 +1,23 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
+// Where /api/* is forwarded to. Switch between the local Go backend and the
+// K3s ingress WITHOUT editing code:
+//
+//   local : npm run dev            → http://localhost:8080 (default)
+//   K3s   : npm run dev:k3s        → https://frontend.example.com (ingress)
+//   other : API_PROXY_TARGET=http://... npm run dev
+//
+// The browser still calls SAME-ORIGIN /api/... so there is no CORS in any mode.
+const API_PROXY_TARGET = process.env.API_PROXY_TARGET || 'http://localhost:8080';
+
 // https://astro.build/config
 export default defineConfig({
   vite: {
     server: {
-      // Forward /api/* to the local Go backend (http://localhost:8080) so the
-      // browser can call SAME-ORIGIN /api/... with no CORS. Vite's dev-server
-      // proxy is the reliable way to do this (Astro runs on Vite under the hood).
       proxy: {
         '/api': {
-          target: 'https://frontend.example.com',
+          target: API_PROXY_TARGET,
           changeOrigin: true,
         },
       },

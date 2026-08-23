@@ -265,7 +265,7 @@ async function runSearch() {
   const currentHostFilter = document.getElementById("hostFilter").value;
 
   // 2. เตรียม Params พื้นฐาน
-  const params = new URLSearchParams({ index_id: index, max_hits: 10000 });
+  const params = new URLSearchParams({ index_id: index, max_hits: 100 });
 
   // 3. เพิ่ม Query/Message
   if (query) params.set("message", query);
