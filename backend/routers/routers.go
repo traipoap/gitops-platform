@@ -1,12 +1,11 @@
 package routers
 
 import (
+	"exporter/config"
 	"exporter/controllers"
 	"exporter/middleware"
 	"exporter/services"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -14,38 +13,16 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	defaultPort = "8080"
-)
-
 // HandleHome returns a welcome message with API usage information
 func HandleHome(c *gin.Context) {
-	port := getPort()
+	port := config.AppConfig.Port
 	c.String(http.StatusOK, "Dummy Quickwit API is running\n"+
 		"Try: http://localhost:%s/api/v1/syslogs/search?query=8.8.8.8&max_hits=5", port)
 }
 
-// getPort returns the port from environment or default
-func getPort() string {
-	if port := os.Getenv("BACKEND_PORT"); port != "" {
-		return port
-	}
-	return defaultPort
-}
-
-// setupCORS configures CORS middleware.
-// Same-origin proxying (npm run dev / dev:k3s) never triggers CORS; CORS_ORIGINS
-// (comma-separated) only matters when a browser on another origin calls the
-// backend directly, e.g. a local frontend testing the K3s backend:
-//
-//	CORS_ORIGINS="http://localhost:4321" go run main.go
 func setupCORS() cors.Config {
-	origins := []string{"http://localhost:4321", "http://127.0.0.1:4321", "https://frontend.example.com"}
-	if v := strings.TrimSpace(os.Getenv("CORS_ORIGINS")); v != "" {
-		origins = strings.Split(v, ",")
-	}
 	return cors.Config{
-		AllowOrigins:     origins,
+		AllowOrigins:     config.AppConfig.CorsOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -92,7 +69,6 @@ func setupAPIRoutes(r *gin.Engine, jwtService *services.JWTService) {
 // SetupRoutes configures all routes for the application
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 
-	port := getPort()
 	jwtService := services.NewJWTService()
 
 	// Configure middleware
@@ -101,7 +77,4 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	// Setup route groups
 	setupAuthRoutes(r, jwtService, db)
 	setupAPIRoutes(r, jwtService)
-
-	// Start server
-	r.Run(":" + port)
 }

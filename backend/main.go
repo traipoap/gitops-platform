@@ -1,6 +1,7 @@
 package main
 
 import (
+	"exporter/config"
 	"exporter/controllers"
 	"exporter/models"
 	"exporter/routers"
@@ -15,6 +16,11 @@ import (
 )
 
 func main() {
+	// Load configuration (env / .env) before anything else
+	if err := config.Load(); err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
 	// Get database path from environment variable
 	dbPath := os.Getenv("DATABASE_PATH")
 	if dbPath == "" {
@@ -63,13 +69,12 @@ func main() {
 	r := gin.Default()
 	routers.SetupRoutes(r, db)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	log.Printf("Starting server on port %s", port)
-	if err := r.Run(":" + port); err != nil {
+	log.Printf("######################################################################")
+	log.Printf("Starting server on port %s", config.AppConfig.Port)
+	log.Printf("CORS_ORIGINS: %s", config.AppConfig.CorsOrigins)
+	log.Printf("Quickwit_URL: %s", config.AppConfig.QuickwitURL)
+	log.Printf("######################################################################")
+	if err := r.Run(":" + config.AppConfig.Port); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }
