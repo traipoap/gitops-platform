@@ -202,15 +202,9 @@ func runExport(ctx context.Context, params models.SearchParams) error {
 		_ = os.Remove(filePath) // drop the empty file; deferred Close is harmless
 	} else if hash, err := computeSHA256(filePath); err == nil {
 		// Log hash to registry (mirroring Rust's append_hash_record pattern)
-		record := HashRecord{
-			Hash:      hash,
-			Timestamp: time.Now().Format(time.RFC3339),
-			Source:    filePath,
+		if err := appendHashRecord(hash, filePath); err != nil {
+			fmt.Printf("failed to append hash record: %v\n", err)
 		}
-		jsonLine, _ := json.Marshal(record)
-		file, _ := os.OpenFile(filepath.Join(exportDirPath, ".hash_registry.jsonl"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		defer file.Close()
-		file.WriteString(string(jsonLine) + "\n")
 	}
 	if err := file.Sync(); err != nil {
 		return fmt.Errorf("sync file: %w", err)

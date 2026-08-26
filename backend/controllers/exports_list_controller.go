@@ -1,10 +1,9 @@
 package controllers
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
+	"bufio"
+	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,7 +14,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const exportsDir = "./exports"
+const (
+	exportsDir       = "./exports"
+	hashRegistryName = ".hash_registry.jsonl"
+)
 
 type exportFile struct {
 	Name    string `json:"name"`
@@ -24,8 +26,71 @@ type exportFile struct {
 	Hash    string `json:"hash"`
 }
 
+func hashRegistryPath() string {
+	return filepath.Join(exportsDir, hashRegistryName)
+}
+
+// readHashRegistry loads all valid records, in file order (last entry for a
+// given file wins when callers build a name→record map).
+func readHashRegistry() ([]HashRecord, error) {
+	var records []HashRecord
+	f, err := os.Open(hashRegistryPath())
+	if os.IsNotExist(err) {
+		return nil, nil // no registry yet — not an error
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		var rec HashRecord
+		if json.Unmarshal([]byte(line), &rec) != nil || rec.Hash == "" || rec.Source == "" {
+			continue // skip malformed lines
+		}
+		records = append(records, rec)
+	}
+	return records, scanner.Err()
+}
+
+// rewriteHashRegistry atomically rewrites the registry (tmp file + rename).
+func rewriteHashRegistry(records []HashRecord) error {
+	tmp := hashRegistryPath() + ".tmp"
+	f, err := os.Create(tmp)
+	if err != nil {
+		return err
+	}
+	enc := json.NewEncoder(f) // Encode appends '\n' → JSONL
+	for i := range records {
+		if err := enc.Encode(&records[i]); err != nil {
+			f.Close()
+			_ = os.Remove(tmp)
+			return err
+		}
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(tmp)
+		return err
+	}
+	return os.Rename(tmp, hashRegistryPath())
+}
+
 // HandleExportsList returns metadata for every export file (sorted newest-first).
+// Hashes come from .hash_registry.jsonl (computed once at export time) instead
+// of re-hashing every file on each request — that was the slow part. Files with
+// no registry entry (e.g. created before the registry existed) show "unknown".
 func HandleExportsList(c *gin.Context) {
+	records, _ := readHashRegistry()
+	latest := make(map[string]HashRecord, len(records))
+	for _, r := range records {
+		latest[filepath.Base(r.Source)] = r
+	}
+
 	files, err := os.ReadDir(exportsDir)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list exports"})
@@ -34,7 +99,7 @@ func HandleExportsList(c *gin.Context) {
 
 	var result []exportFile
 	for _, f := range files {
-		if f.IsDir() {
+		if f.IsDir() || f.Name() == hashRegistryName {
 			continue
 		}
 		name := f.Name()
@@ -47,16 +112,16 @@ func HandleExportsList(c *gin.Context) {
 			continue
 		}
 
-		h, err := fileSHA256(filepath.Join(exportsDir, name))
-		if err != nil {
-			h = "error"
+		hash := "unknown"
+		if rec, ok := latest[name]; ok {
+			hash = rec.Hash
 		}
 
 		result = append(result, exportFile{
 			Name:    name,
 			ModTime: info.ModTime().Format(time.RFC3339),
 			Size:    uint64(info.Size()),
-			Hash:    fmt.Sprintf("SHA256:%s", h),
+			Hash:    hash,
 		})
 	}
 
@@ -72,7 +137,7 @@ func HandleExportsList(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"exports": result})
 }
 
-// HandleDeleteExport removes a single exported file.
+// HandleDeleteExport removes a single exported file and its registry entries.
 func HandleDeleteExport(c *gin.Context) {
 	filename := c.Param("filename")
 	if filename == "" {
@@ -87,30 +152,38 @@ func HandleDeleteExport(c *gin.Context) {
 	}
 
 	filePath := filepath.Join(exportsDir, cleanName)
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+	_, statErr := os.Stat(filePath)
+
+	// Collect registry entries, dropping every record that points at this file.
+	records, _ := readHashRegistry()
+	inRegistry := false
+	remaining := make([]HashRecord, 0, len(records))
+	for _, r := range records {
+		if filepath.Base(r.Source) == cleanName {
+			inRegistry = true
+			continue
+		}
+		remaining = append(remaining, r)
+	}
+
+	if os.IsNotExist(statErr) && !inRegistry {
 		c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
 		return
 	}
 
-	if err := os.Remove(filePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete file"})
-		return
+	if statErr == nil {
+		if err := os.Remove(filePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete file"})
+			return
+		}
+	}
+
+	if inRegistry {
+		if err := rewriteHashRegistry(remaining); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update hash registry"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("deleted %s", cleanName)})
-}
-
-// fileSHA256 reads a file and returns its hex-encoded SHA-256 digest.
-func fileSHA256(path string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(h.Sum(nil)), nil
 }
