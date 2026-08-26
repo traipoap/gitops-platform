@@ -42,3 +42,4 @@ backend/exports/
 docker/rust-backend/
 rust-backend/
 docker-compose.yml
+.gocache/
