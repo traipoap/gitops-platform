@@ -42,7 +42,15 @@ USER app
 EXPOSE 8080
 
 ENV GIN_MODE=release \
-    PORT=8080 \
+    BACKEND_PORT=8080 \
     DATABASE_PATH=/backend/data/users.db
+
+ARG CORS_ORIGINS
+ENV CORS_ORIGINS=${CORS_ORIGINS}
+
+# JWT signing secret — REQUIRED at runtime (server fails to start without it).
+# Provide via --build-arg or -e JWT_SECRET=...
+ARG JWT_SECRET
+ENV JWT_SECRET=${JWT_SECRET}
 
 CMD ["/backend/app"]
