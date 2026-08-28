@@ -18,8 +18,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      version: ${{ steps.set_version.outputs.version }}
 
     steps:
       - name: Checkout Code
@@ -33,33 +31,3 @@ jobs:
 
       - name: Push image
         run: podman push ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }}
-
-      - name: Set Output Version
-        id: set_version
-        run: echo "version=0.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
-
-  update-infra:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Fleet Infra Repo
-        uses: actions/checkout@v6
-        with:
-          repository: traipoap/fleet-infra
-          token: ${{ secrets.TOKEN_REGISTRY }}
-          ref: main
-
-      - name: Update Image Tags with yq
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            yq -i '.spec.template.spec.containers[0].image = "ghcr.io/traipoap/${{ inputs.service }}:${{ needs.build-and-push.outputs.version }}"' \
-                  "./app/base/${{ inputs.service }}-deployment.yaml"
-
-      - name: Commit and Push to Fleet Infra
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "chore(${{ inputs.service }}): sync image tags to ${{ needs.build-and-push.outputs.version }} [skip ci]" || exit 0
-          git push origin main
