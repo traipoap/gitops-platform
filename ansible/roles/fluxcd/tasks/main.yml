@@ -8,11 +8,14 @@
     - name: Bootstrap Flux to bind cluster with GitHub
       shell: |
         flux bootstrap github \
+          --components-extra=image-reflector-controller,image-automation-controller \
           --owner={{ github_owner }} \
           --repository={{ github_repo }} \
           --branch=main \
           --path=./clusters/dev \
+          --read-write-key \
           --personal
+
       environment:
         GITHUB_TOKEN: "{{ app_git_secret }}"
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
