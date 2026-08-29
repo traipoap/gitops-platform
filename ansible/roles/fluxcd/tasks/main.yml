@@ -8,11 +8,11 @@
     - name: Bootstrap Flux to bind cluster with GitHub
       shell: |
         flux bootstrap github \
-          --components-extra=image-reflector-controller,image-automation-controller \
+          --components-extra=image-reflector-controller,image-automation-controller,source-watcher \
           --owner={{ github_owner }} \
           --repository={{ github_repo }} \
           --branch=main \
-          --path=./clusters/dev \
+          --path=./clusters/staging \
           --read-write-key \
           --personal
 
