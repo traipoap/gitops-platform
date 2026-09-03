@@ -69,11 +69,11 @@ func main() {
 	r := gin.Default()
 	routers.SetupRoutes(r, db)
 
-	log.Printf("######################################################################")
+	log.Printf("##########################################################################################")
 	log.Printf("Starting server on port %s", config.AppConfig.Port)
 	log.Printf("CORS_ORIGINS: %s", config.AppConfig.CorsOrigins)
 	log.Printf("Quickwit_URL: %s", config.AppConfig.QuickwitURL)
-	log.Printf("######################################################################")
+	log.Printf("##########################################################################################")
 	if err := r.Run(":" + config.AppConfig.Port); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
