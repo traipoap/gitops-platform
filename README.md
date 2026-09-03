@@ -1,7 +1,7 @@
 # K3s GitOps Platform on Proxmox
 
-[![Frontend Build & Deploy](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml)
-[![Backend Build & Deploy](https://github.com/traipoap/gitops-platform/actions/workflows/backend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/backend-build.yml)
+[![Frontend](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml)
+[![Backend](https://github.com/traipoap/gitops-platform/actions/workflows/backend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/backend-build.yml)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-K3s-326ce5)
 ![GitOps](https://img.shields.io/badge/GitOps-FluxCD-5468ff)
 ![IaC](https://img.shields.io/badge/IaC-Terraform%20%7C%20Ansible-7b42bc)
@@ -308,137 +308,143 @@ Before you begin, ensure the following tools are installed on your workstation:
 
 ```
 .
+├── .github
+│   └── workflows
+│       ├── backend-build.yml
+│       ├── build-and-push.yml
+│       └── frontend-build.yml
 ├── ansible
-│   ├── ansible.cfg
-│   ├── inventory
-│   │   └── hosts
-│   ├── playbooks
-│   │   ├── 00-prerequisites.yml
-│   │   ├── 01-cluster-setup.yml
-│   │   ├── 02-servicemesh.yml
-│   │   ├── 03-storage-networking.yml
-│   │   ├── 04-garage-deploy.yml
-│   │   ├── 05-gitops-bootstrap.yml
-│   │   ├── files
-│   │   │   └── k3s-kubeconfig.yaml
-│   │   └── quickstart.sh
-│   └── roles
-│       ├── common
-│       │   └── tasks
-│       │       └── main.yml
-│       ├── fluxcd
-│       │   └── tasks
-│       │       └── main.yml
-│       ├── garage
-│       │   ├── tasks
-│       │   │   └── main.yml
-│       │   └── templates
-│       │       ├── garage.toml.j2
-│       │       └── systemd
-│       │           └── garage.service.j2
-│       ├── istio
-│       │   └── tasks
-│       │       └── main.yml
-│       ├── k3s-agent
-│       │   └── tasks
-│       │       └── main.yml
-│       ├── k3s-server
-│       │   └── tasks
-│       │       └── main.yml
-│       ├── load-balance
-│       │   ├── tasks
-│       │   │   └── main.yml
-│       │   └── templates
-│       │       └── haproxy.cfg.j2
-│       ├── nfs
-│       │   ├── tasks
-│       │   │   └── main.yml
-│       │   └── templates
-│       │       └── exports.j2
-│       └── runtime
-│           └── tasks
-│               └── main.yml
+│   ├── ansible.cfg
+│   ├── inventory
+│   │   └── hosts
+│   ├── playbooks
+│   │   ├── 00-prerequisites.yml
+│   │   ├── 01-cluster-setup.yml
+│   │   ├── 02-servicemesh.yml
+│   │   ├── 03-storage-networking.yml
+│   │   ├── 04-garage-deploy.yml
+│   │   ├── 05-gitops-bootstrap.yml
+│   │   └── quickstart.sh
+│   └── roles
+│       ├── common
+│       │   └── tasks
+│       │       └── main.yml
+│       ├── fluxcd
+│       │   └── tasks
+│       │       └── main.yml
+│       ├── garage
+│       │   ├── tasks
+│       │   │   └── main.yml
+│       │   └── templates
+│       │       ├── garage.toml.j2
+│       │       └── systemd
+│       │           └── garage.service.j2
+│       ├── istio
+│       │   └── tasks
+│       │       └── main.yml
+│       ├── k3s-agent
+│       │   └── tasks
+│       │       └── main.yml
+│       ├── k3s-server
+│       │   └── tasks
+│       │       └── main.yml
+│       ├── load-balance
+│       │   ├── tasks
+│       │   │   └── main.yml
+│       │   └── templates
+│       │       └── haproxy.cfg.j2
+│       ├── nfs
+│       │   ├── tasks
+│       │   │   └── main.yml
+│       │   └── templates
+│       │       └── exports.j2
+│       └── runtime
+│           └── tasks
+│               └── main.yml
 ├── backend
-│   ├── config
-│   │   ├── config.go
-│   │   └── jwt.go
-│   ├── controllers
-│   │   ├── export_controller.go
-│   │   ├── exports_list_controller.go
-│   │   ├── protected_controller.go
-│   │   ├── register_controller.go
-│   │   ├── search_controller.go
-│   │   └── signin_controller.go
-│   ├── go.mod
-│   ├── go.sum
-│   ├── main.go
-│   ├── middleware
-│   │   └── jwt.go
-│   ├── models
-│   │   ├── export.go
-│   │   ├── jwt.go
-│   │   ├── register.go
-│   │   └── search.go
-│   ├── routers
-│   │   └── routers.go
-│   ├── services
-│   │   ├── download_service.go
-│   │   ├── export_service.go
-│   │   ├── jwt.go
-│   │   └── quickwit_client.go
-│   └── users.db
+│   ├── config
+│   │   ├── config.go
+│   │   └── jwt.go
+│   ├── controllers
+│   │   ├── export_controller.go
+│   │   ├── exports_list_controller.go
+│   │   ├── protected_controller.go
+│   │   ├── register_controller.go
+│   │   ├── search_controller.go
+│   │   └── signin_controller.go
+│   ├── go.mod
+│   ├── go.sum
+│   ├── main.go
+│   ├── middleware
+│   │   └── jwt.go
+│   ├── models
+│   │   ├── export.go
+│   │   ├── jwt.go
+│   │   ├── register.go
+│   │   └── search.go
+│   ├── routers
+│   │   └── routers.go
+│   └── services
+│       ├── download_service.go
+│       ├── export_service.go
+│       ├── jwt.go
+│       └── quickwit_client.go
 ├── docker
-│   ├── backend
-│   │   └── Dockerfile
-│   └── frontend
-│       └── Dockerfile
-├── docker-compose.yml
+│   ├── backend
+│   │   └── Dockerfile
+│   └── frontend
+│       └── Dockerfile
 ├── frontend
-│   ├── astro.config.mjs
-│   ├── astro-dev.log
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── public
-│   │   ├── favicon.ico
-│   │   └── favicon.svg
-│   ├── src
-│   │   ├── assets
-│   │   │   ├── astro.svg
-│   │   │   ├── background.svg
-│   │   │   └── logout.svg
-│   │   ├── components
-│   │   │   └── Welcome.astro
-│   │   ├── layouts
-│   │   │   └── Layout.astro
-│   │   ├── pages
-│   │   │   ├── 404.astro
-│   │   │   ├── dashboard.astro
-│   │   │   ├── index.astro
-│   │   │   ├── signin.astro
-│   │   │   └── signup.astro
-│   │   ├── scripts
-│   │   │   └── dashboard.js
-│   │   └── styles
-│   │       ├── logs.css
-│   │       ├── main.css
-│   │       ├── signin.css
-│   │       └── signup.css
-│   └── tsconfig.json
+│   ├── .vscode
+│   │   ├── extensions.json
+│   │   └── launch.json
+│   ├── astro.config.mjs
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public
+│   │   ├── favicon.ico
+│   │   └── favicon.svg
+│   ├── src
+│   │   ├── assets
+│   │   │   ├── astro.svg
+│   │   │   ├── background.svg
+│   │   │   └── logout.svg
+│   │   ├── components
+│   │   │   └── Welcome.astro
+│   │   ├── layouts
+│   │   │   └── Layout.astro
+│   │   ├── pages
+│   │   │   ├── 404.astro
+│   │   │   ├── dashboard.astro
+│   │   │   ├── index.astro
+│   │   │   ├── signin.astro
+│   │   │   └── signup.astro
+│   │   ├── scripts
+│   │   │   └── dashboard.js
+│   │   └── styles
+│   │       ├── logs.css
+│   │       ├── main.css
+│   │       ├── signin.css
+│   │       └── signup.css
+│   └── tsconfig.json
+├── terraform
+│   ├── .terraform.lock.hcl
+│   ├── backend.tf
+│   ├── locals.tf
+│   ├── main.tf
+│   ├── provider.tf
+│   ├── templates
+│   │   ├── haproxy.tpl
+│   │   └── hosts.tpl
+│   └── variables.tf
+├── .dockerignore
+├── .gitignore
+├── LICENSE
 ├── README.md
-├── roadmap.md
-├── start-app.sh
-└── terraform
-    ├── backend.tf
-    ├── locals.tf
-    ├── main.tf
-    ├── provider.tf
-    ├── templates
-    │   ├── haproxy.tpl
-    │   └── hosts.tpl
-    └── variables.tf
-
-49 directories, 80 files
+└── start-app.sh
 ```
+
+> **Local-only files (gitignored, generated at runtime):** `.env` / `.env.example` (root), `backend/.env`, `backend/data/users.db`, `backend/exports/` (exported CSVs + `.hash_registry.jsonl`), `frontend/.env`, `terraform/*.tfstate`, `terraform/secrets.auto.tfvars`.
 
 ---
 
@@ -577,18 +583,32 @@ kubectl get helmreleases -A
 The CI/CD pipeline uses GitHub Actions.
 
 When code is pushed to the repository, the pipeline performs:
-1. Lint and test the application
+1. Security gate (every push / PR): **Gitleaks** secret scan of the full history + **SonarQube** code quality & security analysis
 2. Build a Docker image
-3. Push the image to a container registry
-4. Update the GitOps repository with the new image tag
-5. FluxCD detects the change and deploys the new version
+3. Scan the image with **Trivy** **before** pushing — CRITICAL/HIGH gate, so vulnerable images never reach the registry (SARIF uploaded to the Security tab)
+4. Push the image to a container registry (GHCR)
+5. Update the GitOps repository with the new image tag
+6. FluxCD detects the change and deploys the new version
+
+### Required repository secrets and variables
+
+| Type | Name | Example value | Used by |
+|---|---|---|---|
+| Variable | `SONAR_HOST_URL` | `http://10.10.16.4:9000` | SonarQube job |
+| Secret | `SONAR_TOKEN` | `sonarqube_…` | SonarQube job |
+| Secret | `TOKEN_REGISTRY` | GHCR fine-grained PAT | build & Trivy jobs |
+
+> All server addresses and credentials are read from **Settings → Secrets and variables → Actions** — no IP, token, or secret is hardcoded in any workflow file.
 
 ### Example workflow
 ```mermaid
 flowchart LR
     A["git push"] --> B["GitHub Actions"]
+    B --> S1["Gitleaks (history)"]
+    B --> S2["SonarQube"]
     B --> C["Build image"]
-    C --> D["Push image to registry"]
+    C --> T["Trivy scan (gate)"]
+    T --> D["Push image to registry"]
     D --> E["Update GitOps repo"]
     E --> F["FluxCD sync"]
     F --> G["Application updated"]
