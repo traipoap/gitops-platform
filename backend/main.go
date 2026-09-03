@@ -24,7 +24,7 @@ func main() {
 	// Get database path from environment variable
 	dbPath := os.Getenv("DATABASE_PATH")
 	if dbPath == "" {
-		dbPath = "data/users.db" // default path
+		dbPath = "backend/data/users.db" // default path
 	}
 
 	// Ensure the directory exists
