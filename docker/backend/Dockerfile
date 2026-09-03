@@ -33,6 +33,8 @@ RUN apk add --no-cache ca-certificates sqlite-libs tzdata \
  && mkdir -p /backend/exports \
  && chown -R app:app /backend
 
+RUN apk upgrade --no-cache
+
 WORKDIR /backend
 
 COPY --from=backend-builder --chown=app:app /out/app /backend/app
