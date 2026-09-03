@@ -596,11 +596,10 @@ When code is pushed to the repository, a single pipeline (`.github/workflows/pip
 | Type | Name | Example value | Used by |
 |---|---|---|---|
 | Variable | `SONAR_HOST_URL` | `http://10.10.16.4:9000` | SonarQube job |
-| Variable | `SONAR_PROJECT_KEY` | `traipoap_gitops-platform` | SonarQube job |
 | Secret | `SONAR_TOKEN` | `sonarqube_…` | SonarQube job |
 | Secret | `TOKEN_REGISTRY` | GHCR fine-grained PAT | build & Trivy steps |
 
-> All server addresses and credentials are read from **Settings → Secrets and variables → Actions** — no IP, token, or secret is hardcoded in any workflow file.
+> Server address and credentials come from **Settings → Secrets and variables → Actions** — no IP, token, or secret is hardcoded in any workflow file. The SonarQube **project key** is not a secret, so it lives in [`sonar-project.properties`](sonar-project.properties) at the repo root (it must match a project that exists on your SonarQube server).
 
 ### Example workflow
 ```mermaid
