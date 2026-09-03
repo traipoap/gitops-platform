@@ -7,7 +7,6 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "dev:k3s": "API_PROXY_TARGET=https://frontend.example.com astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
