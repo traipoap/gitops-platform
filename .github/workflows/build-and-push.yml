@@ -35,7 +35,7 @@ jobs:
       # (trivy-action v0.36+ input schema: scan-type + scan-ref for local
       # images; `image`/`output-format`/`output-file` were removed)
       - name: Run Trivy vulnerability scanner (local image mode)
-        uses: aquasecurity/trivy-action@v0.74.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'image'
           scan-ref: ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }}
