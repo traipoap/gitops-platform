@@ -30,6 +30,18 @@ on:
       - '.github/workflows/**'
   pull_request:
 
+  # Manual trigger from the Actions tab — useful to (re)build services on
+  # demand, e.g. after fixing SonarQube findings or when a previous run was
+  # skipped by the path filter (docs/workflow-only changes).
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Build backend + frontend even if their paths did not change'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+
 # NOTE: no top-level `permissions:` block here on purpose — a caller-level
 # permissions block becomes the ceiling for the reusable build workflow and
 # strips the `packages: write` / `security-events: write` it needs. Each job
@@ -104,7 +116,9 @@ jobs:
     name: Backend — build, Trivy scan, push
     # Gates: if gitleaks or sonarqube failed, this job is skipped.
     needs: [changes, gitleaks, sonarqube]
-    if: needs.changes.outputs.backend == 'true'
+    if: >-
+      needs.changes.outputs.backend == 'true' ||
+      (github.event_name == 'workflow_dispatch' && inputs.force_build == 'true')
     uses: ./.github/workflows/build-and-push.yml
     with:
       service: backend
@@ -115,7 +129,9 @@ jobs:
     name: Frontend — build, Trivy scan, push
     # Gates: if gitleaks or sonarqube failed, this job is skipped.
     needs: [changes, gitleaks, sonarqube]
-    if: needs.changes.outputs.frontend == 'true'
+    if: >-
+      needs.changes.outputs.frontend == 'true' ||
+      (github.event_name == 'workflow_dispatch' && inputs.force_build == 'true')
     uses: ./.github/workflows/build-and-push.yml
     with:
       service: frontend
