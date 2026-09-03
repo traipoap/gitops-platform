@@ -48,6 +48,7 @@ jobs:
           # Fail on known (fixable) CRITICAL findings → blocks the push.
           # Set exit-code: '0' to make this report-only.
           exit-code: '1'
+          limit-severities-for-sarif: true
 
       - name: Upload Trivy results to GitHub Security tab
         if: success() || failure()
