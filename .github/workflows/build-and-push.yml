@@ -32,13 +32,15 @@ jobs:
 
       # Scan the LOCAL image BEFORE pushing — if the gate fails, the Push
       # step is skipped and no vulnerable image reaches the registry.
+      # (trivy-action v0.36+ input schema: scan-type + scan-ref for local
+      # images; `image`/`output-format`/`output-file` were removed)
       - name: Run Trivy vulnerability scanner (local image mode)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image: ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }}
-          format: 'table'
-          output-format: 'sarif'
-          output-file: 'trivy-results.sarif'
+          scan-type: 'image'
+          scan-ref: ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           vuln-type: 'os,library'
