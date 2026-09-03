@@ -15,6 +15,8 @@ RUN apk --no-cache add ca-certificates \
  && addgroup -g 10001 app \
  && adduser -u 10001 -G app -s /sbin/nologin -D app
 
+RUN apk upgrade --no-cache
+
 WORKDIR /app
 
 COPY --from=builder --chown=app:app /app/dist /app/dist
