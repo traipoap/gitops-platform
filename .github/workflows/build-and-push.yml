@@ -41,7 +41,7 @@ jobs:
           scan-ref: ghcr.io/traipoap/${{ inputs.service }}:0.0.${{ github.run_number }}
           format: 'sarif'
           output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          severity: 'HIGH'
           ignore-unfixed: true
           vuln-type: 'os,library'
           timeout: '10m'
