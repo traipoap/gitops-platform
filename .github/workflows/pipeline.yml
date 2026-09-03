@@ -28,8 +28,10 @@ on:
       - '.github/workflows/**'
   pull_request:
 
-permissions:
-  contents: read
+# NOTE: no top-level `permissions:` block here on purpose — a caller-level
+# permissions block becomes the ceiling for the reusable build workflow and
+# strips the `packages: write` / `security-events: write` it needs. Each job
+# below declares only what it requires.
 
 jobs:
   changes:
