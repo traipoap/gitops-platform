@@ -1,14 +1,16 @@
 // @ts-check
+import 'dotenv/config'; // ← บรรทัดนี้ใหม่: โหลด frontend/.env → process.env
 import { defineConfig } from 'astro/config';
 
-// Where /api/* is forwarded to. Switch between the local Go backend and the
-// K3s ingress WITHOUT editing code:
+// Where /api/* is forwarded to. Priority (highest first):
+//   1. shell env   : API_PROXY_TARGET=http://... npm run dev
+//   2. frontend/.env : API_PROXY_TARGET=...   (loaded via dotenv above)
+//   3. default     : http://localhost:8080
 //
-//   local : npm run dev            → http://localhost:8080 (default)
-//   K3s   : npm run dev:k3s        → https://frontend.example.com (ingress)
-//   other : API_PROXY_TARGET=http://... npm run dev
-//
-// The browser still calls SAME-ORIGIN /api/... so there is no CORS in any mode.
+// NOTE: astro.config.mjs is evaluated before Vite loads .env into
+// import.meta.env — so we load it explicitly here with dotenv (which does
+// NOT overwrite variables already set in the shell).
+
 const API_PROXY_TARGET = process.env.API_PROXY_TARGET || 'http://localhost:8080';
 
 // Hosts the dev/preview servers accept (Vite host check). Inject the real
