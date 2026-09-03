@@ -1,10 +1,10 @@
 # K3s GitOps Platform on Proxmox
 
-[![Frontend](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/frontend-build.yml)
-[![Backend](https://github.com/traipoap/gitops-platform/actions/workflows/backend-build.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/backend-build.yml)
+[![Pipeline](https://github.com/traipoap/gitops-platform/actions/workflows/pipeline.yml/badge.svg)](https://github.com/traipoap/gitops-platform/actions/workflows/pipeline.yml)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-K3s-326ce5)
 ![GitOps](https://img.shields.io/badge/GitOps-FluxCD-5468ff)
 ![IaC](https://img.shields.io/badge/IaC-Terraform%20%7C%20Ansible-7b42bc)
+![Trivy](https://img.shields.io/badge/Security-Trivy%20%7C%20Gitleaks%20%7C%20SonarQube-13773d)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 A Ready-production / portfolio platform for provisioning and managing a Kubernetes cluster using Infrastructure as Code, GitOps, CI/CD, observability, and security.
@@ -310,9 +310,8 @@ Before you begin, ensure the following tools are installed on your workstation:
 .
 ├── .github
 │   └── workflows
-│       ├── backend-build.yml
 │       ├── build-and-push.yml
-│       └── frontend-build.yml
+│       └── pipeline.yml
 ├── ansible
 │   ├── ansible.cfg
 │   ├── inventory
@@ -582,13 +581,15 @@ kubectl get helmreleases -A
 ## CI/CD Pipeline
 The CI/CD pipeline uses GitHub Actions.
 
-When code is pushed to the repository, the pipeline performs:
-1. Security gate (every push / PR): **Gitleaks** secret scan of the full history + **SonarQube** code quality & security analysis
-2. Build a Docker image
-3. Scan the image with **Trivy** **before** pushing — CRITICAL/HIGH gate, so vulnerable images never reach the registry (SARIF uploaded to the Security tab)
-4. Push the image to a container registry (GHCR)
-5. Update the GitOps repository with the new image tag
-6. FluxCD detects the change and deploys the new version
+When code is pushed to the repository, a single pipeline (`.github/workflows/pipeline.yml`) runs:
+1. **Security gate** (every push / PR): Gitleaks secret scan of the full history + SonarQube code quality & security analysis
+2. **Per-service build** — only for services whose paths changed, **and only if the security gate passed** (a failing Gitleaks or SonarQube job skips the builds entirely)
+3. Build the Docker image
+4. Scan the image with **Trivy** **before** pushing — CRITICAL/HIGH gate, so vulnerable images never reach the registry (SARIF uploaded to the Security tab)
+5. Push the image to a container registry (GHCR)
+6. FluxCD detects the new tag and deploys it
+
+> The GitOps repository image-tag update is handled by the FluxCD bootstrap configuration in the GitOps repo; the pipeline itself stops at a verified, pushed image.
 
 ### Required repository secrets and variables
 
@@ -596,21 +597,23 @@ When code is pushed to the repository, the pipeline performs:
 |---|---|---|---|
 | Variable | `SONAR_HOST_URL` | `http://10.10.16.4:9000` | SonarQube job |
 | Secret | `SONAR_TOKEN` | `sonarqube_…` | SonarQube job |
-| Secret | `TOKEN_REGISTRY` | GHCR fine-grained PAT | build & Trivy jobs |
+| Secret | `TOKEN_REGISTRY` | GHCR fine-grained PAT | build & Trivy steps |
 
 > All server addresses and credentials are read from **Settings → Secrets and variables → Actions** — no IP, token, or secret is hardcoded in any workflow file.
 
 ### Example workflow
 ```mermaid
 flowchart LR
-    A["git push"] --> B["GitHub Actions"]
+    A["git push"] --> B["Pipeline"]
     B --> S1["Gitleaks (history)"]
-    B --> S2["SonarQube"]
-    B --> C["Build image"]
+    B --> S2["SonarQube (gate)"]
+    S1 --> G{"gate passed?"}
+    S2 --> G
+    G -->|"yes + paths changed"| C["Build image"]
+    G -->|"no"| X["build skipped"]
     C --> T["Trivy scan (gate)"]
     T --> D["Push image to registry"]
-    D --> E["Update GitOps repo"]
-    E --> F["FluxCD sync"]
+    D --> E["FluxCD sync"]
     F --> G["Application updated"]
 ```
 
