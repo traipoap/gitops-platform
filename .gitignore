@@ -37,9 +37,9 @@ roadmap.md
 README-gitops.md
 backend/users.db
 rust-backend/exports/
-backend/data/
 backend/exports/
 docker/rust-backend/
 rust-backend/
 docker-compose.yml
 .gocache/
+backend/backend/data/
