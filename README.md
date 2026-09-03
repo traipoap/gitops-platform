@@ -596,6 +596,7 @@ When code is pushed to the repository, a single pipeline (`.github/workflows/pip
 | Type | Name | Example value | Used by |
 |---|---|---|---|
 | Variable | `SONAR_HOST_URL` | `http://10.10.16.4:9000` | SonarQube job |
+| Variable | `SONAR_PROJECT_KEY` | `traipoap_gitops-platform` | SonarQube job |
 | Secret | `SONAR_TOKEN` | `sonarqube_…` | SonarQube job |
 | Secret | `TOKEN_REGISTRY` | GHCR fine-grained PAT | build & Trivy steps |
 
