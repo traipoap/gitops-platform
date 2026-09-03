@@ -313,8 +313,7 @@ async function runSearch() {
     // 8. อัปเดต Dropdown Source IP
     const uniqueIps = (data.hits || [])
       .map(item => item.source_ip)
-      .filter((id, idx, self) => id && self.indexOf(id) === idx)
-      .sort((a, b) => (a === '192.168.1.2' ? -1 : b === '192.168.1.2' ? 1 : 0));
+      .filter((id, idx, self) => id && self.indexOf(id) === idx);
 
     document.getElementById("sourceFilter").innerHTML = ['<option value="">All Sources</option>']
       .concat(uniqueIps.map(id => `<option value="${id}">${id}</option>`))
@@ -324,8 +323,7 @@ async function runSearch() {
 
     const uniqueHosts = (data.hits || [])
       .map(item => item.host)
-      .filter((id, idx, self) => id && self.indexOf(id) === idx)
-      .sort((a, b) => (a === '192.168.1.2' ? -1 : b === '192.168.1.2' ? 1 : 0));
+      .filter((id, idx, self) => id && self.indexOf(id) === idx);
 
     document.getElementById("hostFilter").innerHTML = ['<option value="">All Hosts</option>']
       .concat(uniqueHosts.map(id => `<option value="${id}">${id}</option>`))
