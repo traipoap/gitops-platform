@@ -1,0 +1,114 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Single entry-point pipeline:
+#   1. Security gate — Gitleaks (secret scan of full history) +
+#      SonarQube (code quality & security analysis)
+#   2. Per-service build (only when that service's paths changed) —
+#      and ONLY if the security gate passed. A failing Gitleaks or
+#      SonarQube job skips the builds automatically.
+#
+# Build → Trivy scan (gate) → push to GHCR happens inside the reusable
+# workflow .github/workflows/build-and-push.yml
+#
+# Configuration lives in Settings → Secrets and variables → Actions
+# (nothing secret is hardcoded in this file):
+#   Variable : SONAR_HOST_URL   e.g. http://10.10.16.4:9000
+#   Secret   : SONAR_TOKEN      e.g. sonarqube_xxxxxxxxxxxxxxxx
+#   Secret   : TOKEN_REGISTRY   GHCR fine-grained PAT
+
+name: Pipeline (Security → Build → Trivy → Push)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker/**'
+      - '.github/workflows/**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect changed service
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Path filters
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'docker/backend/**'
+            frontend:
+              - 'frontend/**'
+              - 'docker/frontend/**'
+
+  gitleaks:
+    name: Gitleaks — secret scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # required to upload the SARIF report
+    steps:
+      - name: Checkout Code (full history)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # scan ALL commits, not just the tip
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          # Lets the action publish the SARIF report to the Security tab
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sonarqube:
+    name: SonarQube — code quality & security
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # post inline findings on PRs
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # full history for accurate new-code analysis
+
+      - name: Analyze with SonarQube
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          # Server address (repo Variable) + auth token (repo Secret)
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build-backend:
+    name: Backend — build, Trivy scan, push
+    # Gates: if gitleaks or sonarqube failed, this job is skipped.
+    needs: [changes, gitleaks, sonarqube]
+    if: needs.changes.outputs.backend == 'true'
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      service: backend
+      dockerfile: ./docker/backend/Dockerfile
+    secrets: inherit
+
+  build-frontend:
+    name: Frontend — build, Trivy scan, push
+    # Gates: if gitleaks or sonarqube failed, this job is skipped.
+    needs: [changes, gitleaks, sonarqube]
+    if: needs.changes.outputs.frontend == 'true'
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      service: frontend
+      dockerfile: ./docker/frontend/Dockerfile
+    secrets: inherit
