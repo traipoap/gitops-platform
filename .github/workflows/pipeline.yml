@@ -83,7 +83,7 @@ jobs:
           fetch-depth: 0 # scan ALL commits, not just the tip
 
       - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           # Lets the action publish the SARIF report to the Security tab
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -101,7 +101,7 @@ jobs:
           fetch-depth: 0 # full history for accurate new-code analysis
 
       - name: Analyze with SonarQube
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v8
         env:
           # Server + auth from repo Variable/Secret; project key & settings
           # from the committed sonar-project.properties file
