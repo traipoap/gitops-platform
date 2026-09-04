@@ -614,7 +614,7 @@ flowchart LR
     C --> T["Trivy scan (gate)"]
     T --> D["Push image to registry"]
     D --> E["FluxCD sync"]
-    F --> G["Application updated"]
+    E --> H["Application updated"]
 ```
 
 ---
@@ -790,16 +790,31 @@ kubectl get events -n <namespace> --sort-by=.metadata.creationTimestamp
 ---
 
 ## Roadmap
-- Add Velero backup and restore testing
-- Add Kyverno policy enforcement
-- Add NetworkPolicies for namespace isolation
-- Add SOPS or External Secrets for secret management
-- Add image vulnerability scanning in CI
-- Add automated testing for Kubernetes manifests
-- Add multi-environment promotion: dev, staging, production
-- Add disaster recovery runbook with measured RTO/RPO
-- Add Ceph for more production-grade storage
-- Add OpenTelemetry tracing
+
+### ✅ Completed — CI/CD security baseline
+- Security gate before build: Gitleaks (secret scan of full history) + SonarQube (quality gate — fail = no build)
+- Trivy image vulnerability scan **before** push to GHCR (CRITICAL/HIGH gate + SARIF in Security tab)
+- Path-filtered builds — only changed services are rebuilt
+- All IPs/tokens centralized in Actions Variables & Secrets — nothing hardcoded in workflows
+
+### Next — DevOps Engineering
+
+**Reliability & disaster recovery**
+- Velero backup with periodic **restore testing** (backup you haven't restored is not a backup)
+- DR runbook with **measured RTO/RPO** for the K3s cluster + Quickwit data
+- Ceph to replace NFS for production-grade, replicated storage
+
+**GitOps maturity & policy-as-code**
+- Kyverno policy enforcement (required labels, resource quotas, disallow privileged containers)
+- NetworkPolicies for namespace isolation (default-deny posture)
+- External Secrets Operator — keep secrets **out of the GitOps repo** entirely
+- Multi-environment promotion: dev → staging → production with stacked GitOps configs and per-env gate
+
+**Pipeline & supply chain**
+- OIDC (workload identity) for GHCR push — eliminate the long-lived registry PAT
+- Kubernetes manifest validation as a pipeline gate (kubeconform + `kubectl apply --dry-run=server`)
+- Image signing with cosign + Flux verification, and SBOM (syft) published as build artifacts
+- OpenTelemetry end-to-end tracing + Prometheus alert rules and SLO dashboards for the platform itself
 
 ---
 
