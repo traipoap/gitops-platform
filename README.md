@@ -573,7 +573,7 @@ flux bootstrap github \
       --owner=traipoap \
       --repository=fleet-infra \
       --branch=main \
-      --path=./clusters/dev \
+      --path=./clusters/staging \
       --personal
 ```
 
@@ -715,15 +715,15 @@ Garage provides S3-compatible object storage.
 - RBAC for access control
 - Pod security best practices
 - Automated reconciliation to reduce configuration drift
+- External Secrets Operator
+- Container image scanning (Trivy in CI)
+- Private registry authentication
 
 ### Recommended additional improvements
 - SOPS + age for secret encryption
-- External Secrets Operator
 - Kyverno or OPA Gatekeeper policies
 - NetworkPolicies
-- Container image scanning
 - Signed container images
-- Private registry authentication
 
 ---
 
