@@ -136,10 +136,21 @@ flowchart LR
 flowchart LR
     Dev[Developer]
     AppRepo[Application Repository]
-    GHActions[GitHub Actions]
-    Registry[Container Registry]
+
+    subgraph CI["GitHub Actions — Pipeline"]
+        Sec["Security gate<br/>Gitleaks + SonarQube"]
+        Build[Build image]
+        Trivy["Trivy scan (gate)"]
+    end
+
+    Registry["GHCR<br/>Container Registry"]
     GitOpsRepo[GitOps Repository]
-    FluxCD[FluxCD]
+
+    subgraph Flux["FluxCD (in-cluster)"]
+        ImgAuto["Image Automation<br/>ImagePolicy: semver &gt;= 0.0.0"]
+        Ctl["Source / Kustomize / Helm controllers"]
+    end
+
     K3s[K3s Cluster]
     Apps[Applications]
     Monitoring[Prometheus / Grafana / Kiali]
@@ -147,11 +158,14 @@ flowchart LR
     Storage[NFS / Garage Object Storage]
 
     Dev -->|git push| AppRepo
-    AppRepo -->|trigger pipeline| GHActions
-    GHActions -->|build and push image| Registry
-    GHActions -->|update image tag| GitOpsRepo
-    FluxCD -->|sync manifests| GitOpsRepo
-    FluxCD -->|deploy workloads| K3s
+    AppRepo -->|trigger pipeline| Sec
+    Sec -->|gate passed| Build
+    Build --> Trivy
+    Trivy -->|scan passed| Registry
+    Registry -->|new tag detected| ImgAuto
+    ImgAuto -->|commit new image tag| GitOpsRepo
+    GitOpsRepo -->|desired state| Ctl
+    Ctl -->|reconcile + deploy| K3s
     K3s --> Apps
     K3s --> Monitoring
     K3s --> Logging
@@ -672,12 +686,12 @@ NFS is used for persistent storage in this lab environment.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: nfs-client
+  name: nfs-subdir-external-provisioner
 provisioner: cluster.local/nfs-subdir-external-provisioner
 parameters:
   server: 10.10.16.4
   path: /nfs
-reclaimPolicy: Retain
+reclaimPolicy: Delete
 volumeBindingMode: Immediate
 ```
 
