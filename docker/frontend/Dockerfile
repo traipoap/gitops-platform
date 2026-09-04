@@ -18,6 +18,8 @@ RUN apk --no-cache add ca-certificates \
 RUN apk upgrade --no-cache && \
     npm install -g npm@11.19.1
 
+RUN chown -R $(whoami) /app
+
 WORKDIR /app
 
 COPY --from=builder --chown=app:app /app/dist /app/dist
