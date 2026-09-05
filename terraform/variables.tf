@@ -134,7 +134,7 @@ variable "cluster_node_specs" {
     master = {
       vm_id_base = 210
       name_base  = "k3s-master"
-      cpu_cores  = 1
+      cpu_cores  = 2
       ram_mb     = 4096
       ip_base    = 11
       disks = [
@@ -144,7 +144,7 @@ variable "cluster_node_specs" {
     worker = {
       vm_id_base = 220
       name_base  = "k3s-worker"
-      cpu_cores  = 1
+      cpu_cores  = 2
       ram_mb     = 8192
       ip_base    = 21
       disks = [
