@@ -103,8 +103,8 @@ Node `N` (1-based) of a role gets name `<name-base>-N`, vm_id `<vm_id_base> + N 
 | Role | Name pattern | vCPU | RAM | Disk | IP (vLan 16) |
 |---|---|---:|---:|---:|---:|
 | super | `super-node-N` | 1 | 2 GB | 32 GB + 100 GB | 10.10.16.4 + N−1 |
-| master | `k3s-master-N` | 1 | 4 GB | 32 GB | 10.10.16.11 + N−1 |
-| worker | `k3s-worker-N` | 1 | 8 GB | 32 GB | 10.10.16.21 + N−1 |
+| master | `k3s-master-N` | 2 | 4 GB | 32 GB | 10.10.16.11 + N−1 |
+| worker | `k3s-worker-N` | 2 | 8 GB | 32 GB | 10.10.16.21 + N−1 |
 
 Example scaled cluster (`cluster_node_counts = { super = 2, master = 2, worker = 2 }`):
 
@@ -715,15 +715,15 @@ Garage provides S3-compatible object storage.
 - RBAC for access control
 - Pod security best practices
 - Automated reconciliation to reduce configuration drift
-
+- External Secrets Operator
+- Container image scanning
+- Private registry authentication
+- 
 ### Recommended additional improvements
 - SOPS + age for secret encryption
-- External Secrets Operator
-- Kyverno or OPA Gatekeeper policies
+- Kyverno policies
 - NetworkPolicies
-- Container image scanning
 - Signed container images
-- Private registry authentication
 
 ---
 
@@ -810,7 +810,8 @@ kubectl get events -n <namespace> --sort-by=.metadata.creationTimestamp
 - Trivy image vulnerability scan **before** push to GHCR (CRITICAL/HIGH gate + SARIF in Security tab)
 - Path-filtered builds — only changed services are rebuilt
 - All IPs/tokens centralized in Actions Variables & Secrets — nothing hardcoded in workflows
-
+- External Secrets Operator — keep secrets **out of the GitOps repo** entirely
+- 
 ### Next — DevOps Engineering
 
 **Reliability & disaster recovery**
@@ -821,7 +822,6 @@ kubectl get events -n <namespace> --sort-by=.metadata.creationTimestamp
 **GitOps maturity & policy-as-code**
 - Kyverno policy enforcement (required labels, resource quotas, disallow privileged containers)
 - NetworkPolicies for namespace isolation (default-deny posture)
-- External Secrets Operator — keep secrets **out of the GitOps repo** entirely
 - Multi-environment promotion: dev → staging → production with stacked GitOps configs and per-env gate
 
 **Pipeline & supply chain**
