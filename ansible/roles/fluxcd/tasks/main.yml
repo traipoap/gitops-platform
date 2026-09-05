@@ -12,7 +12,7 @@
           --owner={{ github_owner }} \
           --repository={{ github_repo }} \
           --branch=main \
-          --path=./clusters/staging \
+          --path=./clusters/{{ cluster_name }} \
           --read-write-key \
           --personal
 
@@ -20,14 +20,12 @@
         GITHUB_TOKEN: "{{ app_git_secret }}"
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
       run_once: true
-      ignore_errors: true
 
     - name: Create namespace for {{ ns_name }}
       shell: kubectl create namespace {{ ns_name }}
       environment:
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
       run_once: true
-      ignore_errors: true
 
     - name: Create secret for GitHub docker-registry
       shell: |
@@ -35,8 +33,7 @@
           --docker-server ghcr.io \
           --docker-username {{ github_owner }} \
           --docker-password {{ github_registry }} \
-          --docker-email {{ github_owner }}@hotmail.com
+          --docker-email {{ github_email }}
       environment:
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
       run_once: true
-      ignore_errors: true

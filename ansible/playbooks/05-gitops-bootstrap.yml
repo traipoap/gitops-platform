@@ -21,7 +21,9 @@
 
     # Create GitOps and git app secrets — priority: 1) env var → 2) user input
     github_owner: "traipoap"
+    github_email: "traipoap@hotmail.com"
     github_repo: "fleet-infra"
+    cluster_name: "staging"
     app_git_secret: >-
       {{ app_git_secret_env | default(input_pat_app_git_secret, true) }}
 
