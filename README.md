@@ -517,14 +517,13 @@ export GARAGE_DEFAULT_ACCESS_KEY="GK$(openssl rand -hex 16)"
 export GARAGE_DEFAULT_SECRET_KEY="$(openssl rand -hex 32)"
 # GitHub PAT for GitOps repository access (FluxCD bootstrap) GitHub PAT
 export APP_GIT_SECRET="xxx"
-# Container registry URL (e.g. ghcr.io/traipoap/gitops-platform) GitHub PAT
-export GITHUB_REGISTRY="xxx"
 ```
 
 ### Provision infrastructure
 ```bash
 cd terraform
 terraform init
+terraform login
 terraform plan
 terraform apply
 ```
