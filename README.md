@@ -718,10 +718,10 @@ Garage provides S3-compatible object storage.
 - External Secrets Operator
 - Container image scanning (Trivy in CI)
 - Private registry authentication
-- Kyverno policies enforced
 
 ### Recommended additional improvements
 - SOPS + age for secret encryption
+- Kyverno or OPA Gatekeeper policies
 - NetworkPolicies
 - Signed container images
 
