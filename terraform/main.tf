@@ -78,7 +78,7 @@ resource "proxmox_virtual_environment_vm" "nodes" {
   vm_id     = each.value.vm_id
 
   clone {
-    vm_id = var.clone_vm_id
+    vm_id = each.value.clone_vm_id
     full  = false
   }
 

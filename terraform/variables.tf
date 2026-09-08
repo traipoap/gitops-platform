@@ -80,12 +80,6 @@ variable "ansible_haproxy_path" {
   default = "../ansible/roles/load-balance/templates/haproxy.cfg.j2"
 }
 
-# proxmox_virtual_environment_vm of main
-variable "clone_vm_id" {
-  type    = number
-  default = 2000
-}
-
 # --- Dynamic node scaling ---
 # How many VMs of each role to create.
 # e.g. super_nodes = 2, master_nodes = 2, worker_nodes = 2
@@ -113,6 +107,7 @@ variable "cluster_node_specs" {
     cpu_cores  = number
     ram_mb     = number
     ip_base    = number
+    clone_vm_id = number
     disks = list(object({
       datastore_id = string
       interface    = string
@@ -123,32 +118,35 @@ variable "cluster_node_specs" {
     super = {
       vm_id_base = 200
       name_base  = "super-node"
+      clone_vm_id = 3000
       cpu_cores  = 1
       ram_mb     = 2048
       ip_base    = 4
       disks = [
-        { datastore_id = "data-st1000", interface = "scsi0", size = 32 },
+        { datastore_id = "st500", interface = "scsi0", size = 32 },
         { datastore_id = "data-st1000", interface = "scsi1", size = 100 }
       ]
     }
     master = {
       vm_id_base = 210
       name_base  = "k3s-master"
-      cpu_cores  = 1
+      clone_vm_id = 4000
+      cpu_cores  = 2
       ram_mb     = 4096
       ip_base    = 11
       disks = [
-        { datastore_id = "st500", interface = "scsi0", size = 32 }
+        { datastore_id = "system-hs512", interface = "scsi0", size = 32 }
       ]
     }
     worker = {
       vm_id_base = 220
       name_base  = "k3s-worker"
-      cpu_cores  = 1
+      clone_vm_id = 4000
+      cpu_cores  = 2
       ram_mb     = 8192
       ip_base    = 21
       disks = [
-        { datastore_id = "st500", interface = "scsi0", size = 32 }
+        { datastore_id = "system-hs512", interface = "scsi0", size = 32 }
       ]
     }
   }
