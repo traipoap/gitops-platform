@@ -4,12 +4,6 @@
   hosts: k3s_masters
   become: true
 
-  vars_prompt:
-    - name: input_pat_app_git_secret
-      prompt: "Enter your GitHub Personal Access Token (PAT) leave blank for secret from environment variable"
-      private: true
-      unsafe: true
-
   vars:
     # Environment variable lookup (from shell or sourced .env)
     app_git_secret_env: "{{ lookup('env', 'APP_GIT_SECRET') }}"
@@ -18,15 +12,13 @@
     github_owner: "traipoap"
     github_repo: "fleet-infra"
     cluster_name: "production"
-    app_git_secret: >-
-      {{ app_git_secret_env | default(input_pat_app_git_secret, true) }}
 
   tasks:
     - name: Debug Github PAT
       ansible.builtin.debug:
         msg:
-          - "Source: {{ 'environment variables' if app_git_secret_env else 'user input' }}"
-          - "APP_GIT_SECRET is set (Length: {{ app_git_secret | length }})"
+          - "Source: {{ 'environment variables' if app_git_secret_env else 'please provide via APP_GIT_SECRET environment variable' }}"
+          - "APP_GIT_SECRET is set (Length: {{ app_git_secret_env | length }})"
 
   roles:
     - fluxcd

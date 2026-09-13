@@ -17,7 +17,7 @@
           --personal
 
       environment:
-        GITHUB_TOKEN: "{{ app_git_secret }}"
+        GITHUB_TOKEN: "{{ app_git_secret_env }}"
         KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
       run_once: true
       ignore_errors: true

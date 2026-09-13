@@ -4,20 +4,6 @@
   hosts: load_balance
   become: true
 
-  vars_prompt:
-    - name: user_input_rpc_secret
-      private: true
-      prompt: "Enter RPC secret (or run `echo $(openssl rand -hex 32)` to generate, leave blank for auto)"
-    - name: user_input_admin_token
-      private: true
-      prompt: "Enter admin token (or run `echo $(openssl rand -base64 32)` to generate, leave blank for auto)"
-    - name: user_input_access_key
-      private: true
-      prompt: "Enter Garage access key (leave blank for auto)"
-    - name: user_input_secret_key
-      private: true
-      prompt: "Enter Garage secret key (leave blank for auto)"
-
   vars:
     garage_version: "2.3.0"
     garage_binaries_dir: /usr/local/bin
@@ -39,17 +25,17 @@
     secret_key_env: "{{ lookup('env', 'GARAGE_DEFAULT_SECRET_KEY') }}"
 
     my_rpc_secret: >-
-      {{ rpc_secret_env | default(user_input_rpc_secret, true) | default(lookup('password', '/dev/null chars=hexdigits length=64'), true) }}
+      {{ rpc_secret_env | default(lookup('password', '/dev/null chars=hexdigits length=64'), true) }}
     my_admin_token: >-
-      {{ admin_token_env | default(user_input_admin_token, true) | default(lookup('password', '/dev/null chars=ascii_letters,digits length=64'), true) }}
+      {{ admin_token_env | default(lookup('password', '/dev/null chars=ascii_letters,digits length=64'), true) }}
 
     garage_service_template: "garage.service.j2"
     garage_systemd_service: "garage"
 
     GARAGE_DEFAULT_ACCESS_KEY: >-
-      {{ access_key_env | default(user_input_access_key, true) | default('GK' + lookup('password', '/dev/null chars=hexdigits length=32'), true) }}
+      {{ access_key_env | default('GK' + lookup('password', '/dev/null chars=hexdigits length=32'), true) }}
     GARAGE_DEFAULT_SECRET_KEY: >-
-      {{ secret_key_env | default(user_input_secret_key, true) | default(lookup('password', '/dev/null chars=hexdigits length=64'), true) }}
+      {{ secret_key_env | default(lookup('password', '/dev/null chars=hexdigits length=64'), true) }}
     GARAGE_DEFAULT_BUCKET: "default-bucket"
 
   tasks:
