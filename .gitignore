@@ -43,3 +43,4 @@ rust-backend/
 docker-compose.yml
 .gocache/
 backend/backend/data/
+ansible/logs/
