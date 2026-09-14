@@ -11,7 +11,7 @@
     # Create GitOps and git app secrets — priority: 1) env var → 2) user input
     github_owner: "traipoap"
     github_repo: "fleet-infra"
-    cluster_name: "production"
+    cluster_name: "staging"
 
   tasks:
     - name: Debug Github PAT
