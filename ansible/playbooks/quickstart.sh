@@ -30,7 +30,10 @@ echo "Cluster Bootstrap"
 echo "Started: $(date)"
 echo "=========================================="
 
-for playbook in "${PLAYBOOKS[@]}"; do
+LAST_INDEX=$((${#PLAYBOOKS[@]} - 1))
+
+for i in "${!PLAYBOOKS[@]}"; do
+  playbook="${PLAYBOOKS[$i]}"
   PLAYBOOK_START=$(date +%s)
 
   echo
@@ -50,7 +53,7 @@ for playbook in "${PLAYBOOKS[@]}"; do
     $(((PLAYBOOK_DURATION % 3600) / 60)) \
     $((PLAYBOOK_DURATION % 60))
 
-  if [[ "${playbook}" != "${PLAYBOOKS[-1]}" ]]; then
+  if (( i != LAST_INDEX )); then
     echo ">>> Waiting ${SLEEP_SECONDS}s..."
     sleep "${SLEEP_SECONDS}"
   fi
