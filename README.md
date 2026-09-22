@@ -14,7 +14,7 @@ The **application** layer of the K3s GitOps log platform: a Go API backend and a
 - JWT authentication — access + refresh tokens, bcrypt password hashing, role-based (admin) access
 - Log search UI backed by Quickwit (index listing + query with paging)
 - Server-side log export to **CSV / JSON / NDJSON**, listed, downloaded, and deleted from the dashboard
-- SQLite persistence (users + export records) — no external database required
+- SQLite persistence for user accounts — no external database required (export history is tracked as files on disk)
 - Multi-stage, non-root container images (Alpine)
 - Secure CI/CD: Gitleaks + SonarQube gate before build, Trivy scan before push, path-filtered builds, GHCR delivery
 
@@ -25,8 +25,8 @@ flowchart LR
     B["Browser"] --> F["Frontend · Astro (:4321)"]
     F -->|"/api/* via dev proxy / reverse proxy"| A["Backend · Go + Gin (:8080)"]
     A -->|"Quickwit REST API"| Q["Quickwit · log search engine"]
-    A --> DB["SQLite · users + export records"]
-    A --> FS["exports/ · CSV, JSON, NDJSON files"]
+    A --> DB["SQLite · user accounts"]
+    A --> FS["exports/ · CSV, JSON, NDJSON files + hash registry"]
 ```
 
 The frontend is static-first: it calls same-origin `/api/*`, which the Astro dev server (or a reverse proxy in the cluster) forwards to the backend. The backend in turn proxies search queries to Quickwit and materializes exports as files.
@@ -59,7 +59,7 @@ The frontend is static-first: it calls same-origin `/api/*`, which the Astro dev
 └── start-app.sh        # local dev runner
 ```
 
-> Local-only files (gitignored, created at runtime): `backend/data/` (SQLite), `backend/exports/`, and optional `.env` files.
+> Local-only files (gitignored, created at runtime): `backend/data/` (SQLite user database), `backend/exports/` (export files + their registry), and optional `.env` files.
 
 ## Prerequisites
 
@@ -190,8 +190,10 @@ flowchart LR
     S2 --> G
     G -->|"yes + paths changed"| C["Build image"]
     G -->|"no"| X["build skipped"]
-    C --> T["Trivy scan (gate)"]
-    T --> D["Push image to GHCR"]
+    C --> T["Trivy scan"]
+    T --> TG{"Trivy passed?"}
+    TG -->|"yes"| D["Push image to GHCR"]
+    TG -->|"no"| Y["push blocked<br/>(SARIF still uploaded)"]
     D --> E["FluxCD picks up the new tag (gitops repo)"]
 ```
 
