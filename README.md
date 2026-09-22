@@ -1,4 +1,4 @@
-# App — Log-Search Platform · live: [https://app.traipoap.com](https://app.traipoap.com)
+# App — Log-Search Platform · live: [app.traipoap.com](https://app.traipoap.com)
 
 [![Pipeline](https://github.com/traipoap/app/actions/workflows/pipeline.yml/badge.svg)](https://github.com/traipoap/app/actions/workflows/pipeline.yml)
 ![Go](https://img.shields.io/badge/Backend-Go%20%7C%20Gin-00ADD8)
